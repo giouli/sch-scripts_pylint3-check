@@ -90,7 +90,7 @@ class Gui:
         # TODO: Maybe throw an error message if not os.path.isfile(filename)
 
     def run_as_sudo_user(self, cmd):
-        print('EXECUTE:\t' + '\t'.join(cmd))
+        print(('EXECUTE:\t' + '\t'.join(cmd)))
         sys.stdout.flush()
 
     def open_link(self, link):
@@ -125,9 +125,9 @@ class Gui:
 
     def populate_treeviews(self):
         """Fill the users and groups treeviews from the system"""
-        for user in self.system.users.values():
+        for user in list(self.system.users.values()):
             self.users_model.append([user, user.uid, user.name, user.primary_group, user.rname, user.office, user.wphone, user.hphone, user.other, user.directory, user.shell, user.lstchg, user.min, user.max, user.warn, user.inact, user.expire])
-        for group in self.system.groups.values():
+        for group in list(self.system.groups.values()):
             self.groups_model.append([group, group.gid, group.name])
 
     def repopulate_treeviews(self):
@@ -157,7 +157,7 @@ class Gui:
         selected = self.get_selected_groups()
         # FIXME: The list comprehension here costs
         return (len(selected) == 0 and (self.show_system_groups or not user.is_system_user())) \
-                or user in [u for g in selected for u in g.members.values()]
+                or user in [u for g in selected for u in list(g.members.values())]
 
     def set_group_visibility(self, model, rowiter, options):
         group = model[rowiter][0]
@@ -323,9 +323,9 @@ class Gui:
         users = self.get_selected_users()
         if len(users) == 0:
             if self.show_system_groups:
-                users = self.system.users.values()
+                users = list(self.system.users.values())
             else:
-                users = [u for u in self.system.users.values() if not u.is_system_user()]
+                users = [u for u in list(self.system.users.values()) if not u.is_system_user()]
         export_dialog.ExportDialog(self.system, users)
 
 ## Server menu
@@ -505,7 +505,7 @@ class Gui:
 # To export a man page:
 # help2man -L el -s 8 -o sch-scripts.8 -N ./sch-scripts && man ./sch-scripts.8
 def usage():
-    print """Χρήση: sch-scripts [ΕΠΙΛΟΓΕΣ]
+    print("""Χρήση: sch-scripts [ΕΠΙΛΟΓΕΣ]
 
 Παρέχει ένα σύνολο εξαρτήσεων για την αυτοματοποίηση της εγκατάστασης
 σχολικών εργαστηρίων και ένα γραφικό περιβάλλον που υποστηρίζει διαχείριση
@@ -520,15 +520,15 @@ def usage():
     -h, --help     Σελίδα βοήθειας της εφαρμογής.
     -v, --version  Προβολή έκδοσης των sch-scripts.
 
-Αναφορά σφαλμάτων στο https://bugs.launchpad.net/sch-scripts."""
+Αναφορά σφαλμάτων στο https://bugs.launchpad.net/sch-scripts.""")
 
 
 def print_version():
-    print """sch-scripts %s
+    print("""sch-scripts %s
 Copyright (C) 2009-2013 Άλκης Γεωργόπουλος <alkisg@gmail.com>, Φώτης Τσάμης <ftsamis@gmail.com>.
 Άδεια χρήσης GPLv3+: GNU GPL έκδοσης 3 ή νεότερη <http://gnu.org/licenses/gpl.html>.
 
-Συγγραφή: by Άλκης Γεωργόπουλος <alkisg@gmail.com>, Φώτης Τσάμης <ftsamis@gmail.com>.""" % version.__version__
+Συγγραφή: by Άλκης Γεωργόπουλος <alkisg@gmail.com>, Φώτης Τσάμης <ftsamis@gmail.com>.""" % version.__version__)
 
 if __name__ == '__main__':
     if len(sys.argv) == 2 and (sys.argv[1] == '-v' or sys.argv[1] == '--version'):
