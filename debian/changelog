@@ -1,3 +1,8 @@
+sch-scripts (18.04.1) bionic; urgency=low
+  * Εκκίνηση εργασιών για την έκδοση 18.04.1.
+
+ -- Hellenic Schools Technical Support Team (Τεχνική Στήριξη ΣΕΠΕΗΥ) <devs@ts.sch.gr>  Thu, 19 Jul 2018 08:51:57 +0300
+
 sch-scripts (16.04.1) xenial; urgency=low
   * Εκκίνηση εργασιών για την έκδοση 16.04.1.
 
