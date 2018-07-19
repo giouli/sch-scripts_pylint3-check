@@ -1,4 +1,9 @@
-#-*- coding: utf-8 -*-
+# This file is part of sch-scripts, https://launchpad.net/sch-scripts
+# Copyright 2009-2018 the sch-scripts team, see AUTHORS.
+# SPDX-License-Identifier: GPL-3.0-or-later
+"""
+Configuration handling.
+"""
 import configparser
 import os
 
@@ -54,5 +59,3 @@ if not os.path.isfile(settings_f):
 
 parser.read(settings_f)
 setdefaults()
-
-

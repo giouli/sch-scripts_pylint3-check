@@ -1,4 +1,10 @@
-#-*- coding: utf-8 -*-
+#!/usr/bin/env python3
+# This file is part of sch-scripts, https://launchpad.net/sch-scripts
+# Copyright 2009-2018 the sch-scripts team, see AUTHORS.
+# SPDX-License-Identifier: GPL-3.0-or-later
+"""
+User handling classes and functions.
+"""
 from twisted.internet import inotify
 from twisted.python import filepath
 import pwd

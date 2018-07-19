@@ -1,8 +1,9 @@
-#!/usr/bin/python
-# -*- coding: utf-8 -*-
-# Copyright (C) 2013 Lefteris Nikoltsios <lefteris.nikoltsios@gmail.com>
-# 2017, Alkis Georgopoulos <alkisg@gmail.com>
-# License GNU GPL version 3 or newer <http://gnu.org/licenses/gpl.html>
+# This file is part of sch-scripts, https://launchpad.net/sch-scripts
+# Copyright 2009-2018 the sch-scripts team, see AUTHORS.
+# SPDX-License-Identifier: GPL-3.0-or-later
+"""
+Connection information and creation dialog.
+"""
 from gi.repository import Gtk, Gdk, GObject
 from binascii import unhexlify, hexlify
 import re

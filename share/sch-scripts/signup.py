@@ -1,10 +1,10 @@
-#!/usr/bin/python
-# -*- coding: utf-8 -*-
-# Copyright (C) 2012 Fotis Tsamis <ftsamis@gmail.com>
-# 2012-2014, Lefteris Nikoltsios <lefteris.nikoltsios@gmail.com>
-# 2012-2017, Alkis Georgopoulos <alkisg@gmail.com>
-# License GNU GPL version 3 or newer <http://gnu.org/licenses/gpl.html>
-
+#!/usr/bin/env python3
+# This file is part of sch-scripts, https://launchpad.net/sch-scripts
+# Copyright 2009-2018 the sch-scripts team, see AUTHORS.
+# SPDX-License-Identifier: GPL-3.0-or-later
+"""
+Client side signup logic and form.
+"""
 import crypt
 import gi
 gi.require_version('Gtk', '3.0')

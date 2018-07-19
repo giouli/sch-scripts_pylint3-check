@@ -1,6 +1,9 @@
-#!/usr/bin/python
-#-*- coding: utf-8 -*-
-
+# This file is part of sch-scripts, https://launchpad.net/sch-scripts
+# Copyright 2009-2018 the sch-scripts team, see AUTHORS.
+# SPDX-License-Identifier: GPL-3.0-or-later
+"""
+New group form.
+"""
 import re
 import os
 import subprocess

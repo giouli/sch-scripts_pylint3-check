@@ -1,9 +1,11 @@
-#-*- coding: utf-8 -*-
-# Copyright (C) 2012 Lefteris Nikoltsios <lefteris.nikoltsios@gmail.com>
-# License GNU GPL version 3 or newer <http://gnu.org/licenses/gpl.html>
-# http://www.sete.gr/files/Media/Egkyklioi/040707Latin-Greek.pdf
-# Transliterate and transcript made according iso843
-
+#!/usr/bin/env python3
+# This file is part of sch-scripts, https://launchpad.net/sch-scripts
+# Copyright 2009-2018 the sch-scripts team, see AUTHORS.
+# SPDX-License-Identifier: GPL-3.0-or-later
+"""
+Transliterate and transcript according to iso843:
+http://www.sete.gr/files/Media/Egkyklioi/040707Latin-Greek.pdf
+"""
 import re
 import unicodedata
 

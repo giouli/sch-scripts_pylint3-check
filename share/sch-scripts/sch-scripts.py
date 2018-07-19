@@ -1,9 +1,10 @@
-#!/usr/bin/python
-# -*- coding: utf-8 -*-
-# Copyright (C) 2012-2017 Alkis Georgopoulos <alkisg@gmail.com>
-# 2012-2015, Fotis Tsamis <ftsamis@gmail.com>
-# License GNU GPL version 3 or newer <http://gnu.org/licenses/gpl.html>
-
+#!/usr/bin/env python3
+# This file is part of sch-scripts, https://launchpad.net/sch-scripts
+# Copyright 2009-2018 the sch-scripts team, see AUTHORS.
+# SPDX-License-Identifier: GPL-3.0-or-later
+"""
+Sch-scripts.
+"""
 import getpass
 import gi
 gi.require_version('Gtk', '3.0')
@@ -525,7 +526,7 @@ def usage():
 
 def print_version():
     print("""sch-scripts %s
-Copyright (C) 2009-2013 Άλκης Γεωργόπουλος <alkisg@gmail.com>, Φώτης Τσάμης <ftsamis@gmail.com>.
+Copyright (C) 2009-2018 Άλκης Γεωργόπουλος <alkisg@gmail.com>, Φώτης Τσάμης <ftsamis@gmail.com>.
 Άδεια χρήσης GPLv3+: GNU GPL έκδοσης 3 ή νεότερη <http://gnu.org/licenses/gpl.html>.
 
 Συγγραφή: by Άλκης Γεωργόπουλος <alkisg@gmail.com>, Φώτης Τσάμης <ftsamis@gmail.com>.""" % version.__version__)
