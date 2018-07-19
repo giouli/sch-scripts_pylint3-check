@@ -91,7 +91,7 @@ class Gui:
         # TODO: Maybe throw an error message if not os.path.isfile(filename)
 
     def run_as_sudo_user(self, cmd):
-        print(('EXECUTE:\t' + '\t'.join(cmd)))
+        print('EXECUTE:\t' + '\t'.join(cmd))
         sys.stdout.flush()
 
     def open_link(self, link):
@@ -126,9 +126,9 @@ class Gui:
 
     def populate_treeviews(self):
         """Fill the users and groups treeviews from the system"""
-        for user in list(self.system.users.values()):
+        for user in self.system.users.values():
             self.users_model.append([user, user.uid, user.name, user.primary_group, user.rname, user.office, user.wphone, user.hphone, user.other, user.directory, user.shell, user.lstchg, user.min, user.max, user.warn, user.inact, user.expire])
-        for group in list(self.system.groups.values()):
+        for group in self.system.groups.values():
             self.groups_model.append([group, group.gid, group.name])
 
     def repopulate_treeviews(self):
@@ -158,7 +158,7 @@ class Gui:
         selected = self.get_selected_groups()
         # FIXME: The list comprehension here costs
         return (len(selected) == 0 and (self.show_system_groups or not user.is_system_user())) \
-                or user in [u for g in selected for u in list(g.members.values())]
+                or user in [u for g in selected for u in g.members.values()]
 
     def set_group_visibility(self, model, rowiter, options):
         group = model[rowiter][0]
@@ -324,9 +324,9 @@ class Gui:
         users = self.get_selected_users()
         if len(users) == 0:
             if self.show_system_groups:
-                users = list(self.system.users.values())
+                users = self.system.users.values()
             else:
-                users = [u for u in list(self.system.users.values()) if not u.is_system_user()]
+                users = [u for u in self.system.users.values() if not u.is_system_user()]
         export_dialog.ExportDialog(self.system, users)
 
 ## Server menu
