@@ -4,7 +4,7 @@
 
 set -e
 
-# http://www.debian.org/doc/debian-policy/ch-maintainerscripts.html#s-mscriptsinstact
+# https://www.debian.org/doc/debian-policy/#summary-of-ways-maintainer-scripts-are-called
 # The postinst script may be called in the following ways:
 # <postinst> configure <most-recently-configured-version>
 # <old-postinst> abort-upgrade <new version>
@@ -56,64 +56,20 @@ install() {
             /etc/hosts || true
     fi & # Background it in case the DNS resolve takes a long time.
 
-    # Remove the local resolver (LP: #959037), we want a real DNS server.
-    if search_and_replace "^dns=dnsmasq" "" /etc/NetworkManager/NetworkManager.conf; then
-        echo "Restarting network-manager to remove its spawned dnsmasq..." >&2
-        service network-manager restart
-    fi
-
     # Install the dnsmasq configuration file and restart dnsmasq.
     if [ ! -f /etc/dnsmasq.d/ltsp-server-dnsmasq.conf ]; then
         ltsp-config dnsmasq
     fi
 
     # Allow more simultaneous SSH connections from the local network.
-    search_and_replace "^#MaxStartups 10:30:60$" "MaxStartups 20:30:60" \
+    search_and_replace "^#MaxStartups 10:30:100$" "MaxStartups 20:30:100" \
         /etc/ssh/sshd_config true
-
-    # Specify that the BIOS clock is not set to UTC, to match Windows.
-    search_and_replace "^UTC=yes$" "UTC=no" /etc/default/rcS true
 
     # Don't prompt for new LTS releases until we're ready for them.
     # Note that we can't use search_and_replace here (LP: #1504893).
     sed 's/^Prompt=.*/Prompt=never/' -i /etc/update-manager/release-upgrades
 
-    # Prevent ibus from starting (LP: #1481025).
-    search_and_replace "^IM_CONFIG_DEFAULT_MODE=auto$" \
-        "IM_CONFIG_DEFAULT_MODE=cjkv" /etc/default/im-config
-
-    # If gnome-fallback exists, set it as the default session.
-    for session in gnome-fallback gnome-flashback-metacity ""; do
-        test -f "/usr/share/xsessions/$session.desktop" && break
-    done
-    if [ -n "$session" ] && [ -x /usr/sbin/lightdm ]; then
-        if [ -x /usr/lib/lightdm/lightdm-set-defaults ]; then
-            # Set the default session for 12.04.
-            grep -qs "user-session=$session" /etc/lightdm/lightdm.conf ||
-                /usr/lib/lightdm/lightdm-set-defaults -s "$session"
-        else
-            # We can't ship a conffile because the session name varies.
-            mkdir -p /etc/lightdm/lightdm.conf.d
-            cat >/etc/lightdm/lightdm.conf.d/90_sch-scripts.conf <<EOF
-[SeatDefaults]
-user-session=$session
-EOF
-        fi
-        # Also workaround the keyboard layout problem for administrator
-        if [ -n "$SUDO_USER" ]; then
-            rm -f "/home/$SUDO_USER/.dmrc"
-            rm -f "/var/lib/AccountsService/users/$SUDO_USER"
-        fi
-
-        # Work around gnome-panel not appearing (LP: #1078679).
-        ln -sf /usr/share/sch-scripts/gnome-panel /usr/local/bin/ || true
-
-        # Specify better default apps for some mime types.
-        mkdir -p /usr/local/share/applications
-        ln -rsf /usr/share/sch-scripts/mimeapps.list /usr/local/share/applications/ || true
-    fi
-
-    # If gnome-flashback isn't installed, and mate is, use its mimeapps for root
+    # Use MATE mimeapps for root
     if [ ! -f /usr/local/share/applications/mimeapps.list ] &&
       [ -f /usr/share/mate/applications/defaults.list ]; then
         mkdir -p /usr/local/share/applications
@@ -131,16 +87,13 @@ EOF
         ln -sf /usr/share/sch-scripts/sch-scripts.js /usr/lib/firefox/defaults/pref/ || true
     fi
 
-    while read file temp; do
-        if [ -f "$file" ] && [ ! -f "/etc/sch-scripts/diverted/${file##*/}" ]; then
-            dpkg-divert --package sch-scripts --divert "/etc/sch-scripts/diverted/${file##*/}" --rename "$file"
-        fi
-    done <<EOF
-        /etc/dnsmasq.d/network-manager  # Makes dnsmasq malfunction sometimes
-        /etc/init.d/nbd-client  # Break ordering cycle with n-m (LP: #1487679)
-        /etc/skel/.config/autostart/ubuntu-mate-welcome.desktop  # Welcome screen
-        /usr/share/mate/autostart/tilda.desktop  # Useless terminal that opens with F12
-EOF
+    # Enable printer sharing, only if the user hasn't modified cups settings.
+    # `cupsctl _share_printers=1` strips comments, but that's what the
+    # system-config-printer does as well, and it takes care of restarting cups.
+    if cmp --quiet /usr/share/cups/cupsd.conf.default /etc/cups/cupsd.conf; then
+        cupsctl _share_printers=1
+    fi
+
     # Add group "teachers"
     test -f /etc/default/shared-folders && . /etc/default/shared-folders
     if [ -n "$TEACHERS" ]; then
@@ -156,11 +109,6 @@ EOF
     # Manually run update-kernels until it's moved to ltsp-client-core.postinst
     if [ ! -d /boot/pxelinux.cfg ]; then
         /usr/share/ltsp/update-kernels
-    fi
-
-    # Call update-gconf-defaults without depending on it with ${misc:depends}
-    if which update-gconf-defaults >/dev/null 2>&1; then
-        update-gconf-defaults 
     fi
 }
 
