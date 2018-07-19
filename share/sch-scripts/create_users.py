@@ -29,7 +29,7 @@ class NewUsersDialog:
         self.groups = []
         
         self.glade.get_object('computers_number_spin').set_value(12)
-        for group in self.roles['Μαθητής'].split(","):
+        for group in self.roles['μαθητής'].split(","):
             if group in self.system.groups:
                 self.groups.append(group)   
         self.glade.get_object('groups_template_entry').set_text("{c} "+" ".join(self.groups))

@@ -17,13 +17,13 @@ gui_defaults = {'show_system_groups' : False,
                 'requests_checked_groups' : ''
                }
 roles_defaults = {
-                  'Καθηγητής' : 'adm,cdrom,epoptes,fuse,plugdev,sambashare,vboxusers,$$teachers',
-                  'Διαχειριστής' : 'adm,cdrom,dip,epoptes,fuse,lpadmin,plugdev,sambashare,sudo,vboxusers,$$teachers',
-                  'Μαθητής' : 'fuse,sambashare,vboxusers',
-                  'Προσωπικό' : 'adm,cdrom,fuse,plugdev,sambashare,vboxusers'
+                  'καθηγητής' : 'adm,cdrom,epoptes,fuse,plugdev,sambashare,vboxusers,$$teachers',
+                  'διαχειριστής' : 'adm,cdrom,dip,epoptes,fuse,lpadmin,plugdev,sambashare,sudo,vboxusers,$$teachers',
+                  'μαθητής' : 'fuse,sambashare,vboxusers',
+                  'προσωπικό' : 'adm,cdrom,fuse,plugdev,sambashare,vboxusers'
                  }
 
-parser = configparser.SafeConfigParser()
+parser = configparser.ConfigParser()
 
 def save():
     f = open(settings_f, 'w')
