@@ -29,8 +29,7 @@ remove() {
     local - link
 
     set +e
-    for link in /usr/local/bin/gnome-panel \
-        /usr/local/bin/tuxtype \
+    for link in /usr/local/bin/tuxtype \
         /usr/local/bin/unzip \
         /usr/lib/firefox/defaults/pref/sch-scripts.js \
         /usr/local/share/applications/mimeapps.list
@@ -55,6 +54,7 @@ purge() {
     examples="
         /etc/dnsmasq.d/ltsp-server-dnsmasq.conf
         /var/lib/tftpboot/ltsp/i386/lts.conf
+        /var/lib/tftpboot/ltsp/amd64/lts.conf
     "
     configs="
         /etc/NetworkManager/NetworkManager.conf
