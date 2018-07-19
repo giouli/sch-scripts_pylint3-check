@@ -130,7 +130,7 @@ class SharedFolders():
     def parse_mounts(self):
         """Return a list of all bindfs mounts unset /home/Shared."""
         mounts=[]
-        for line in file("/proc/mounts").readlines():
+        for line in open("/proc/mounts").readlines():
             items=line.split()
             if items[0] != "bindfs"  or items[2] != "fuse.bindfs" \
               or not items[1].startswith(self.config["SHARE_DIR/"]):
