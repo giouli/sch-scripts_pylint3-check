@@ -2,33 +2,31 @@ Source: sch-scripts
 Section: admin
 Priority: extra
 Maintainer: Hellenic Schools Technical Support Team (Τεχνική Στήριξη ΣΕΠΕΗΥ) <devs@ts.sch.gr>
-Build-Depends: debhelper (>= 7.3.0)
-Standards-Version: 3.9.6
-Vcs-Bzr: http://bazaar.launchpad.net/~ts.sch.gr/sch-scripts/trunk
-Vcs-Browser: http://bazaar.launchpad.net/~ts.sch.gr/sch-scripts/trunk/files
+Build-Depends: debhelper
+Standards-Version: 4.1.5
+Vcs-Git: https://git.launchpad.net/sch-scripts
+Vcs-Browser: https://code.launchpad.net/sch-scripts
 Homepage: http://ts.sch.gr/wiki/Linux/LTSP
 
 Package: sch-scripts
 Architecture: all
-Depends: iputils-arping,
+Depends: ${python3:Depends}, ${misc:Depends},
+ iputils-arping,
  librsvg2-common,
  policykit-1,
- python (>= 2.6),
- python-aptdaemon.gtk3widgets,
- python-gtk2
+ python3-gi
 Recommends: apturl,
  bindfs,
  dnsmasq,
  epoptes,
  ethtool,
  flashplugin-no-sse2,
- gnome-session-fallback | gnome-session-flashback | kde-workspace-bin | xfce4-utils | lxde-common | mate-session-manager,
+ mate-session-manager | gnome-session-fallback | gnome-session-flashback | kde-workspace-bin | xfce4-utils | lxde-common,
  iperf,
- ldm-ubuntu-theme | ldm-edubuntu-theme | ldm-kubuntu-theme | ldm-lubuntu-theme | ldm-xubuntu-theme,
- ltsp-client (>= 5.4.0),
+ ltsp-client,
  ltsp-docs,
- ltsp-server-standalone (>= 5.4.0) | ltsp-server (>= 5.4.0),
- xserver-xorg-video-s3virge
+ ltsp-server-standalone | ltsp-server,
+ synaptic
 Suggests: ident2,
  squid,
  x2goserver
