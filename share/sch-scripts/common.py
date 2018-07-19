@@ -20,16 +20,16 @@ def run_command(cmd, poll=False):
     if not poll:
         res = p.wait()
         if res == 0:
-            return (True, p.stdout.read())
+            return True, p.stdout.read().decode('utf-8')
         else:
             print("Σφάλμα κατά την εκτέλεση εντολής:")
             print(" $ %s" % ' '.join(cmdline))
-            print(p.stdout.read())
-            err = p.stderr.read()
+            print(p.stdout.read().decode('utf-8'))
+            err = p.stderr.read().decode('utf-8')
             print(err)
             if err == '':
-                err = "\n"
-            return (False, err)
+                err = '\n'
+            return False, err
     else:
         return p
     
