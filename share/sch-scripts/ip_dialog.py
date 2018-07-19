@@ -804,7 +804,6 @@ class Ip_Dialog:
                             ipv4.update({'dns-search': dns_search})
             elif interface.page.method_entry.get_active() == 3:
                 # LTSP
-                ethernet = dbus.Dictionary({'duplex': 'full'})
                 ipv4 = dbus.Dictionary({'method': 'manual', 'dns': dns, 'may-fail': 0,
                                         'dhcp-send-hostname': dbus.Boolean('false'),
                                         'addresses': dbus.Array([addresses], signature=dbus.Signature('au'))})
@@ -827,7 +826,7 @@ class Ip_Dialog:
                     new_connections.remove(interface)
                 try:
                     connection_settings_mac = \
-                        ':'.join([hexlify(chr(v))
+                        ':'.join([hexlify(chr(v).encode('utf-8')).decode('utf-8')
                                   for v in connection_settings.get_settings()['802-3-ethernet']['mac-address']]).upper()
                 except KeyError:
                     continue
