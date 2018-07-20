@@ -328,7 +328,7 @@ class AutoRemove(MaintenanceDialog):
         status_path = apt_pkg.config.find_file('Dir::State::status')
         tagf = apt_pkg.TagFile(open(status_path))
         self.pkgs = [Package(sect['Package'], self.cache) for sect in tagf if \
-                     self.cache[sect['Package']].is_auto_removable]
+                     self.cache['{}:{}'.format(sect['Package'], sect['Architecture'])].is_auto_removable]
         self.pkgs.sort(key=lambda x: x.name)
         return True if len(self.pkgs) != 0 else False   
 
