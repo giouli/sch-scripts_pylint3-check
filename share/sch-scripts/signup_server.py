@@ -47,11 +47,12 @@ class Registrations(LineReceiver):
     
     def booltr(self, b):
         if b:
-            return "YES"
-        return "NO"
+            return b'YES'
+        return b'NO'
     
     def lineReceived(self, line):
-        #print line # DEBUGGING
+        # print(line)  # DEBUGGING
+        line = line.decode('utf-8')
         cmd = line.split(None, 1)
         if len(cmd) > 1:
             cmd, data = cmd
@@ -73,15 +74,15 @@ class Registrations(LineReceiver):
         elif cmd == "USER_EXISTS":
             self.sendLine(self.booltr(data in self.system.users))
         elif cmd == "REALNAME_REGEX":
-            self.sendLine(".+")
+            self.sendLine(b'.+')
         elif cmd == "USER_REGEX":
-            self.sendLine(libuser.NAME_REGEX)
+            self.sendLine(libuser.NAME_REGEX.encode())
         elif cmd == "PASS_REGEX":
-            self.sendLine(".+")
+            self.sendLine(b'.+')
         elif cmd == "GET_ROLES":
-            self.sendLine(','.join(self.roles))
+            self.sendLine(','.join(self.roles).encode())
         elif cmd == "GET_GROUPS":
-            self.sendLine(','.join(self.groups))
+            self.sendLine(','.join(self.groups).encode())
         elif cmd == "SEND_DATA":
             try:
                 data = data.split('\t')
@@ -103,10 +104,10 @@ class Registrations(LineReceiver):
                 self.gui.add_request(req)
                 
                 self.requests.append(req)
-                self.sendLine("YES")
+                self.sendLine(b'YES')
             except Exception as e:
                 print(e)
-                self.sendLine("NO")
+                self.sendLine(b'NO')
                 print("Error receiving data.")
         else:
             print("Received invalid command %s from %s:%s" % (cmd, self.ip, self.port))
@@ -114,7 +115,7 @@ class Registrations(LineReceiver):
     def identify(self, line):
         self.id_hostname = line
         self.state = 'listen'
-        self.sendLine("YES")
+        self.sendLine(b'YES')
 
 
 class RegistrationsFactory(Factory):
