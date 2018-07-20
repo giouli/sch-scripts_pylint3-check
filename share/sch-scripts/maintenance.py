@@ -27,15 +27,9 @@ class Package:
             mimetypes.guess_type(src)[0], os.path.getsize(src), 'Debian package', []
         else:
             pkg_cache = cache[src]
-            try:
-                self.name, self.sum, self.size, self.desc, self.childs = pkg_cache.shortname, \
-                pkg_cache.installed.version, pkg_cache.installed.installed_size, \
-                pkg_cache.installed.summary, []
-            except:
-                # TODO: this is a quick hack to avoid crashes for packages in "rc" state. Investigate further!
-                self.name, self.sum, self.size, self.desc, self.childs = pkg_cache.shortname, \
-                pkg_cache.candidate.version, pkg_cache.candidate.installed_size, \
-                pkg_cache.candidate.summary, []
+            self.name, self.sum, self.size, self.desc, self.childs = pkg_cache.shortname, \
+            pkg_cache.installed.version, pkg_cache.installed.installed_size, \
+            pkg_cache.installed.summary, []
 
     def do_child(self, child):
         self.childs.append(child)
@@ -183,10 +177,12 @@ class Purge(MaintenanceDialog):
     def find(self):
         status_path = apt_pkg.config.find_file('Dir::State::status')
         tagf = apt_pkg.TagFile(open(status_path))
+        # TODO: it would be nice to remove packages in rc state too
         tmp_pkgs = [Package(sect['Package'], self.cache) for sect in tagf if \
                     (sect['Package'].startswith('linux-image-') \
                     or sect['Package'].startswith('linux-headers-')) \
-                    and sect['Source'] != 'linux-meta']
+                    and sect['Source'] != 'linux-meta' \
+                    and not sect['Status'].startswith('deinstall')]
 
         kernels = [pkg for pkg in tmp_pkgs if pkg.name.startswith('linux-image-')]
         headers = [pkg for pkg in tmp_pkgs if pkg.name.startswith('linux-headers-')]
@@ -367,4 +363,3 @@ class AutoRemove(MaintenanceDialog):
     def on_prog_dlg_response(self, prog_dlg, response):
         self.clear_cache()
         super(AutoRemove, self).on_prog_dlg_response(prog_dlg, response)
-
