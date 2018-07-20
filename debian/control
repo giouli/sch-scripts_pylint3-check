@@ -12,8 +12,10 @@ Package: sch-scripts
 Architecture: all
 Depends: ${python3:Depends}, ${misc:Depends},
  iputils-arping,
+ libgtk-3-0,
  librsvg2-common,
  policykit-1,
+ python3-aptdaemon.gtk3widgets,
  python3-gi
 Recommends: apturl,
  bindfs,
@@ -22,7 +24,6 @@ Recommends: apturl,
  ethtool,
  flashplugin-no-sse2,
  mate-session-manager | gnome-session-fallback | gnome-session-flashback | kde-workspace-bin | xfce4-utils | lxde-common,
- iperf,
  ltsp-client,
  ltsp-docs,
  ltsp-server-standalone | ltsp-server,
