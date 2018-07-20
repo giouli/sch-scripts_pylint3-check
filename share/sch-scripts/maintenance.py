@@ -16,6 +16,7 @@ import apt_pkg
 import gc
 import mimetypes
 import os
+import functools
 
 import dialogs
 
@@ -25,10 +26,16 @@ class Package:
             self.name, self.sum, self.size, self.desc, self.childs = os.path.basename(src), \
             mimetypes.guess_type(src)[0], os.path.getsize(src), 'Debian package', []
         else:
-            pkg_cache = cache[src]        
-            self.name, self.sum, self.size, self.desc, self.childs = pkg_cache.shortname, \
-            pkg_cache.installed.version, pkg_cache.installed.installed_size, \
-            pkg_cache.installed.summary, []
+            pkg_cache = cache[src]
+            try:
+                self.name, self.sum, self.size, self.desc, self.childs = pkg_cache.shortname, \
+                pkg_cache.installed.version, pkg_cache.installed.installed_size, \
+                pkg_cache.installed.summary, []
+            except:
+                # TODO: this is a quick hack to avoid crashes for packages in "rc" state. Investigate further!
+                self.name, self.sum, self.size, self.desc, self.childs = pkg_cache.shortname, \
+                pkg_cache.candidate.version, pkg_cache.candidate.installed_size, \
+                pkg_cache.candidate.summary, []
 
     def do_child(self, child):
         self.childs.append(child)
@@ -183,9 +190,9 @@ class Purge(MaintenanceDialog):
 
         kernels = [pkg for pkg in tmp_pkgs if pkg.name.startswith('linux-image-')]
         headers = [pkg for pkg in tmp_pkgs if pkg.name.startswith('linux-headers-')]
+        kernels.sort(key=functools.cmp_to_key(
+            lambda x, y: apt_pkg.version_compare(x.sum, y.sum)), reverse=True)
 
-        kernels.sort(cmp=lambda x,y: apt_pkg.version_compare(x.sum, y.sum), reverse=True)
-        
         variants = []
         for kernel in kernels:
             version_variant = kernel.name.replace('linux-image-', '')
