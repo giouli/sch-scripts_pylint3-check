@@ -124,6 +124,7 @@ NPBKU1xbjWICQVXVB3ZEkIi2Y6tHzVx5hX1GqiRxVfZXo4N/
         "ts.sch.gr-repo"|"ts.sch.gr/repo")
             repo="ts.sch.gr/repo"
             lines="deb [trusted=yes] http://ts.sch.gr/repo stable main non-free"
+            filename="ts_sch_gr-repo-stable.list"
             # Key id: 9849BE20
             key='-----BEGIN PGP PUBLIC KEY BLOCK-----
 Version: GnuPG v1.4.9 (GNU/Linux)
@@ -165,10 +166,10 @@ IBG/AJ9rr/f+ulpVCgR5bk1UH9uMDidtwA==
 
     if [ -z "$lines" ]; then
         lines="deb http://ppa.launchpad.net/$repo/ubuntu $release main
-#deb-src http://ppa.launchpad.net/$repo/ubuntu $release main"
+# deb-src http://ppa.launchpad.net/$repo/ubuntu $release main"
     fi
     if [ -z "$filename" ]; then
-        filename="$(echo "$repo" | tr './' '_-')-$release.list"
+        filename="$(echo "$repo" | sed 's,/,-ubuntu-,' | tr '.' '_')-$release.list"
     fi
     filename="/etc/apt/sources.list.d/$filename"
 
