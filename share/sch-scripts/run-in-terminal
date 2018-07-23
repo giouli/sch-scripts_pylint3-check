@@ -202,9 +202,11 @@ install_sch_scripts() {
         die "Τα sch-scripts μπορούν να εγκατασταθούν μόνο σε LTS εκδόσεις του Ubuntu."
     fi
     # Remove the old repository filenames that contain "." instead of "_".
-    rm -f /etc/apt/sources.list.d/ts.sch.gr*.list
+    rm -f /etc/apt/sources.list.d/ts?sch?gr*.list*
     add_repository "ts.sch.gr"
     add_repository "ts.sch.gr/repo"
+    # Enable the partner repository for adobe-flashplugin
+    sed 's/^# *\(deb .* partner\)/\1/' -i /etc/apt/sources.list
 
     bold "Γίνεται ενημέρωση των διαθέσιμων πακέτων."
     apt update || die "Σφάλμα κατά την ενημέρωση των διαθέσιμων πακέτων."
