@@ -10,6 +10,9 @@ Homepage: http://ts.sch.gr/wiki/Linux/LTSP
 
 Package: sch-scripts
 Architecture: all
+Pre-depends:
+ epoptes,
+ openssh-server
 Depends: ${python3:Depends}, ${misc:Depends},
  iputils-arping,
  libgtk-3-0,
@@ -20,7 +23,6 @@ Depends: ${python3:Depends}, ${misc:Depends},
 Recommends: apturl,
  bindfs,
  dnsmasq,
- epoptes,
  ethtool,
  flashplugin-no-sse2,
  mate-session-manager | gnome-session-fallback | gnome-session-flashback | kde-workspace-bin | xfce4-utils | lxde-common,
