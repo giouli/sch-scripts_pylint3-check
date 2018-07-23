@@ -33,7 +33,8 @@ class Package:
 
     def do_child(self, child):
         self.childs.append(child)
-        self.childs.sort()
+        # TODO: this gives TypeError, cannot compare Package '<' Package.
+        # self.childs.sort()
 
 
 
