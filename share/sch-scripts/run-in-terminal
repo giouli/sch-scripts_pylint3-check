@@ -217,13 +217,7 @@ install_sch_scripts() {
     apt install --yes sch-scripts || die "Σφάλμα κατά την εγκατάσταση των sch-scripts."
 
     bold "Γίνεται εκτέλεση των sch-scripts."
-    sch-scripts >/dev/null 2>&1 &
-
-    if [ -x /usr/sbin/synaptic ]; then
-        bold "Μπορείτε πλέον να εγκαταστήσετε όποια πακέτα λογισμικού θέλετε από το μενού Σύστημα → Διαχείριση συστήματος → Διαχείριση πακέτων Synaptic."
-    else
-        bold "Μπορείτε πλέον να εγκαταστήσετε όποια πακέτα λογισμικού θέλετε."
-    fi
+    ( exec 0</dev/null >/dev/null 2>&1; setsid sch-scripts ) &
 }
 
 # First check if we need to spawn an x-terminal-emulator
