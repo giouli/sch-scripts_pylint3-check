@@ -8,6 +8,9 @@ fi
 # No need to call "set_lts_var", we just want to bypass 35encrypted-swap.
 ENCRYPT_SWAP=${ENCRYPT_SWAP:-False}
 
+# LOCALDEV seems broken in 18.04, it introduces 1+ min boot delays.
+LOCALDEV=${LOCALDEV:-False}
+
 # A list of services to disable on both thin and fat clients.
 RM_SYSTEM_SERVICES="$RM_SYSTEM_SERVICES apache2 bluetooth clamav-daemon clamav-freshclam mysql network-manager nfs-kernel-server nmbd php5-fpm shared-folders smbd squid3 teamviewerd vboxweb whoopsie"
 
