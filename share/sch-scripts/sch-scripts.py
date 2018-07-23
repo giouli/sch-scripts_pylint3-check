@@ -9,6 +9,7 @@ import getpass
 import gi
 gi.require_version('Gtk', '3.0')
 from gi.repository import Gtk
+from glob
 import locale
 import os
 import socket
@@ -353,10 +354,12 @@ class Gui:
             subprocess.Popen(['./run-in-terminal', 'ltsp-update-image', '--revert', '/'])
 
     def on_mi_edit_lts_conf_activate(self, widget):
-        self.edit_file('/var/lib/tftpboot/ltsp/i386/lts.conf')
+        for file in glob.glob('/var/lib/tftpboot/ltsp/*/lts.conf'):
+            self.edit_file(file)
 
     def on_mi_edit_pxelinux_cfg_activate(self, widget):
-        self.edit_file('/var/lib/tftpboot/ltsp/i386/pxelinux.cfg/default')
+        for file in glob.glob('/var/lib/tftpboot/ltsp/*/pxelinux.cfg/default'):
+            self.edit_file(file)
 
     def on_mi_edit_shared_folders_activate(self, widget):
         self.edit_file('/etc/default/shared-folders')
