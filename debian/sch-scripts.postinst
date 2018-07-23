@@ -69,6 +69,9 @@ install() {
     # Note that we can't use search_and_replace here (LP: #1504893).
     sed 's/^Prompt=.*/Prompt=never/' -i /etc/update-manager/release-upgrades
 
+    # Immediately show security updates, don't install them in the background
+    ln -rsf /usr/share/sch-scripts/apt.conf /etc/apt/apt.conf.d/60sch-scripts || true
+
     # Use MATE mimeapps for root
     if [ ! -f /usr/local/share/applications/mimeapps.list ] &&
       [ -f /usr/share/mate/applications/defaults.list ]; then

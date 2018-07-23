@@ -29,7 +29,8 @@ remove() {
     local - link
 
     set +e
-    for link in /usr/local/bin/tuxtype \
+    for link in /etc/apt/apt.conf.d/60sch-scripts \
+        /usr/local/bin/tuxtype \
         /usr/local/bin/unzip \
         /usr/lib/firefox/defaults/pref/sch-scripts.js \
         /usr/local/share/applications/mimeapps.list
