@@ -9,7 +9,7 @@ import getpass
 import gi
 gi.require_version('Gtk', '3.0')
 from gi.repository import Gtk
-from glob
+import glob
 import locale
 import os
 import socket
@@ -119,12 +119,12 @@ class Gui:
         d = defer.Deferred()
         reactor.callLater(1, d.callback, len(self.queue))
         d.addCallback(self.check_libuser_events)
-            
+
     def check_libuser_events(self, len_queue):
-        if len_queue == len(self.queue): 
+        if len_queue == len(self.queue):
             self.queue = []
             self.repopulate_treeviews()
-    
+
 ## Groups and users treeviews
 
     def populate_treeviews(self):
