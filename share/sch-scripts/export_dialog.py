@@ -12,12 +12,12 @@ import common
 class ExportDialog:
     def __init__(self, system, users):
         self.csv = parsers.CSV()
-        chooser = Gtk.FileChooserDialog(title="Επιλέξτε όνομα αρχείου για εξαγωγή", 
+        chooser = Gtk.FileChooserDialog(title="Επιλέξτε όνομα αρχείου για εξαγωγή",
                                         action=Gtk.FileChooserAction.SAVE,
                                         buttons=(Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL,
                                                  Gtk.STOCK_OK, Gtk.ResponseType.OK))
 
-        chooser.set_icon_from_file('/usr/share/pixmaps/sch-scripts.svg') 
+        chooser.set_icon_from_file('/usr/share/pixmaps/sch-scripts.svg')
         chooser.set_default_response(Gtk.ResponseType.OK)
         chooser.set_do_overwrite_confirmation(True)
         homepath = os.path.expanduser('~')
@@ -35,5 +35,5 @@ class ExportDialog:
                 filename += '.csv'
             self.csv.write(filename, system, users)
             os.chown(filename, int(os.environ['SUDO_UID']), int(os.environ['SUDO_GID']))
-        
+
         chooser.destroy()

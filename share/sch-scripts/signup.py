@@ -22,15 +22,15 @@ class Connection:
         # Create a new socket and connect to the server
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.sock.connect((host, port))
-        
+
         # 'Identify' to the server
         host = socket.gethostname()
         self._send('ID %s' % host)
-        
+
         self.p_reg = None
         self.u_reg = None
         self.n_reg = None
-    
+
     # TODO: Review the recv call, there should be a better way
     # TODO: Show exceptions in a graphical message
     def _send(self, data):
@@ -38,41 +38,41 @@ class Connection:
             data += '\r\n'
         self.sock.send(data)
         return self.sock.recv(4096).strip()
-    
+
     def close(self):
         self._send("BYE")
         self.sock.close()
-    
+
     def get_groups(self):
         groups = self._send("GET_GROUPS")
         if groups != '':
             return groups.split(',')
         return []
-    
+
     def get_roles(self):
         roles = self._send("GET_ROLES")
         if roles != '':
             return roles.split(',')
         return []
-    
+
     def user_exists(self, username):
         return self._send("USER_EXISTS %s" % username) == "YES"
-    
+
     def realname_regex(self):
         if self.n_reg is None:
             self.n_reg = self._send("REALNAME_REGEX")
         return self.n_reg
-    
+
     def username_regex(self):
         if self.u_reg is None:
             self.u_reg = self._send("USER_REGEX")
         return self.u_reg
-    
+
     def password_regex(self):
         if self.p_reg is None:
             self.p_reg = self._send("PASS_REGEX")
         return self.p_reg
-    
+
     def send_data(self, realname, username='', password='', role='', groups=''):
         groups = ','.join(groups)
         data = '\t'.join([realname, username, password, role, groups])
@@ -94,9 +94,9 @@ class UserForm(object):
             dlg.run()
             dlg.destroy()
             sys.exit(1)
-        
+
         self.builder = Gtk.Builder()
-        self.builder.add_from_file('signup_form.ui')  
+        self.builder.add_from_file('signup_form.ui')
         self.dialog = self.builder.get_object('dialog')
         self.username_combo = self.builder.get_object('username_combo')
         self.username_entry = self.username_combo.get_child()
@@ -112,16 +112,16 @@ class UserForm(object):
         # Workaround the problem with starting with a sensitive button (but an empty model)
         self.username_combo.set_button_sensitivity(Gtk.SensitivityType.OFF)
         self.username_combo.set_button_sensitivity(Gtk.SensitivityType.AUTO)
-        
+
         # Fill the groups treeview or hide it if there are no groups to select
         groups = self.connection.get_groups()
-        
+
         if len(groups) > 0:
             for group in groups:
                 self.groups_store.append([False, group])
         else:
             self.groups_box.hide()
-        
+
         # Fill the roles combobox or hide it if there are no roles to select
         roles = self.connection.get_roles()
         if len(roles) > 0:
@@ -131,21 +131,21 @@ class UserForm(object):
         else:
             self.role_combo.hide()
             self.builder.get_object('role_label').hide()
-            
+
         self.dialog.show()
-    
+
     def on_group_toggled(self, widget, path):
         self.groups_store[path][0] = not self.groups_store[path][0]
-    
+
     def get_icon(self, check):
         if check:
             return Gtk.STOCK_OK
         return Gtk.STOCK_DIALOG_ERROR
-    
+
     def to_alpha(self, s):
         return ''.join(c for c in s.decode('utf-8') if c.isalpha())
 
-    def get_suggestions(self, name):       
+    def get_suggestions(self, name):
         tokens = []
         for tok in name.split():
             t = self.to_alpha(tok).lower()
@@ -161,9 +161,9 @@ class UserForm(object):
         _append(iso843.transcript(tokens[-1] + ''.join(tok[0] for tok in tokens[:-1]), False))
         _append(iso843.transcript(tokens[-1], False))
         _append(iso843.transcript(tokens[0], False))
-        
+
         return sug
-    
+
     def on_realname_entry_changed(self, widget):
         name = widget.get_text()
         icon = self.get_icon(re.match(self.connection.realname_regex(), name.decode('utf-8'), re.UNICODE))
@@ -177,24 +177,24 @@ class UserForm(object):
                 self.username_combo.append_text(s)
         self.builder.get_object('realname_valid').set_from_stock(icon, Gtk.IconSize.BUTTON)
         self.set_apply_sensitivity()
-    
+
     def on_password_entry_changed(self, widget):
         password = widget.get_text()
         password_repeat = self.retype_password.get_text()
         icon = self.get_icon(password == password_repeat)
         self.builder.get_object('retype_password_valid').set_from_stock(icon, Gtk.IconSize.BUTTON)
-        
+
         icon = self.get_icon(re.match(self.connection.password_regex(), password.decode('utf-8'), re.UNICODE))
         self.builder.get_object('password_valid').set_from_stock(icon, Gtk.IconSize.BUTTON)
         self.set_apply_sensitivity()
-    
+
     def on_retype_password_entry_changed(self, widget):
         password = self.password.get_text()
         password_repeat = widget.get_text()
         icon = self.get_icon(password == password_repeat)
         self.builder.get_object('retype_password_valid').set_from_stock(icon, Gtk.IconSize.BUTTON)
         self.set_apply_sensitivity()
-    
+
     def on_username_entry_changed(self, widget):
         username = self.username_entry.get_text()
         valid_name = re.match(self.connection.username_regex(), username.decode('utf-8'), re.UNICODE)
@@ -202,19 +202,19 @@ class UserForm(object):
         icon = self.get_icon(valid_name and free_name)
         self.builder.get_object('username_valid').set_from_stock(icon, Gtk.IconSize.BUTTON)
         self.set_apply_sensitivity()
-    
+
     def set_apply_sensitivity(self):
         icon = lambda x: self.builder.get_object(x).get_stock()[0]
         s = icon('username_valid') == icon('password_valid') == icon('retype_password_valid') == icon('realname_valid') == Gtk.STOCK_OK
-        
+
         self.builder.get_object('apply_button').set_sensitive(s)
 
     def on_dialog_delete_event(self, widget, event):
         self.quit()
-    
+
     def on_cancel_clicked(self, widget):
         self.quit()
-    
+
     def on_apply_clicked(self, widget):
         realname = self.realname.get_text()
         username = self.username_entry.get_text()
@@ -237,24 +237,24 @@ class UserForm(object):
                                     buttons = Gtk.ButtonsType.CLOSE,
                                     message_format = msg)
             dlg.set_title("Αποτυχία")
-        
+
         self.connection.close()
         self.connection = None
         dlg.run()
         dlg.destroy()
         self.quit()
-    
+
     def encrypt(self, pwd):
         alphabet = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'
         salt = ''.join([random.choice(alphabet) for i in range(8)])
         return crypt.crypt(pwd, "$6$%s$" % salt)
-    
+
     def quit(self):
         self.dialog.destroy()
         if self.connection:
             self.connection.close()
         sys.exit()
-    
+
 if __name__ == '__main__':
     if len(sys.argv) > 2:
         form = UserForm(sys.argv[1], int(sys.argv[2]))

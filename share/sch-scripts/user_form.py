@@ -18,10 +18,10 @@ class UserForm(object):
         self.mode = None
         self.builder = Gtk.Builder()
         self.builder.add_from_file('user_form.ui')
-        
+
         self.roles = {i : config.parser.get('Roles', i).replace('$$teachers', self.system.teachers) for i in config.parser.options('Roles')}
         self.selected_role = None
-        
+
         self.dialog = self.builder.get_object('dialog')
         self.username = self.builder.get_object('username_entry')
         self.password = self.builder.get_object('password_entry')
@@ -51,29 +51,29 @@ class UserForm(object):
         self.primary_group = None
         self.show_sys_groups = False
         self.active_from_role = []
-        
+
         self.groups_filter.set_visible_func(self.groups_visible_func)
         self.groups_sort.set_sort_column_id(1, Gtk.SortType.ASCENDING)
-        
+
         # Fill the groups treeview
         # object, name, active, activatable, font weight, actually active, gid
         for group, group_obj in system.groups.items():
             self.groups_store.append([group_obj, group, False, True, 400, False, group_obj.gid])
-            
+
         # Fill the shells combobox
         for shell in system.get_valid_shells():
             self.shells_combo.append_text(shell)
-            
+
         # Fill the roles combobox
         for role, groups in self.roles.items():
             self.role_combo.append_text(role)
-    
+
     def groups_visible_func(self, model, itr, x):
         primary_group = not model[itr][3] or self.username.get_text() in model[itr][0].members
         show_user_group = self.show_sys_groups or model[itr][0].is_user_group()
         show_private_group = config.parser.getboolean('GUI', 'show_private_groups') or not model[itr][0].is_private()
         return (show_user_group and show_private_group) or primary_group
-    
+
     def on_show_sys_groups_toggled(self, widget):
         self.show_sys_groups = not self.show_sys_groups
         self.groups_filter.refilter()
@@ -81,22 +81,22 @@ class UserForm(object):
             self.groups_sort.set_sort_column_id(6, Gtk.SortType.ASCENDING)
         else:
             self.groups_sort.set_sort_column_id(1, Gtk.SortType.ASCENDING)
-    
+
     def on_role_combo_changed(self, widget):
         role = widget.get_active_text()
         self.selected_role = role
         for row in self.active_from_role:
             row[2] = False
-        self.active_from_role = []   
-        
+        self.active_from_role = []
+
         if role is not None:
             groups = self.roles[role].split(',')
             for row in self.groups_store:
                 if row[0].name in groups:
                     row[2] = True
                     self.active_from_role.append(row)
-                    
-    
+
+
     def on_uid_changed(self, widget):
         uid = widget.get_text()
         uid_valid_icon = self.builder.get_object('uid_valid')
@@ -106,7 +106,7 @@ class UserForm(object):
             uid_valid_icon.set_from_stock(Gtk.STOCK_CANCEL, Gtk.IconSize.BUTTON)
             self.set_apply_sensitivity()
             return
-        
+
         if (self.mode == 'edit' and uid == self.user.uid) or self.system.uid_is_free(uid):
             icon = Gtk.STOCK_OK
         else:
@@ -114,53 +114,53 @@ class UserForm(object):
         uid_valid_icon.set_from_stock(icon, Gtk.IconSize.BUTTON)
         self.on_homedir_entry_changed(self.homedir)
         self.set_apply_sensitivity()
-    
+
     def on_group_toggled(self, widget, path):
         path = self.groups_sort[path].path
         path = self.groups_sort.convert_path_to_child_path(path)
         path = self.groups_filter.convert_path_to_child_path(path)
-        
+
         self.groups_store[path][2] = not self.groups_store[path][2]
         self.groups_store[path][5] = not self.groups_store[path][5]
-        
+
     def on_groups_selection_changed(self, widget):
         self.builder.get_object('set_primary_button').set_sensitive(len(widget.get_selected_rows()[1]) == 1)
-    
+
     def on_set_primary_button_clicked(self, widget):
         # The paths list will always contain 1 element, I just use
         # get_selected_rows here instead of get_selected for extra features
         # such as context menu actions which would work with multiple selection
         model, paths = self.groups_tree.get_selection().get_selected_rows()
-        
+
         path = self.groups_sort[paths[0]].path
         path = self.groups_sort.convert_path_to_child_path(path)
         path = self.groups_filter.convert_path_to_child_path(path)
         row = self.groups_store[path]
-        
+
         # Mark the group as primary
         self.set_group_primary(row)
-        
+
         # Set the primary group name and gid entries
         self.pgroup.set_text(row[0].name)
         self.pgid.set_text(str(row[0].gid))
-    
+
     def unset_primary(self):
         if self.primary_group:
             self.primary_group[2] = self.primary_group[5]
             self.primary_group[3] = True
             self.primary_group[4] = 400
             self.primary_group = None
-    
+
     def set_group_primary(self, row):
         # Unset the previous primary group
         self.unset_primary()
         row[2] = True # Activate this group
         row[3] = False # Make it non-(de)activatable since it's now primary
         row[4] = 700 # Make the name bold to distinguish it
-        
+
         # Remember the new primary group
         self.primary_group = row
-    
+
     def on_gcos_other_entry_changed(self, widget):
         icon = self.get_icon(self.system.gecos_is_valid(widget.get_text()))
         self.builder.get_object('other_valid').set_from_stock(icon, Gtk.IconSize.BUTTON)
@@ -194,7 +194,7 @@ class UserForm(object):
     def on_password_entry_changed(self, widget):
         icon = self.get_icon(self.password_repeat.get_text() == self.password.get_text())
         self.builder.get_object('password_retype_valid').set_from_stock(icon, Gtk.IconSize.BUTTON)
-        
+
         icon = self.get_icon(self.password.get_text() != '')
         self.builder.get_object('password_valid').set_from_stock(icon, Gtk.IconSize.BUTTON)
         self.set_apply_sensitivity()
@@ -211,7 +211,7 @@ class UserForm(object):
         icon = self.get_icon(valid_name and free_name)
         self.builder.get_object('username_valid').set_from_stock(icon, Gtk.IconSize.BUTTON)
         self.set_apply_sensitivity()
-    
+
     def on_homedir_entry_changed(self, widget):
         home = widget.get_text()
         try:
@@ -237,9 +237,9 @@ class UserForm(object):
                 valid_icon.set_from_stock(Gtk.STOCK_CANCEL, Gtk.IconSize.BUTTON)
             else:
                 valid_icon.set_from_stock(Gtk.STOCK_OK, Gtk.IconSize.BUTTON)
-        
+
         self.set_apply_sensitivity()
-    
+
     def on_pgroup_entry_changed(self, widget):
         pgname = self.pgroup.get_text()
         exists = pgname in self.system.groups
@@ -258,11 +258,11 @@ class UserForm(object):
                 gid = int(self.pgid.get_text())
             except:
                 gid = None
-            
+
             if gid is not None and not self.system.gid_is_free(gid):
                 self.pgid.set_text(str(self.system.get_free_gid()))
         self.set_apply_sensitivity()
-    
+
     def on_pgid_entry_changed(self, widget):
         valid_icon = self.builder.get_object('pgid_valid')
         try:
@@ -273,7 +273,7 @@ class UserForm(object):
                 self.pgroup.set_text('')
             self.set_apply_sensitivity()
             return
-        
+
         exists = not self.system.gid_is_free(gid)
         icon = self.get_icon(self.system.gid_is_valid(gid))
         valid_icon.set_from_stock(icon, Gtk.IconSize.BUTTON)
@@ -294,38 +294,38 @@ class UserForm(object):
                     self.pgroup.set_text('')
         self.on_homedir_entry_changed(self.homedir)
         self.set_apply_sensitivity()
-    
+
     def get_icon(self, check):
         if check:
             return Gtk.STOCK_OK
         return Gtk.STOCK_CANCEL
-    
+
     def set_apply_sensitivity(self):
         icon = lambda x: self.builder.get_object(x).get_stock()[0]
         s = icon('username_valid') == icon('uid_valid') == icon('password_valid') == icon('password_retype_valid') == icon('full_name_valid') == icon('office_valid') == icon('office_phone_valid') == icon('home_phone_valid') == icon('other_valid') == icon('homedir_valid') == icon('pgid_valid') == icon('pgroup_valid') == Gtk.STOCK_OK
-        
+
         self.builder.get_object('apply_button').set_sensitive(s)
 
     def on_dialog_delete_event(self, widget, event):
         self.dialog.destroy()
-    
+
     def on_cancel_clicked(self, widget):
         self.dialog.destroy()
-         
+
 class NewUserDialog(UserForm):
     def __init__(self, system):
         super(NewUserDialog, self).__init__(system)
         self.mode = 'new'
         self.builder.connect_signals(self)
-        
+
         # Set some defaults
         self.uid_entry.set_text(str(self.system.get_free_uid()))
         self.pgid.set_text(str(self.system.get_free_gid()))
         self.shells_entry.set_text('/bin/bash')
         self.last_change.set_value(common.days_since_epoch())
-        
+
         self.dialog.show()
-    
+
     def on_apply_clicked(self, widget):
         user = libuser.User()
         user.name = self.username.get_text()
@@ -344,28 +344,28 @@ class NewUserDialog(UserForm):
         user.inact = int(self.inactive.get_value())
         user.expire = int(self.expire.get_value())
         user.password = self.system.encrypt(self.password.get_text())
-        
+
         user.groups = [g[0].name for g in self.groups_store if g[2]]
         user.gid = int(self.pgid.get_text())
         user.primary_group = self.pgroup.get_text()
         if self.system.gid_is_free(user.gid):
             self.system.add_group(libuser.Group(user.primary_group, user.gid, {}))
-        
+
         self.system.add_user(user)
         if self.builder.get_object('locked_account_check').get_active():
             self.system.lock_user(user)
         self.dialog.destroy()
-    
+
 class EditUserDialog(UserForm):
     def __init__(self, system, user):
         super(EditUserDialog, self).__init__(system)
         self.mode = 'edit'
         self.user = user
         self.builder.connect_signals(self)
-        
+
         self.builder.get_object('primary_group_grid').set_visible(False)
         self.builder.get_object('role_box').set_visible(False)
-        
+
         self.username.set_text(user.name)
         self.password.set_text('\n'*8)
         self.password_repeat.set_text('\n'*8)
@@ -384,7 +384,7 @@ class EditUserDialog(UserForm):
         self.inactive.set_value(user.inact)
         self.expire.set_value(user.expire)
         self.builder.get_object('locked_account_check').set_active(self.system.user_is_locked(user))
-        
+
         self.pgroup.set_text(user.primary_group)
         # Activate the groups in which the user belongs and mark the primary
         for row in self.groups_store:
@@ -394,9 +394,9 @@ class EditUserDialog(UserForm):
             if row[1] == user.primary_group:
                 self.primary_group = row
                 self.set_group_primary(row)
-        
+
         self.dialog.show()
-        
+
     def on_apply_clicked(self, widget):
         username = self.user.name
         self.user.name = self.username.get_text()
@@ -416,18 +416,18 @@ class EditUserDialog(UserForm):
         self.user.expire = int(self.expire.get_value())
         if not '\n' in self.password.get_text():
             self.user.password = self.system.encrypt(self.password.get_text())
-        
+
         self.user.groups = [g[1] for g in self.groups_store if g[2]]
         self.user.gid = int(self.pgid.get_text())
         self.user.primary_group = self.pgroup.get_text()
         if self.system.gid_is_free(self.user.gid):
             self.system.add_group(libuser.Group(self.user.primary_group, self.user.gid, {}))
-        
+
         self.system.update_user(username, self.user)
         if self.builder.get_object('locked_account_check').get_active():
             self.system.lock_user(self.user)
         self.dialog.destroy()
-        
+
 class ReviewUserDialog(UserForm):
     def __init__(self, system, user, role='', callback=None):
         super(ReviewUserDialog, self).__init__(system)
@@ -436,7 +436,7 @@ class ReviewUserDialog(UserForm):
         self.user = user
         self.selected_role = role
         self.builder.connect_signals(self)
-        
+
         self.username.set_text(user.name)
         if user.password not in ['!','*', ''] or user.plainpw:
             self.password.set_text('\n'*8)
@@ -456,7 +456,7 @@ class ReviewUserDialog(UserForm):
         self.inactive.set_value(user.inact)
         self.expire.set_value(user.expire)
         self.builder.get_object('locked_account_check').set_active(user.password[0] == '!')
-        
+
         self.pgroup.set_text(user.primary_group)
         self.pgid.set_text(str(user.gid))
         # Activate the groups in which the user belongs and mark the primary
@@ -468,15 +468,15 @@ class ReviewUserDialog(UserForm):
             if row[1] == user.primary_group:
                 self.primary_group = row
                 self.set_group_primary(row)
-        
+
         if role:
             for r in self.role_combo.get_model():
                 if r[0] == role:
                     self.role_combo.set_active_iter(r.iter)
                     break
-        
+
         self.dialog.show()
-        
+
     def on_apply_clicked(self, widget):
         self.user.name = self.username.get_text()
         self.user.rname = self.gc_name.get_text()
@@ -495,11 +495,11 @@ class ReviewUserDialog(UserForm):
         self.user.expire = int(self.expire.get_value())
         if not '\n' in self.password.get_text():
             self.user.password = self.system.encrypt(self.password.get_text())
-        
+
         self.user.groups = [g[1] for g in self.groups_store if g[2]]
         self.user.gid = int(self.pgid.get_text())
         self.user.primary_group = self.pgroup.get_text()
-        
+
         if self.builder.get_object('locked_account_check').get_active():
             if self.user.password[0] != '!':
                 self.user.password = '!'+self.user.password

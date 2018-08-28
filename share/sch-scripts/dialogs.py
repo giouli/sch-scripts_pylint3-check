@@ -15,7 +15,7 @@ class AskDialog(Gtk.MessageDialog):
                                           message_format = message)
         self.set_title(title)
         self.set_default_response(Gtk.ResponseType.NO)
-    
+
     def showup(self):
         response = self.run()
         self.destroy()
@@ -29,7 +29,7 @@ class InfoDialog(Gtk.MessageDialog):
                                           buttons = Gtk.ButtonsType.CLOSE,
                                           message_format = message)
         self.set_title(title)
-    
+
     def showup(self):
         response = self.run()
         self.destroy()
@@ -42,7 +42,7 @@ class WarningDialog(Gtk.MessageDialog):
                                           buttons = Gtk.ButtonsType.CLOSE,
                                           message_format = message)
         self.set_title(title)
-    
+
     def showup(self):
         response = self.run()
         self.destroy()
@@ -55,10 +55,10 @@ class ErrorDialog(Gtk.MessageDialog):
                                           buttons = Gtk.ButtonsType.CLOSE,
                                           message_format = message)
         self.set_title(title)
-    
+
     def showup(self):
         response = self.run()
         self.destroy()
         return response
-        
+
 

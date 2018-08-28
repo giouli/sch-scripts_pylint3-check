@@ -1,5 +1,5 @@
 #!/bin/sh
-# Purges all kernels and headers except for the newest ones for each 
+# Purges all kernels and headers except for the newest ones for each
 # kernel variant, and except for the active one.
 # Copyright (C) 2012 Alkis Georgopoulos <alkisg@gmail.com>
 # License GNU GPL version 3 or newer <http://gnu.org/licenses/gpl.html>

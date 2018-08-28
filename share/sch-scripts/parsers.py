@@ -15,14 +15,14 @@ FIELDS_MAP = {'Όνομα χρήστη': 'name', 'Τελευταία αλλαγ�
 class CSV:
     def __init__(self):
         self.fields_map = FIELDS_MAP
-    
+
     def parse(self, fname):
         users_dict = csv.DictReader(open(fname))
         users = {}
         groups = {}
         for user_d in users_dict:
             user = libuser.User()
-            
+
             for key, value in user_d.items():
                 try:
                     user.__dict__[self.fields_map[key]] = value # FIXME: Here we lose the datatype
@@ -38,7 +38,7 @@ class CSV:
             # If plainpw is set, override and update password
             if user.plainpw:
                 user.password = libuser.system.encrypt(user.plainpw)
-            
+
             if user.name:
                 users[user.name] = user
                 user_groups_string = user.groups
@@ -56,17 +56,17 @@ class CSV:
                         gid = None
                     if gname != '':
                         user.groups.append(gname)
-                    
+
                     # Create Group instances from memberships
                     if gname not in groups:
                         groups[gname] = libuser.Group(gname, gid)
                     groups[gname].members[user.name] = user
-                        
+
                 if user.groups == '':
                     user.groups = None
-        
+
         return libuser.Set(users, groups)
-            
+
 
     def write(self, fname, system, users):
         f = open(fname, 'w')
@@ -83,7 +83,7 @@ class CSV:
                 gid = system.groups[gname].gid
                 final_groups[i] = ':'.join((final_groups[i], str(gid)))
             u_dict['Ομάδες'] = ','.join(final_groups)
-            
+
             writer.writerow(u_dict)
         f.close()
 
@@ -95,10 +95,10 @@ class passwd():
     # gshadow format: Not Implemented
     def __init__(self):
         pass
-    
+
     def parse(self, pwd, spwd=None, grp=None):
         new_set = libuser.Set()
-        
+
         with open(pwd) as f:
             reader = csv.reader(f, delimiter=':', quoting=csv.QUOTE_NONE)
             for row in reader:
@@ -113,7 +113,7 @@ class passwd():
                 u.directory = row[5]
                 u.shell = row[6]
                 new_set.add_user(u)
-        
+
         if spwd:
             with open(spwd) as f:
                 reader = csv.reader(f, delimiter=':', quoting=csv.QUOTE_NONE)
@@ -127,7 +127,7 @@ class passwd():
                             u.__dict__[att] = int(row[i])
                         except:
                             pass
-        
+
         if grp:
             with open(grp) as f:
                 reader = csv.reader(f, delimiter=':', quoting=csv.QUOTE_NONE)
@@ -143,16 +143,16 @@ class passwd():
                     for name in members:
                         g.members[name] = new_set.users[name]
                         new_set.users[name].groups.append(g.name)
-                    
+
                     new_set.add_group(g)
                     gids_map[g.gid] = g.name
-                
+
                 for u in new_set.users.values():
                     u.primary_group = gids_map[u.gid]
                     if u.primary_group in u.groups:
                         u.groups.remove(u.primary_group)
                     #u.groups.append(u.primary_group)
-        
+
         return new_set
 
 

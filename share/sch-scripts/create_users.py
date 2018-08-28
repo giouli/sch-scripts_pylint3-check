@@ -17,21 +17,21 @@ class NewUsersDialog:
     def __init__(self, system, sf):
         self.system = system
         self.sf = sf
-        
+
         self.glade = Gtk.Builder()
         self.glade.add_from_file('create_users.ui')
         self.glade.connect_signals(self)
         self.dialog = self.glade.get_object('create_users_dialog')
         self.user_tree = self.glade.get_object('user_treeview')
         self.user_store = self.glade.get_object('user_liststore')
-        
+
         self.roles = {i : config.parser.get('Roles', i) for i in config.parser.options('Roles')}
         self.groups = []
-        
+
         self.glade.get_object('computers_number_spin').set_value(12)
         for group in self.roles['μαθητής'].split(","):
             if group in self.system.groups:
-                self.groups.append(group)   
+                self.groups.append(group)
         self.glade.get_object('groups_template_entry').set_text("{c} "+" ".join(self.groups))
         self.dialog.show()
 
@@ -48,25 +48,25 @@ class NewUsersDialog:
             get_text()
 
         button_apply = self.glade.get_object('button_apply')
-        
+
         # Check the validity of characters in the classes entry#FIXME: libuser
         classes_validity_image = self.glade.get_object('classes_validity_image')
         if not (classes_str.replace(' ', '') + 'foo').isalnum():
-            classes_validity_image.set_from_stock(Gtk.STOCK_DIALOG_ERROR, 
+            classes_validity_image.set_from_stock(Gtk.STOCK_DIALOG_ERROR,
                                         Gtk.IconSize.SMALL_TOOLBAR)
             button_apply.set_sensitive(False)
             return
         else:
             if self.classes == []:
                 self.classes = ['']
-            classes_validity_image.set_from_stock(Gtk.STOCK_OK, 
+            classes_validity_image.set_from_stock(Gtk.STOCK_OK,
                                             Gtk.IconSize.SMALL_TOOLBAR)
             button_apply.set_sensitive(True)
-        
+
         # Check the validity of characters in the username entry #FIXME: libuser
         username_validity_image = self.glade.get_object(
             'username_validity_image')
-        if (not self.username_tmpl.replace('{c}', 'a').replace('{0i}', 
+        if (not self.username_tmpl.replace('{c}', 'a').replace('{0i}',
           'a').replace('{i}', 'a').replace('-', '').replace('_', '').isalnum()) or \
           (len(self.classes) == 1 and self.computers > 1 and not '{i}' in self.username_tmpl and \
           not '{0i}' in self.username_tmpl) or (self.computers == 1 and len(self.classes) > 1 and \
@@ -74,22 +74,22 @@ class NewUsersDialog:
           (not '{c}' in self.username_tmpl or (not '{0i}' in self.username_tmpl and \
           not '{i}' in self.username_tmpl))):
 
-            username_validity_image.set_from_stock(Gtk.STOCK_DIALOG_ERROR, 
+            username_validity_image.set_from_stock(Gtk.STOCK_DIALOG_ERROR,
                                         Gtk.IconSize.SMALL_TOOLBAR)
             button_apply.set_sensitive(False)
             return
         else:
-            username_validity_image.set_from_stock(Gtk.STOCK_OK, 
+            username_validity_image.set_from_stock(Gtk.STOCK_OK,
                                             Gtk.IconSize.SMALL_TOOLBAR)
             button_apply.set_sensitive(True)
         self.user_store.clear()
-        
+
         # Repopulate the store
         for classn in self.classes:
             for compn in range(1, self.computers+1):
                 if len(self.user_store) == 300:
                     break
-                ev = lambda x: x.replace('{c}', classn.strip()).replace('{i}', 
+                ev = lambda x: x.replace('{c}', classn.strip()).replace('{i}',
                     str(compn)).replace('{0i}', '%02d' %compn)
                 self.user_store.append([ev(self.username_tmpl), ev(self.name_tmpl),
                     '/home/'+ev(self.username_tmpl),ev(self.password_tmpl)])
@@ -117,7 +117,7 @@ class NewUsersDialog:
         set_uids = []
         while Gtk.events_pending():
             Gtk.main_iteration()
-        
+
         # Create groups for all the listed classes
         if self.classes != ['']:
             for classn in self.classes:
@@ -127,33 +127,33 @@ class NewUsersDialog:
                     tmp_gid = self.system.get_free_gid(exclude=set_gids)
                     set_gids.append(tmp_gid)
                     cmd_error = self.system.add_group(libuser.Group(classn, tmp_gid, {}))
-                    progressbar.set_text('Δημιουργία ομάδας %d από %d' 
+                    progressbar.set_text('Δημιουργία ομάδας %d από %d'
                         % (groups_created+1, total_groups))
                     #TODO expect returned value from add_group
                     if False and cmd_error != "":
                         self.glade.get_object('error_label').set_text(cmd_error)
-                        self.glade.get_object('error_hbox').show() 
+                        self.glade.get_object('error_hbox').show()
                         button_close.set_sensitive(True)
                         return
                     groups_created += 1
                     progressbar.set_fraction(float(groups_created) / float(total_groups))
                 else:
                     tmp_gid=self.system.groups[classn].gid
-                
+
                 # Add teachers to group
                 if self.glade.get_object('teachers_checkbutton').get_active():
                     for user in self.system.users.values():
                         if 'teachers' in user.groups and classn not in user.groups:
                             user.groups.append(classn)
                             self.system.update_user(user.name, user)
-            
+
             # Create shared folders
             if self.glade.get_object('shared_checkbutton').get_active():
                 for classn in self.classes:
                     while Gtk.events_pending():
                         Gtk.main_iteration()
                     self.sf.add([classn])
-                
+
 
         # And finally, create the users
         cmd_error = str()
@@ -161,10 +161,10 @@ class NewUsersDialog:
             for compn in range(1, self.computers+1):
                 while Gtk.events_pending():
                     Gtk.main_iteration()
-                progressbar.set_text('Δημιουργία χρήστη %d από %d...' 
+                progressbar.set_text('Δημιουργία χρήστη %d από %d...'
                     %(users_created+1, total_users))
 
-                ev = lambda x: x.replace('{c}', classn.strip()).replace('{i}', 
+                ev = lambda x: x.replace('{c}', classn.strip()).replace('{i}',
                                 str(compn)).replace('{0i}', '%02d'%compn)
                 epoch = datetime.datetime.utcfromtimestamp(0)
                 uname = ev(self.username_tmpl)

@@ -33,23 +33,23 @@ class Registrations(LineReceiver):
         self.ip = None
         self.port = None
         self.id_hostname = None
-    
+
     def connectionMade(self):
         self.ip = self.transport.getPeer().host
         self.port = self.transport.getPeer().port
         self.connections.append(self)
         print("New connection from %s:%s" % (self.ip, self.port))
-        
+
     def connectionLost(self, reason):
         print("Connection with %s:%s was closed." % (self.ip, self.port))
         if self in self.connections:
             del self.connections[self.connections.index(self)]
-    
+
     def booltr(self, b):
         if b:
             return b'YES'
         return b'NO'
-    
+
     def lineReceived(self, line):
         # print(line)  # DEBUGGING
         line = line.decode('utf-8')
@@ -59,7 +59,7 @@ class Registrations(LineReceiver):
         else:
             cmd = cmd[0]
             data = None
-        
+
         if self.state == 'identify':
             if cmd == 'ID':
                 self.identify(data)
@@ -67,7 +67,7 @@ class Registrations(LineReceiver):
                 print("Error: Expected ID command from %s:%s but instead got %s. Closing connection" % (self.ip, self.port, cmd))
                 self.transport.loseConnection()
             return
-            
+
         if line == 'BYE':
             print("%s:%s sent BYE." % (self.ip, self.port))
             self.transport.loseConnection()
@@ -95,14 +95,14 @@ class Registrations(LineReceiver):
                 groups = []
                 if self.groups:
                     groups = data[4].split(',') if data[4] else []
-                
+
                 # Create a new request
                 applicant = Applicant(self.ip, self.id_hostname)
                 user = libuser.User(username, rname=realname, password=password, groups=groups)
                 #print user # DEBUGGING
                 req = Request(time.localtime(), applicant, user, role)
                 self.gui.add_request(req)
-                
+
                 self.requests.append(req)
                 self.sendLine(b'YES')
             except Exception as e:
@@ -111,7 +111,7 @@ class Registrations(LineReceiver):
                 print("Error receiving data.")
         else:
             print("Received invalid command %s from %s:%s" % (cmd, self.ip, self.port))
-            
+
     def identify(self, line):
         self.id_hostname = line
         self.state = 'listen'
@@ -135,7 +135,7 @@ class Applicant(object):
     def __init__(self, ip, hostname=None):
         self.ip = ip
         self.hostname = hostname
-        
+
     def __str__(self):
         return '%s (%s)' % (self.hostname, self.ip)
 
@@ -165,10 +165,10 @@ class UI:
         self.selection = self.builder.get_object('treeview-selection')
         self.roles = {i : config.parser.get('Roles', i).replace('$$teachers', self.system.teachers) for i in config.parser.options('Roles')}
         self.window.show()
-    
+
     def strtime(self, t):
         return time.strftime("%d/%m/%Y %T", t)
-    
+
     def user_autocomplete(self, user):
         if user.directory in [None, '']:
             user.directory = os.path.join(libuser.HOME_PREFIX, user.name)
@@ -196,12 +196,12 @@ class UI:
             user.expire = -1
         if user.password in [None, '']:
             user.password = '!'
-    
+
     def add_request(self, request):
         #object time applicant realname username role groups
-        self.requests_list.append([request, self.strtime(request.time), 
+        self.requests_list.append([request, self.strtime(request.time),
                                    str(request.applicant), request.user.rname,
-                                   request.user.name, str(request.role), 
+                                   request.user.name, str(request.role),
                                    ','.join(request.user.groups)])
         self.user_autocomplete(request.user)
         # Add the role groups to user.groups but don't show them in the treeview
@@ -213,28 +213,28 @@ class UI:
             if gr and gr not in request.user.groups and gr in libuser.system.groups:
                 request.user.groups.append(gr)
         self.builder.get_object('apply_button').set_sensitive(True)
-    
+
     def update_row(self, row, role=None):
         request = row[0]
         if role is not None:
             request.role = role
-        data = [request, self.strtime(request.time), 
+        data = [request, self.strtime(request.time),
                 str(request.applicant), request.user.rname,
                 request.user.name, str(request.role)]
         for i in range(len(data)):
             row[i] = data[i]
-        
+
         if request.role in self.roles:
             role_groups = self.roles[request.role].split(',')
         else:
             role_groups = []
         row[6] = ','.join([g for g in request.user.groups if g and g not in role_groups])
-    
+
     def get_selected_rows(self):
         paths = self.selection.get_selected_rows()[1]
         selected = [self.requests_list[path] for path in paths]
         return selected
-    
+
     def on_treeview_selection_changed(self, widget):
         cnt = widget.count_selected_rows()
         if cnt > 0:
@@ -246,7 +246,7 @@ class UI:
         else:
             self.reject_tb.set_sensitive(False)
             self.review_tb.set_sensitive(False)
-    
+
     def on_reject_tb_clicked(self, widget):
         selected = self.get_selected_rows()
         msg = "Θέλετε σίγουρα να διαγραφούν τα παρακάτω αιτήματα από τη λίστα;\n\n"
@@ -257,13 +257,13 @@ class UI:
                 self.requests_list.remove(row.iter)
             if len(self.requests_list) == 0:
                 self.builder.get_object('apply_button').set_sensitive(False)
-            
+
     def on_review_tb_clicked(self, widget):
         row = self.get_selected_rows()[0] # It should always be only one
         request = row[0]
         cb = lambda role: self.update_row(row, role)
         user_form.ReviewUserDialog(self.system, request.user, request.role, cb)
-    
+
     def on_apply_button_clicked(self, widget):
         requests = [row[0] for row in self.requests_list]
         users = [req.user for req in requests]
@@ -281,20 +281,20 @@ class UI:
                         self.requests_list.remove(self.requests_list.get_iter(counter))
             if len(self.requests_list) == 0:
                 self.builder.get_object('apply_button').set_sensitive(False)
-    
-    def on_close_button_clicked(self, widget):    
+
+    def on_close_button_clicked(self, widget):
         if len(self.requests_list):
             r=dialogs.AskDialog("Θέλετε σίγουρα να τερματίσετε την εφαρμογή αιτήσεων; Όλες οι εκκρεμείς αιτήσεις θα χαθούν.", "Επιβεβαίωση").showup()
             if r == Gtk.ResponseType.YES:
                 reactor.stop()
         else:
             reactor.stop()
-    
+
     def on_window_delete_event(self, widget, event):
         reactor.stop()
-    
 
-def startServer(system, groups, roles):   
+
+def startServer(system, groups, roles):
     gui = UI(system)
     reactor.listenTCP(790, RegistrationsFactory(gui, system, groups, roles))
     reactor.run()
@@ -319,14 +319,14 @@ class SettingsDialog:
         self.populate_groups()
         self.dlg.run()
         self.dlg.destroy()
-   
+
     def populate_roles(self):
          check_list = config.parser.get('GUI', 'requests_checked_roles').split(',')
          for role in config.parser.options('Roles'):
             check = role in check_list
             self.roles_list.append([check, role])
          self.set_header_checkbutton(self.check_all_roles, self.roles_list)
-    
+
     def populate_groups(self):
         check_list = config.parser.get('GUI', 'requests_checked_groups').split(',')
         for group in self.system.groups.values():
@@ -334,13 +334,13 @@ class SettingsDialog:
                 check = group.name in check_list
                 self.groups_list.append([check, group.name])
         self.set_header_checkbutton(self.check_all_groups, self.groups_list)
-    
+
     def get_selected_roles(self):
         return [r[1] for r in self.roles_list if r[0]]
-    
+
     def get_selected_groups(self):
         return [r[1] for r in self.groups_list if r[0]]
-    
+
     def set_header_checkbutton(self, button, store):
         checked = [r[0] for r in store]
         if False in checked:
@@ -352,17 +352,17 @@ class SettingsDialog:
         else:
             button.set_inconsistent(False)
             button.set_active(True)
-    
+
     def on_role_toggled(self, widget, path):
         selected = not self.roles_list[path][0]
         self.roles_list[path][0] = selected
         self.set_header_checkbutton(self.check_all_roles, self.roles_list)
-        
+
     def on_group_toggled(self, widget, path):
         selected = not self.groups_list[path][0]
         self.groups_list[path][0] = selected
         self.set_header_checkbutton(self.check_all_groups, self.groups_list)
-    
+
     def on_check_all_groups_clicked(self, widget):
         active = self.all_groups
         self.check_all_groups.set_inconsistent(False)
@@ -370,7 +370,7 @@ class SettingsDialog:
         self.all_groups = not active
         for row in self.groups_list:
             row[0] = not active
-    
+
     def on_check_all_roles_clicked(self, widget):
         active = self.all_roles
         self.check_all_roles.set_inconsistent(False)
@@ -378,18 +378,18 @@ class SettingsDialog:
         self.all_roles = not active
         for row in self.roles_list:
             row[0] = not active
-    
+
     def on_continue_clicked(self, widget):
         self.dlg.hide()
         config.parser.set('GUI', 'requests_checked_groups', ','.join([r[1] for r in self.groups_list if r[0]]))
         config.parser.set('GUI', 'requests_checked_roles', ','.join([r[1] for r in self.roles_list if r[0]]))
         config.save()
         startServer(self.system, self.get_selected_groups(), self.get_selected_roles())
-    
+
     def on_cancel_clicked(self, widget):
         self.dlg.destroy()
 
-    
+
 if __name__ == '__main__':
     import libuser
     SettingsDialog(libuser.system)

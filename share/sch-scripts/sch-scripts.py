@@ -248,10 +248,10 @@ class Gui:
 
     def on_groups_treeview_row_activated(self, widget, path, column):
         group_form.EditGroupDialog(self.system, self.sf, widget.get_model()[path][0])
-    
+
     def on_unselect_all_groups_clicked(self, widget):
         self.groups_tree.get_selection().unselect_all()
-    
+
     def on_main_window_delete_event(self, widget, event):
         self.conf.set('GUI', 'show_private_groups', str(self.show_private_groups))
         self.conf.set('GUI', 'show_system_groups', str(self.show_system_groups))
@@ -264,19 +264,19 @@ class Gui:
 
     def on_mi_signup_activate(self, widget):
         subprocess.Popen(['./signup_server.py'])
-        
-    #FIXME: Maybe use notify /etc/group then self.populate_treeviews not need to 
+
+    #FIXME: Maybe use notify /etc/group then self.populate_treeviews not need to
     #update user groups for shared folder library
     def on_mi_new_users_activate(self, widget):
         create_users.NewUsersDialog(self.system, self.sf)
-    
+
     def on_mi_import_passwd_activate(self, widget):
-        chooser = Gtk.FileChooserDialog(title="Επιλέξτε το αρχείο passwd προς εισαγωγή", 
+        chooser = Gtk.FileChooserDialog(title="Επιλέξτε το αρχείο passwd προς εισαγωγή",
                                         action=Gtk.FileChooserAction.OPEN,
                                         buttons=(Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL,
                                                  Gtk.STOCK_OK, Gtk.ResponseType.OK))
-        
-        chooser.set_icon_from_file('/usr/share/pixmaps/sch-scripts.svg')        
+
+        chooser.set_icon_from_file('/usr/share/pixmaps/sch-scripts.svg')
         chooser.set_default_response(Gtk.ResponseType.OK)
         homepath = os.path.expanduser('~')
         chooser.set_current_folder(homepath)
@@ -299,14 +299,14 @@ class Gui:
             import_dialog.ImportDialog(new_users)
         else:
             chooser.destroy()
-    
+
     def on_mi_import_csv_activate(self, widget):
-        chooser = Gtk.FileChooserDialog(title="Επιλέξτε το αρχείο CSV προς εισαγωγή", 
+        chooser = Gtk.FileChooserDialog(title="Επιλέξτε το αρχείο CSV προς εισαγωγή",
                                         action=Gtk.FileChooserAction.OPEN,
                                         buttons=(Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL,
                                                  Gtk.STOCK_OK, Gtk.ResponseType.OK))
-        
-        chooser.set_icon_from_file('/usr/share/pixmaps/sch-scripts.svg')        
+
+        chooser.set_icon_from_file('/usr/share/pixmaps/sch-scripts.svg')
         chooser.set_default_response(Gtk.ResponseType.OK)
         homepath = os.path.expanduser('~')
         chooser.set_current_folder(homepath)
@@ -322,7 +322,7 @@ class Gui:
             import_dialog.ImportDialog(new_users)
         else:
             chooser.destroy()
-    
+
     def on_mi_export_csv_activate(self, widget):
         users = self.get_selected_users()
         if len(users) == 0:
@@ -343,14 +343,14 @@ class Gui:
         dlg = dialogs.AskDialog(message)
         dlg.format_secondary_text(second_message)
         response = dlg.showup()
-        if response == Gtk.ResponseType.YES:        
+        if response == Gtk.ResponseType.YES:
             subprocess.Popen(['./run-in-terminal', 'ltsp-update-image', '--cleanup', '/'])
 
     def on_mi_ltsp_revert_image_activate(self, widget):
         message = "Θέλετε σίγουρα να προχωρήσετε στην επαναφορά του εικονικού δίσκου σε προηγούμενη έκδοση;"
         dlg = dialogs.AskDialog(message)
         response = dlg.showup()
-        if response == Gtk.ResponseType.YES: 
+        if response == Gtk.ResponseType.YES:
             subprocess.Popen(['./run-in-terminal', 'ltsp-update-image', '--revert', '/'])
 
     def on_mi_edit_lts_conf_activate(self, widget):
@@ -414,11 +414,11 @@ class Gui:
             homes_message = "Να διαγραφούν και οι αρχικοί κατάλογοι των παραπάνω χρηστών."
             homes_warn = "ΠΡΟΣΟΧΗ: Αν ενεργοποιήσετε αυτήν την επιλογή θα διαγραφούν οι αρχικοί κατάλογοι όλων των παραπάνω χρηστών, καθώς και όλα τα αρχεία που αυτοί περιέχουν, αλλά και οι αντίστοιχοι κατάλογοι e-mail στο /var/mail (εάν υπάρχουν)."
         homes_warn += "\n\nΗ ενέργεια αυτή είναι μη-αναστρέψιμη."
-        
+
         dlg = dialogs.AskDialog(message)
         vbox = dlg.get_message_area()
         rm_homes_check = Gtk.CheckButton(homes_message)
-        rm_homes_check.get_child().set_tooltip_text(homes_warn) 
+        rm_homes_check.get_child().set_tooltip_text(homes_warn)
         rm_homes_check.show()
         vbox.pack_start(rm_homes_check, False, False, 12)
         response = dlg.showup()
@@ -426,7 +426,7 @@ class Gui:
             rm_homes = rm_homes_check.get_active()
             for user in self.get_selected_users():
                 self.system.delete_user(user, rm_homes)
-            
+
     def on_mi_remove_user_activate(self, widget):
         users = self.get_selected_users()
         groups = self.get_selected_groups()
@@ -476,10 +476,10 @@ class Gui:
 
     def on_mi_ask_question_activate(self, widget):
         self.open_link('https://answers.launchpad.net/sch-scripts')
-    
+
     def on_helpdesk_ticket_activate(self, widget):
         self.open_link('http://helpdesk.sch.gr/ticketnew_user.php?category_id=9017')
-    
+
     def on_mi_irc_activate(self, widget):
         host = socket.gethostname()
         user = getpass.getuser()

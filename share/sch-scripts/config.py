@@ -33,27 +33,27 @@ def save():
 def setdefaults(overwrite=False):
     if not parser.has_section('GUI'):
         parser.add_section('GUI')
-    
+
     for k, v in gui_defaults.items():
         if overwrite or not parser.has_option('GUI', k):
             parser.set('GUI', k, str(v))
-            
+
     if not parser.has_section('Roles'):
         parser.add_section('Roles')
-    
+
     for k, v in roles_defaults.items():
         # TODO: new sch-scripts versions are not able to append groups like
         # 'fuse' to the saved user Roles, so don't read the user settings
         # at all until we reapproach the issue.
         # if overwrite or not parser.has_option('Roles', k):
             parser.set('Roles', k, str(v))
-    
-    
+
+
     save()
 
 if not os.path.isdir(path):
     os.makedirs(path)
-    
+
 if not os.path.isfile(settings_f):
     setdefaults()
 
