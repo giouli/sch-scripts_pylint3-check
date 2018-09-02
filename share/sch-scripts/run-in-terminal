@@ -211,9 +211,9 @@ install_sch_scripts() {
     bold "Γίνεται ενημέρωση των διαθέσιμων πακέτων."
     apt update || die "Σφάλμα κατά την ενημέρωση των διαθέσιμων πακέτων."
 
-    if [ -x /usr/bin/ubuntu-mate-welcome ]; then
+    if [ -x /usr/bin/snap ]; then
         bold "Αφαιρούνται ορισμένα ανεπιθύμητα πακέτα· αν θέλετε μπορείτε να τα ξαναπροσθέσετε χειρωνακτικά αργότερα."
-        apt purge --yes --auto-remove mate-hud snapd ubuntu-mate-welcome
+        apt purge --yes --auto-remove mate-hud snapd
     fi
 
     bold "Γίνεται εγκατάσταση των sch-scripts."
