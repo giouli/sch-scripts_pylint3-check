@@ -1,0 +1,4 @@
+# Nouveau is broken in 18.04, disable pageflip as a workaround.
+if [ -d /sys/module/nouveau ] && [ -z "$NO_PAGEFLIP_WORKAROUND" ]; then
+    export X_OPTION_PAGEFLIP='"PageFlip" "off"'
+fi
