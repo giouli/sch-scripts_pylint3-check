@@ -47,11 +47,7 @@ _reg6 = '('+_re_reg5.lower()+'|'+_re_reg5.upper()+')('+_re_reg6.lower()+'|'+_re_
 _reg7 = '('+_re_reg7.lower()+'|'+_re_reg7.upper()+')('+_re_reg8.lower()+'|'+_re_reg8.upper()+')'
 
 
-
 def transcript(string, accents=True):
-    if not isinstance(string, str):
-        string = string.decode('utf-8')
-
     string = re.sub(_reg1, replace_v, string)
     string = re.sub(_reg2, replace_f, string)
     string = re.sub(_reg3, replace_b, string)
@@ -61,53 +57,44 @@ def transcript(string, accents=True):
     letters = []
     for letter in string:
         if letter in _mapping_letters:
-            letters.append(_mapping_letters[letter].decode("utf-8"))
+            letters.append(_mapping_letters[letter])
         elif letter.lower() in _mapping_letters:
-            letters.append((_mapping_letters[letter.lower()].decode("utf-8")).upper())
+            letters.append(_mapping_letters[letter.lower()].upper())
         else:
             letters.append(letter)
 
     string = ''.join(letters)
 
-
     if re.match(_reg4, string):
         string = string.replace(string[1], string[1].lower())
 
     if accents:
-        return string.encode("utf-8")
+        return string
     else:
-        return strip_accents(string).encode("utf-8")
-
-
+        return strip_accents(string)
 
 
 def transliterate(string, accents=True):
-    if not isinstance(string, str):
-        string = string.decode('utf-8')
-
     string = re.sub(_reg6, replace_ou, string)
-
 
     letters = []
     for letter in string:
         if letter in _mapping_letters:
-            letters.append(_mapping_letters[letter].decode("utf-8"))
+            letters.append(_mapping_letters[letter])
         elif letter.lower() in _mapping_letters:
-            letters.append((_mapping_letters[letter.lower()].decode("utf-8")).upper())
+            letters.append(_mapping_letters[letter.lower()].upper())
         else:
             letters.append(letter)
 
     string = ''.join(letters)
 
-
     if re.match(_reg4, string):
         string = string.replace(string[1], string[1].lower())
 
     if accents:
-        return string.encode("utf-8")
+        return string
     else:
-        return strip_accents(string).encode("utf-8")
-
+        return strip_accents(string)
 
 
 def replace_v(m):
@@ -133,6 +120,7 @@ def replace_v(m):
         response = response.replace(m.group(2),'V')
         return response
 
+
 def replace_f(m):
     response = m.group(0)
     if m.group(2) == 'ύ' or m.group(2) == 'Ύ':
@@ -155,6 +143,7 @@ def replace_f(m):
     else:
         response = response.replace(m.group(2),'F')
         return response
+
 
 def replace_b(m):
     if m.group(0)[0].islower():
@@ -193,5 +182,5 @@ def replace_ou(m):
 
 
 def strip_accents(string):
-   return ''.join((c for c in unicodedata.normalize('NFD', string) if unicodedata.category(c) != 'Mn'))
+    return ''.join((c for c in unicodedata.normalize('NFD', string) if unicodedata.category(c) != 'Mn'))
 

@@ -17,6 +17,7 @@ import sys
 
 import iso843
 
+
 class Connection:
     def __init__(self, host, port):
         # Create a new socket and connect to the server
@@ -36,8 +37,8 @@ class Connection:
     def _send(self, data):
         if not data.endswith('\r\n'):
             data += '\r\n'
-        self.sock.send(data)
-        return self.sock.recv(4096).strip()
+        self.sock.send(data.encode())
+        return self.sock.recv(4096).strip().decode()
 
     def close(self):
         self._send("BYE")
@@ -108,7 +109,7 @@ class UserForm(object):
         self.groups_store = self.builder.get_object('groups_store')
         self.role_combo = self.builder.get_object('role_combo')
         self.builder.connect_signals(self)
-        #self.groups_store.set_sort_column_id(1, Gtk.SortType.ASCENDING)
+        # self.groups_store.set_sort_column_id(1, Gtk.SortType.ASCENDING)
         # Workaround the problem with starting with a sensitive button (but an empty model)
         self.username_combo.set_button_sensitivity(Gtk.SensitivityType.OFF)
         self.username_combo.set_button_sensitivity(Gtk.SensitivityType.AUTO)
@@ -127,7 +128,7 @@ class UserForm(object):
         if len(roles) > 0:
             for role in roles:
                 self.role_combo.append_text(role)
-            self.role_combo.set_active(0) # Select the first role by default
+            self.role_combo.set_active(0)  # Select the first role by default
         else:
             self.role_combo.hide()
             self.builder.get_object('role_label').hide()
@@ -143,7 +144,7 @@ class UserForm(object):
         return Gtk.STOCK_DIALOG_ERROR
 
     def to_alpha(self, s):
-        return ''.join(c for c in s.decode('utf-8') if c.isalpha())
+        return ''.join(c for c in s if c.isalpha())
 
     def get_suggestions(self, name):
         tokens = []
@@ -166,11 +167,11 @@ class UserForm(object):
 
     def on_realname_entry_changed(self, widget):
         name = widget.get_text()
-        icon = self.get_icon(re.match(self.connection.realname_regex(), name.decode('utf-8'), re.UNICODE))
+        icon = self.get_icon(re.match(self.connection.realname_regex(), name, re.UNICODE))
         self.username_combo.remove_all()
         self.username_entry.set_text('')
         sug = self.get_suggestions(name)
-        sug = [s for s in sug if re.match(self.connection.username_regex(), s.decode('utf-8'), re.UNICODE) and not self.connection.user_exists(s)]
+        sug = [s for s in sug if re.match(self.connection.username_regex(), s, re.UNICODE) and not self.connection.user_exists(s)]
         if sug:
             self.username_entry.set_text(sug[0])
             for s in sug:
@@ -184,7 +185,7 @@ class UserForm(object):
         icon = self.get_icon(password == password_repeat)
         self.builder.get_object('retype_password_valid').set_from_stock(icon, Gtk.IconSize.BUTTON)
 
-        icon = self.get_icon(re.match(self.connection.password_regex(), password.decode('utf-8'), re.UNICODE))
+        icon = self.get_icon(re.match(self.connection.password_regex(), password, re.UNICODE))
         self.builder.get_object('password_valid').set_from_stock(icon, Gtk.IconSize.BUTTON)
         self.set_apply_sensitivity()
 
@@ -197,7 +198,7 @@ class UserForm(object):
 
     def on_username_entry_changed(self, widget):
         username = self.username_entry.get_text()
-        valid_name = re.match(self.connection.username_regex(), username.decode('utf-8'), re.UNICODE)
+        valid_name = re.match(self.connection.username_regex(), username, re.UNICODE)
         free_name = not self.connection.user_exists(username)
         icon = self.get_icon(valid_name and free_name)
         self.builder.get_object('username_valid').set_from_stock(icon, Gtk.IconSize.BUTTON)
