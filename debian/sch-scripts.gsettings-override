@@ -1,3 +1,6 @@
+[org.mate.panel]
+default-layout = 'ubuntu-mate'
+
 [org.mate.peripherals-keyboard-xkb.general]
 group-per-window = false
 

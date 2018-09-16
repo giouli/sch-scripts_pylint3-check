@@ -1,0 +1,23 @@
+#!/bin/sh
+# Reset settings and respawn mate-panel.
+
+test -x /usr/bin/mate-panel || exit 0
+
+# I *think* -QUIT prevents it from respawning, so that we can
+# reset the settings without worrying about race conditions.
+# Although, it seems to make it exit with a crash dump!
+if pkill -QUIT -U $(id -u) mate-panel; then
+    sleep 1
+fi
+# Sometimes dconf has zero size; maybe sshfs bug?
+if [ ! -s ~/.config/dconf/user ]; then
+    pkill -U $(id -u) mate-settings-daemon
+    mv ~/.config/dconf ~/.config/dconf.$(date +%s)
+    mate-settings-daemon &
+    sleep 1
+fi
+gsettings reset-recursively org.mate.panel
+if [ -n "$1" ]; then
+    mate-panel --reset --layout "$1"
+fi
+exec mate-panel --replace
