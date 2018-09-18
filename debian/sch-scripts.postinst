@@ -79,6 +79,9 @@ install() {
         ln -rsf /usr/share/mate/applications/defaults.list /usr/local/share/applications/mimeapps.list || true
     fi
 
+    # Start tuxpaint fullscreen.
+    ln -sf /usr/share/sch-scripts/tuxpaint /usr/local/bin/ || true
+
     # Start tuxtype with the correct theme for the current locale.
     ln -sf /usr/share/sch-scripts/tuxtype /usr/local/bin/ || true
 

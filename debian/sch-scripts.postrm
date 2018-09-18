@@ -30,6 +30,7 @@ remove() {
 
     set +e
     for link in /etc/apt/apt.conf.d/60sch-scripts \
+        /usr/local/bin/tuxpaint \
         /usr/local/bin/tuxtype \
         /usr/local/bin/unzip \
         /usr/lib/firefox/defaults/pref/sch-scripts.js \
