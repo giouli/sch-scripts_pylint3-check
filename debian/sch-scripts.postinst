@@ -20,7 +20,7 @@ set -e
 # $search must be ready for sed, e.g. '^whole line$'.
 # Return 0 if a replacement was made, 1 otherwise.
 search_and_replace() {
-    local search replace file migrate old_search 
+    local search replace file migrate old_search
     search=$1
     replace=$2
     file=$3
@@ -72,25 +72,30 @@ install() {
     # Immediately show security updates, don't install them in the background
     ln -rsf /usr/share/sch-scripts/apt.conf /etc/apt/apt.conf.d/60sch-scripts || true
 
+    # Allow flash by default in chromium-browser for educational applications.
+    if [ -d /etc/chromium-browser/policies/managed ]; then
+        ln -rsf /usr/share/sch-scripts/chromium-browser.json /etc/chromium-browser/policies/managed/sch-scripts.json || true
+    fi
+
+    # Work around apturl not working after firefox 16 (LP: #1261178).
+    if [ -d /usr/lib/firefox/defaults/pref ]; then
+        ln -rsf /usr/share/sch-scripts/firefox.js /usr/lib/firefox/defaults/pref/sch-scripts.js || true
+    fi
+
+    # Start tuxpaint fullscreen.
+    ln -rsf /usr/share/sch-scripts/tuxpaint /usr/local/bin/ || true
+
+    # Start tuxtype with the correct theme for the current locale.
+    ln -rsf /usr/share/sch-scripts/tuxtype /usr/local/bin/ || true
+
+    # Work around unzip not using the correct charset (LP: #580961).
+    ln -rsf /usr/share/sch-scripts/unzip /usr/local/bin/ || true
+
     # Use MATE mimeapps for root
     if [ ! -f /usr/local/share/applications/mimeapps.list ] &&
       [ -f /usr/share/mate/applications/defaults.list ]; then
         mkdir -p /usr/local/share/applications
         ln -rsf /usr/share/mate/applications/defaults.list /usr/local/share/applications/mimeapps.list || true
-    fi
-
-    # Start tuxpaint fullscreen.
-    ln -sf /usr/share/sch-scripts/tuxpaint /usr/local/bin/ || true
-
-    # Start tuxtype with the correct theme for the current locale.
-    ln -sf /usr/share/sch-scripts/tuxtype /usr/local/bin/ || true
-
-    # Work around unzip not using the correct charset (LP: #580961).
-    ln -sf /usr/share/sch-scripts/unzip /usr/local/bin/ || true
-
-    # Work around apturl not working after firefox 16 (LP: #1261178).
-    if [ -d /usr/lib/firefox/defaults/pref ]; then
-        ln -sf /usr/share/sch-scripts/sch-scripts.js /usr/lib/firefox/defaults/pref/ || true
     fi
 
     # Enable printer sharing, only if the user hasn't modified cups settings.

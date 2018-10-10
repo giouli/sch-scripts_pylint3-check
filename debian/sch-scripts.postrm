@@ -30,10 +30,11 @@ remove() {
 
     set +e
     for link in /etc/apt/apt.conf.d/60sch-scripts \
+        /etc/chromium-browser/policies/managed/sch-scripts.json \
+        /usr/lib/firefox/defaults/pref/sch-scripts.js \
         /usr/local/bin/tuxpaint \
         /usr/local/bin/tuxtype \
         /usr/local/bin/unzip \
-        /usr/lib/firefox/defaults/pref/sch-scripts.js \
         /usr/local/share/applications/mimeapps.list
     do
         if [ -h "$link" ]; then

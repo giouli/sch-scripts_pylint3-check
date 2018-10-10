@@ -1,0 +1,5 @@
+{
+  "PluginsAllowedForUrls": [
+    "file:///*"
+  ]
+}
