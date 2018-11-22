@@ -31,6 +31,7 @@ remove() {
     set +e
     for link in /etc/apt/apt.conf.d/60sch-scripts \
         /etc/chromium-browser/policies/managed/sch-scripts.json \
+        /etc/lightdm/lightdm.conf.d/sch-scripts.conf \
         /usr/lib/firefox/defaults/pref/sch-scripts.js \
         /usr/local/bin/tuxpaint \
         /usr/local/bin/tuxtype \

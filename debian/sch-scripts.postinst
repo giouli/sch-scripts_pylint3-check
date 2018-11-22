@@ -82,6 +82,11 @@ install() {
         ln -rsf /usr/share/sch-scripts/firefox.js /usr/lib/firefox/defaults/pref/sch-scripts.js || true
     fi
 
+    # Allow manual login (LP: #1804375)
+    if [ -d /etc/lightdm/lightdm.conf.d ]; then
+        ln -rsf /usr/share/sch-scripts/lightdm.conf /etc/lightdm/lightdm.conf.d/sch-scripts.conf || true
+    fi
+
     # Start tuxpaint fullscreen.
     ln -rsf /usr/share/sch-scripts/tuxpaint /usr/local/bin/ || true
 
