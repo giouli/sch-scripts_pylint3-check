@@ -500,17 +500,14 @@ class ImportDialog:
         else:
             return False
 
-
-        parent = ((widget.get_parent()).get_parent()).get_parent()
-        parent.destroy()
+        self.dialog.destroy()
 
 
     def Cancel(self, widget):
-        parent = ((widget.get_parent()).get_parent()).get_parent()
-        parent.destroy()
+        self.dialog.destroy()
 
     def Exit(self, widget, event):
-        widget.destroy()
+        self.dialog.destroy()
 
     def Tooltip(self, widget, x, y, keyboard_tip, tooltip):
         if not widget.get_tooltip_context(x, y, keyboard_tip):
