@@ -26,14 +26,10 @@ Recommends: adobe-flashplugin | flashplugin-nonfree,
  dnsmasq,
  ethtool,
  flashplugin-no-sse2,
- mate-session-manager | gnome-session-fallback | gnome-session-flashback | kde-workspace-bin | xfce4-utils | lxde-common,
  ltsp-client,
  ltsp-docs,
  ltsp-server-standalone | ltsp-server,
  synaptic
-Suggests: ident2,
- squid,
- x2goserver
 Description: Διαχείριση ΣΕΠΕΗΥ
  Παρέχει ένα σύνολο εξαρτήσεων για την αυτοματοποίηση της εγκατάστασης
  σχολικών εργαστηρίων, και ένα γραφικό περιβάλλον που υποστηρίζει διαχείριση
