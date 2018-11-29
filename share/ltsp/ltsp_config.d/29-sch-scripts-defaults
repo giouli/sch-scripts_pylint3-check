@@ -18,4 +18,4 @@ RM_SYSTEM_SERVICES="$RM_SYSTEM_SERVICES apache2 bluetooth clamav-daemon clamav-f
 RM_THIN_SYSTEM_SERVICES="$RM_THIN_SYSTEM_SERVICES irqbalance openbsd-inetd qemu-kvm virtualbox winbind"
 
 # Prevent those services from starting on fat client sessions.
-RM_SESSION_SERVICES="$RM_SESSION_SERVICES at-spi-dbus-bus blueman bluetooth-applet bluetooth-applet-unity deja-dup-monitor nm-applet ubuntuone-launch zeitgeist-datahub"
+RM_SESSION_SERVICES="$RM_SESSION_SERVICES at-spi-dbus-bus blueman bluetooth-applet bluetooth-applet-unity mate-maximus-autostart nm-applet org.gnome.DejaDup.Monitor ubuntuone-launch zeitgeist-datahub"
