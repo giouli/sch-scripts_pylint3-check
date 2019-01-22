@@ -1,17 +1,15 @@
 # This file is part of sch-scripts, https://launchpad.net/sch-scripts
 # Copyright 2009-2018 the sch-scripts team, see AUTHORS.
 # SPDX-License-Identifier: GPL-3.0-or-later
+# pylint: disable= invalid-name, line-too-long
 """
 Common functions.
 """
 import subprocess
 import datetime
-import re
 
 def run_command(cmd, poll=False):
-    # Runs a command and returns either True, on successful
-    # completion, or the whole stdout and stderr of the command, on error.
-    # If poll is set return only the process
+    """Runs a command and returns either True, on successful completion, or the whole stdout and stderr of the command, on error. If poll is set return only the process"""
 
     # Popen doesn't like integers like uid or gid in the command line.
     cmdline = [str(s) for s in cmd]
@@ -39,4 +37,3 @@ def days_since_epoch():
 
 def date():
     return datetime.date.today()
-

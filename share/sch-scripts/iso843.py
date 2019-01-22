@@ -2,6 +2,7 @@
 # This file is part of sch-scripts, https://launchpad.net/sch-scripts
 # Copyright 2009-2018 the sch-scripts team, see AUTHORS.
 # SPDX-License-Identifier: GPL-3.0-or-later
+# pylint: disable= invalid-name, line-too-long
 """
 Transliterate and transcript according to iso843:
 http://www.sete.gr/files/Media/Egkyklioi/040707Latin-Greek.pdf
@@ -10,62 +11,62 @@ import re
 import unicodedata
 
 
-_mapping_letters = {
-'α' : 'a', 'ά' : 'á', 'β' : 'v', 'γ' : 'g', 'δ' : 'd', 'ε' : 'e',
-'έ' : 'é', 'ζ' : 'z', 'η' : 'i', 'ή' : 'í', 'θ' :'th', 'ι' : 'i',
-'ί' : 'í', 'ϊ' : 'ï', 'ΐ' : 'ḯ', 'κ' : 'k', 'λ' : 'l', 'μ' : 'm',
-'ν' : 'n', 'ξ' : 'x', 'ο' : 'o', 'ό' : 'ó', 'π' : 'p', 'ρ' : 'r',
-'σ' : 's', 'ς' : 's', 'τ' : 't', 'υ' : 'y', 'ύ' : 'ý', 'ϋ' : 'ÿ',
-'ΰ' : 'ÿ́', 'φ' : 'f', 'χ' :'ch', 'ψ' :'ps', 'ω' : 'o', 'ώ' : 'ó'}
+_MAPPING_LETTERS = {
+    'α' : 'a', 'ά' : 'á', 'β' : 'v', 'γ' : 'g', 'δ' : 'd', 'ε' : 'e',
+    'έ' : 'é', 'ζ' : 'z', 'η' : 'i', 'ή' : 'í', 'θ' :'th', 'ι' : 'i',
+    'ί' : 'í', 'ϊ' : 'ï', 'ΐ' : 'ḯ', 'κ' : 'k', 'λ' : 'l', 'μ' : 'm',
+    'ν' : 'n', 'ξ' : 'x', 'ο' : 'o', 'ό' : 'ó', 'π' : 'p', 'ρ' : 'r',
+    'σ' : 's', 'ς' : 's', 'τ' : 't', 'υ' : 'y', 'ύ' : 'ý', 'ϋ' : 'ÿ',
+    'ΰ' : 'ÿ́', 'φ' : 'f', 'χ' :'ch', 'ψ' :'ps', 'ω' : 'o', 'ώ' : 'ó'}
 
 
-_mapping_compine_letters = {
-'γγ':'ng', 'γξ':'nx', 'γχ':'nch'}
+_MAPPING_COMPINE_LETTERS = {
+    'γγ':'ng', 'γξ':'nx', 'γχ':'nch'}
 
 
-_re_reg1 = 'α|ε|η'
-_re_reg2 = 'υ|ύ'
-_re_reg3 = 'β|γ|δ|ζ|λ|μ|ν|ρ|α|ά|ε|έ|η|ή|ι|ί|ϊ|ΐ|ο|ό|υ|ύ|ϋ|ΰ|ω|ώ'
-_re_reg4 = 'θ|κ|ξ|π|σ|τ|φ|χ|ψ'
-_re_reg5 = 'α|ά|ε|έ|ο|ό'
-_re_reg6 = 'υ|ύ|ϋ|ΰ'
-_re_reg7 = 'ο'
-_re_reg8 = 'ύ|υ'
+_RE_REG1 = 'α|ε|η'
+_RE_REG2 = 'υ|ύ'
+_RE_REG3 = 'β|γ|δ|ζ|λ|μ|ν|ρ|α|ά|ε|έ|η|ή|ι|ί|ϊ|ΐ|ο|ό|υ|ύ|ϋ|ΰ|ω|ώ'
+_RE_REG4 = 'θ|κ|ξ|π|σ|τ|φ|χ|ψ'
+_RE_REG5 = 'α|ά|ε|έ|ο|ό'
+_RE_REG6 = 'υ|ύ|ϋ|ΰ'
+_RE_REG7 = 'ο'
+_RE_REG8 = 'ύ|υ'
 
-_reg1 = '('+_re_reg1.lower()+'|'+_re_reg1.upper()+')('+_re_reg2.lower()+'|'+_re_reg2.upper()+')('+_re_reg3.lower()+'|'+_re_reg3.upper()+')'
+_REG1 = '('+_RE_REG1.lower()+'|'+_RE_REG1.upper()+')('+_RE_REG2.lower()+'|'+_RE_REG2.upper()+')('+_RE_REG3.lower()+'|'+_RE_REG3.upper()+')'
 
-_reg2 = '('+_re_reg1.lower()+'|'+_re_reg1.upper()+')('+_re_reg2.lower()+'|'+_re_reg2.upper()+')('+_re_reg4.lower()+'|'+_re_reg4.upper()+')'
+_REG2 = '('+_RE_REG1.lower()+'|'+_RE_REG1.upper()+')('+_RE_REG2.lower()+'|'+_RE_REG2.upper()+')('+_RE_REG4.lower()+'|'+_RE_REG4.upper()+')'
 
-_reg3 = '^μπ|^Μπ|^ΜΠ|^μΠ|μπ$|Μπ$|ΜΠ$|μΠ$'
+_REG3 = '^μπ|^Μπ|^ΜΠ|^μΠ|μπ$|Μπ$|ΜΠ$|μΠ$'
 
-_reg4 = '^PS|^TH|^CH'
+_REG4 = '^PS|^TH|^CH'
 
-_reg5 = '(γ|Γ)(γ|ξ|χ|Γ|Ξ|Χ)'
+_REG5 = '(γ|Γ)(γ|ξ|χ|Γ|Ξ|Χ)'
 
-_reg6 = '('+_re_reg5.lower()+'|'+_re_reg5.upper()+')('+_re_reg6.lower()+'|'+_re_reg6.upper()+')'
+_REG6 = '('+_RE_REG5.lower()+'|'+_RE_REG5.upper()+')('+_RE_REG6.lower()+'|'+_RE_REG6.upper()+')'
 
-_reg7 = '('+_re_reg7.lower()+'|'+_re_reg7.upper()+')('+_re_reg8.lower()+'|'+_re_reg8.upper()+')'
+_REG7 = '('+_RE_REG7.lower()+'|'+_RE_REG7.upper()+')('+_RE_REG8.lower()+'|'+_RE_REG8.upper()+')'
 
 
 def transcript(string, accents=True):
-    string = re.sub(_reg1, replace_v, string)
-    string = re.sub(_reg2, replace_f, string)
-    string = re.sub(_reg3, replace_b, string)
-    string = re.sub(_reg5, replace_g, string)
-    string = re.sub(_reg7, replace_ou, string)
+    string = re.sub(_REG1, replace_v, string)
+    string = re.sub(_REG2, replace_f, string)
+    string = re.sub(_REG3, replace_b, string)
+    string = re.sub(_REG5, replace_g, string)
+    string = re.sub(_REG7, replace_ou, string)
 
     letters = []
     for letter in string:
-        if letter in _mapping_letters:
-            letters.append(_mapping_letters[letter])
-        elif letter.lower() in _mapping_letters:
-            letters.append(_mapping_letters[letter.lower()].upper())
+        if letter in _MAPPING_LETTERS:
+            letters.append(_MAPPING_LETTERS[letter])
+        elif letter.lower() in _MAPPING_LETTERS:
+            letters.append(_MAPPING_LETTERS[letter.lower()].upper())
         else:
             letters.append(letter)
 
     string = ''.join(letters)
 
-    if re.match(_reg4, string):
+    if re.match(_REG4, string):
         string = string.replace(string[1], string[1].lower())
 
     if accents:
@@ -75,20 +76,20 @@ def transcript(string, accents=True):
 
 
 def transliterate(string, accents=True):
-    string = re.sub(_reg6, replace_ou, string)
+    string = re.sub(_REG6, replace_ou, string)
 
     letters = []
     for letter in string:
-        if letter in _mapping_letters:
-            letters.append(_mapping_letters[letter])
-        elif letter.lower() in _mapping_letters:
-            letters.append(_mapping_letters[letter.lower()].upper())
+        if letter in _MAPPING_LETTERS:
+            letters.append(_MAPPING_LETTERS[letter])
+        elif letter.lower() in _MAPPING_LETTERS:
+            letters.append(_MAPPING_LETTERS[letter.lower()].upper())
         else:
             letters.append(letter)
 
     string = ''.join(letters)
 
-    if re.match(_reg4, string):
+    if re.match(_REG4, string):
         string = string.replace(string[1], string[1].lower())
 
     if accents:
@@ -114,10 +115,10 @@ def replace_v(m):
             response = response.replace(m.group(1), 'Ή')
 
     if m.group(2).islower():
-        response = response.replace(m.group(2),'v')
+        response = response.replace(m.group(2), 'v')
         return response
     else:
-        response = response.replace(m.group(2),'V')
+        response = response.replace(m.group(2), 'V')
         return response
 
 
@@ -138,10 +139,10 @@ def replace_f(m):
             response = response.replace(m.group(1), 'Ή')
 
     if m.group(2).islower():
-        response = response.replace(m.group(2),'f')
+        response = response.replace(m.group(2), 'f')
         return response
     else:
-        response = response.replace(m.group(2),'F')
+        response = response.replace(m.group(2), 'F')
         return response
 
 
@@ -154,15 +155,15 @@ def replace_b(m):
 
 def replace_g(m):
     if m.group(0).islower():
-        return _mapping_compine_letters[m.group(0)]
+        return _MAPPING_COMPINE_LETTERS[m.group(0)]
     elif m.group(0).isupper():
-        return _mapping_compine_letters[m.group(0).lower()].upper()
+        return _MAPPING_COMPINE_LETTERS[m.group(0).lower()].upper()
     else:
         if m.group(0)[0].isupper() and m.group(0)[1].islower():
-            response = _mapping_compine_letters[m.group(0).lower()]
+            response = _MAPPING_COMPINE_LETTERS[m.group(0).lower()]
             return response.replace(response[0], response[0].upper())
         elif m.group(0)[0].islower() and m.group(0)[1].isupper():
-            response = _mapping_compine_letters[m.group(0).lower()]
+            response = _MAPPING_COMPINE_LETTERS[m.group(0).lower()]
             return response.replace(response[1], response[1].upper())
 
 
@@ -177,10 +178,9 @@ def replace_ou(m):
             return response
 
     else:
-        response = response.replace(m.group(0)[1],'U')
+        response = response.replace(m.group(0)[1], 'U')
         return response
 
 
 def strip_accents(string):
     return ''.join((c for c in unicodedata.normalize('NFD', string) if unicodedata.category(c) != 'Mn'))
-

@@ -5,9 +5,10 @@
 About dialog.
 """
 import gi
-gi.require_version('Gtk', '3.0')
 from gi.repository import Gtk
 import version
+gi.require_version('Gtk', '3.0')
+
 
 class AboutDialog:
     def __init__(self, main_window):

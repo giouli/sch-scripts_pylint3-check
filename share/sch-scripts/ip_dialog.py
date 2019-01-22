@@ -1,22 +1,25 @@
 # This file is part of sch-scripts, https://launchpad.net/sch-scripts
 # Copyright 2009-2018 the sch-scripts team, see AUTHORS.
 # SPDX-License-Identifier: GPL-3.0-or-later
+# pylint: disable=line-too-long, invalid-name, too-many-arguments, too-many-branches, too-many-statements, too-few-public-methods
 """
 Connection information and creation dialog.
 """
-from gi.repository import Gtk, Gdk, GObject
-from binascii import unhexlify, hexlify
 import re
 import uuid
 import struct, socket
-import dialogs
+from binascii import unhexlify, hexlify
 import dbus
+from gi.repository import Gtk, Gdk, GObject
+import dialogs
 import common
 import parsers
 
+
+
 ## Define global variables
 
-IP_REG = "^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([1-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-4])$"
+IP_REG = r"^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([1-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-4])$"
 BUS = dbus.SystemBus()
 DBUS_SERVICE_NAME = 'org.freedesktop.NetworkManager'
 MSG_PC_CONFLICT_IP = 'Η διεύθυνση {0} χρησιμοποιείται ήδη από άλλον υπολογιστή. Παρακάλω δώστε μια διαφορετική.'
@@ -50,14 +53,14 @@ def string_to_int32(address):
     """
     Convert ip to int32
     """
-    return struct.unpack("I",socket.inet_aton(address))[0]
+    return struct.unpack("I", socket.inet_aton(address))[0]
 
 
 def int32_to_string(num):
     """
     Convert int32 to ip
     """
-    return socket.inet_ntoa(struct.pack("I",num))
+    return socket.inet_ntoa(struct.pack("I", num))
 
 
 def bits_to_subnet(bits):
@@ -65,13 +68,13 @@ def bits_to_subnet(bits):
     Convert bits to subnet mask
     """
     try:
-        bits=int(bits)
-        if bits<=0 or bits>32:
+        bits = int(bits)
+        if bits <= 0 or bits > 32:
             raise Exception
     except:
         return "255.255.255.255"
     num = ((1<<bits)-1)<<(32-bits)
-    return socket.inet_ntoa(struct.pack("!I",num))
+    return socket.inet_ntoa(struct.pack("!I", num))
 
 
 def subnet_to_bits(subnet):
@@ -474,7 +477,7 @@ class Ip_Dialog:
         for interface in self.interfaces:
             if interface.dhcp_request_info.subnet and interface.existing_info.subnet and \
                             interface.dhcp_request_info.subnet != interface.existing_info.subnet:
-                    self.interfaces_diff_subnet.append(interface)
+                self.interfaces_diff_subnet.append(interface)
             self.populate_pages(interface)
 
         # Show all widgets and destroy loading widget. Dialog is ready
@@ -651,7 +654,7 @@ class Ip_Dialog:
         reset_ltsp_method = True
         for l_interface in self.interfaces:
             if l_interface.page.method_entry.get_active() == 3:
-                    reset_ltsp_method = False
+                reset_ltsp_method = False
 
         if reset_ltsp_method and len(self.interfaces) >= 2:
             for l_interface in self.interfaces:
@@ -746,7 +749,7 @@ class Ip_Dialog:
         new_connections = []
         replace_connections = []
         interest_interfaces = [interface for interface in self.interfaces \
-                           if interface.page.method_entry.get_active()!=4]
+                           if interface.page.method_entry.get_active() != 4]
 
         for interface in interest_interfaces:
             bytes = [unhexlify(v) for v in interface.mac.split(":")]

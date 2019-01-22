@@ -2,20 +2,21 @@
 # This file is part of sch-scripts, https://launchpad.net/sch-scripts
 # Copyright 2009-2018 the sch-scripts team, see AUTHORS.
 # SPDX-License-Identifier: GPL-3.0-or-later
+# pylint: disable= invalid-name, line-too-long, unused-argument
 """
 Client side signup logic and form.
 """
 import crypt
-import gi
-gi.require_version('Gtk', '3.0')
-from gi.repository import Gtk
 import os
 import random
 import re
 import socket
 import sys
+import gi
+from gi.repository import Gtk
 
 import iso843
+gi.require_version('Gtk', '3.0')
 
 
 class Connection:
@@ -88,9 +89,9 @@ class UserForm(object):
             msg1 = "Πιθανόν ο διαχειριστής να μην έχει ενεργοποιήσει τις εγγραφές."
             msg2 = "Πιθανόν να υπάρχει πρόβλημα δικτύου."
             msg = "Σφάλμα %d: %s\n\n%s" % (e.errno, e.strerror, msg1 if e.errno == 111 else msg2)
-            dlg = Gtk.MessageDialog(type = Gtk.MessageType.ERROR,
-                                    buttons = Gtk.ButtonsType.CLOSE,
-                                    message_format = msg)
+            dlg = Gtk.MessageDialog(type=Gtk.MessageType.ERROR,
+                                    buttons=Gtk.ButtonsType.CLOSE,
+                                    message_format=msg)
             dlg.set_title("Σφάλμα σύνδεσης")
             dlg.run()
             dlg.destroy()
@@ -224,19 +225,19 @@ class UserForm(object):
         groups = [g[1] for g in self.groups_store if g[0]]
         if self.connection.send_data(realname, username, password, role, groups):
             msg = "Το αίτημά σας καταχωρήθηκε επιτυχώς για αναθεώρηση."
-            dlg = Gtk.MessageDialog(parent = self.dialog,
-                                    type = Gtk.MessageType.INFO,
-                                    flags = Gtk.DialogFlags.MODAL,
-                                    buttons = Gtk.ButtonsType.CLOSE,
-                                    message_format = msg)
+            dlg = Gtk.MessageDialog(parent=self.dialog,
+                                    type=Gtk.MessageType.INFO,
+                                    flags=Gtk.DialogFlags.MODAL,
+                                    buttons=Gtk.ButtonsType.CLOSE,
+                                    message_format=msg)
             dlg.set_title("Επιτυχία")
         else:
             msg = "Αποτυχία αποστολής του αιτήματός σας. Ζητήστε βοήθεια από τον υπεύθυνο."
-            dlg = Gtk.MessageDialog(parent = self.dialog,
-                                    type = Gtk.MessageType.ERROR,
-                                    flags = Gtk.DialogFlags.MODAL,
-                                    buttons = Gtk.ButtonsType.CLOSE,
-                                    message_format = msg)
+            dlg = Gtk.MessageDialog(parent=self.dialog,
+                                    type=Gtk.MessageType.ERROR,
+                                    flags=Gtk.DialogFlags.MODAL,
+                                    buttons=Gtk.ButtonsType.CLOSE,
+                                    message_format=msg)
             dlg.set_title("Αποτυχία")
 
         self.connection.close()

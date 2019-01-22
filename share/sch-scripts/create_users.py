@@ -1,17 +1,18 @@
 # This file is part of sch-scripts, https://launchpad.net/sch-scripts
 # Copyright 2009-2018 the sch-scripts team, see AUTHORS.
 # SPDX-License-Identifier: GPL-3.0-or-later
+# pylint: disable= invalid-name, line-too-long, unused-argument
 """
 Create users dialog.
 """
 import datetime
 import gi
-gi.require_version('Gtk', '3.0')
 from gi.repository import Gtk
 
 import config
 import libuser
-import shared_folders
+gi.require_version('Gtk', '3.0')
+
 
 class NewUsersDialog:
     def __init__(self, system, sf):
@@ -24,8 +25,13 @@ class NewUsersDialog:
         self.dialog = self.glade.get_object('create_users_dialog')
         self.user_tree = self.glade.get_object('user_treeview')
         self.user_store = self.glade.get_object('user_liststore')
-
-        self.roles = {i : config.parser.get('Roles', i) for i in config.parser.options('Roles')}
+        self.classes = None
+        self.computers = None
+        self.username_tmpl = None
+        self.name_tmpl = None
+        self.password_tmpl = None
+        self.groups_tmpl = None
+        self.roles = {i : config.PARSER.get('Roles', i) for i in config.PARSER.options('Roles')}
         self.groups = []
 
         self.glade.get_object('computers_number_spin').set_value(12)
@@ -53,21 +59,21 @@ class NewUsersDialog:
         classes_validity_image = self.glade.get_object('classes_validity_image')
         if not (classes_str.replace(' ', '') + 'foo').isalnum():
             classes_validity_image.set_from_stock(Gtk.STOCK_DIALOG_ERROR,
-                                        Gtk.IconSize.SMALL_TOOLBAR)
+                                                  Gtk.IconSize.SMALL_TOOLBAR)
             button_apply.set_sensitive(False)
             return
         else:
             if self.classes == []:
                 self.classes = ['']
             classes_validity_image.set_from_stock(Gtk.STOCK_OK,
-                                            Gtk.IconSize.SMALL_TOOLBAR)
+                                                  Gtk.IconSize.SMALL_TOOLBAR)
             button_apply.set_sensitive(True)
 
         # Check the validity of characters in the username entry #FIXME: libuser
         username_validity_image = self.glade.get_object(
             'username_validity_image')
         if (not self.username_tmpl.replace('{c}', 'a').replace('{0i}',
-          'a').replace('{i}', 'a').replace('-', '').replace('_', '').isalnum()) or \
+                                                               'a').replace('{i}', 'a').replace('-', '').replace('_', '').isalnum()) or \
           (len(self.classes) == 1 and self.computers > 1 and not '{i}' in self.username_tmpl and \
           not '{0i}' in self.username_tmpl) or (self.computers == 1 and len(self.classes) > 1 and \
           not '{c}' in self.username_tmpl) or (self.computers > 1 and len(self.classes) > 1 and \
@@ -75,12 +81,12 @@ class NewUsersDialog:
           not '{i}' in self.username_tmpl))):
 
             username_validity_image.set_from_stock(Gtk.STOCK_DIALOG_ERROR,
-                                        Gtk.IconSize.SMALL_TOOLBAR)
+                                                   Gtk.IconSize.SMALL_TOOLBAR)
             button_apply.set_sensitive(False)
             return
         else:
             username_validity_image.set_from_stock(Gtk.STOCK_OK,
-                                            Gtk.IconSize.SMALL_TOOLBAR)
+                                                   Gtk.IconSize.SMALL_TOOLBAR)
             button_apply.set_sensitive(True)
         self.user_store.clear()
 
@@ -90,9 +96,9 @@ class NewUsersDialog:
                 if len(self.user_store) == 300:
                     break
                 ev = lambda x: x.replace('{c}', classn.strip()).replace('{i}',
-                    str(compn)).replace('{0i}', '%02d' %compn)
+                                                                        str(compn)).replace('{0i}', '%02d' %compn)
                 self.user_store.append([ev(self.username_tmpl), ev(self.name_tmpl),
-                    '/home/'+ev(self.username_tmpl),ev(self.password_tmpl)])
+                                        '/home/'+ev(self.username_tmpl), ev(self.password_tmpl)])
 
         users_number = self.computers * len(self.classes)
         self.glade.get_object('users_number_label').set_text(
@@ -128,7 +134,7 @@ class NewUsersDialog:
                     set_gids.append(tmp_gid)
                     cmd_error = self.system.add_group(libuser.Group(classn, tmp_gid, {}))
                     progressbar.set_text('Δημιουργία ομάδας %d από %d'
-                        % (groups_created+1, total_groups))
+                                         % (groups_created+1, total_groups))
                     #TODO expect returned value from add_group
                     if False and cmd_error != "":
                         self.glade.get_object('error_label').set_text(cmd_error)
@@ -138,7 +144,7 @@ class NewUsersDialog:
                     groups_created += 1
                     progressbar.set_fraction(float(groups_created) / float(total_groups))
                 else:
-                    tmp_gid=self.system.groups[classn].gid
+                    tmp_gid = self.system.groups[classn].gid
 
                 # Add teachers to group
                 if self.glade.get_object('teachers_checkbutton').get_active():
@@ -162,25 +168,25 @@ class NewUsersDialog:
                 while Gtk.events_pending():
                     Gtk.main_iteration()
                 progressbar.set_text('Δημιουργία χρήστη %d από %d...'
-                    %(users_created+1, total_users))
+                                     %(users_created+1, total_users))
 
                 ev = lambda x: x.replace('{c}', classn.strip()).replace('{i}',
-                                str(compn)).replace('{0i}', '%02d'%compn)
+                                                                        str(compn)).replace('{0i}', '%02d'%compn)
                 epoch = datetime.datetime.utcfromtimestamp(0)
                 uname = ev(self.username_tmpl)
                 tmp_uid = self.system.get_free_uid(exclude=set_uids)
                 set_uids.append(tmp_uid)
                 tmp_gid = self.system.get_free_gid(exclude=set_gids)
-                tmp_password=ev(self.password_tmpl)
+                tmp_password = ev(self.password_tmpl)
                 # Create the UPG
                 g = libuser.Group(uname, tmp_gid)
                 self.system.add_group(g)
-                u=libuser.User(name=uname, uid=tmp_uid,
-                    gid=tmp_gid, rname=ev(self.name_tmpl),
-                    directory=('/home/'+ev(self.username_tmpl)),
-                    lstchg = (datetime.datetime.today() - epoch).days,
-                    groups=[classn],
-                    password=self.system.encrypt(tmp_password))
+                u = libuser.User(name=uname, uid=tmp_uid,
+                                 gid=tmp_gid, rname=ev(self.name_tmpl),
+                                 directory=('/home/'+ev(self.username_tmpl)),
+                                 lstchg=(datetime.datetime.today() - epoch).days,
+                                 groups=[classn],
+                                 password=self.system.encrypt(tmp_password))
                 self.system.add_user(u)
                 self.system.load()
                 users_created += 1
@@ -208,4 +214,3 @@ class NewUsersDialog:
         dialog = self.glade.get_object('help_dialog')
         dialog.run()
         dialog.hide()
-

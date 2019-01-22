@@ -1,14 +1,15 @@
 # This file is part of sch-scripts, https://launchpad.net/sch-scripts
 # Copyright 2009-2018 the sch-scripts team, see AUTHORS.
 # SPDX-License-Identifier: GPL-3.0-or-later
+# pylint: disable= invalid-name, line-too-long
 """
 Parsers.
 """
 import csv
-import libuser
 import os
 import configparser
 from io import StringIO, BytesIO
+import libuser
 
 FIELDS_MAP = {'Όνομα χρήστη': 'name', 'Τελευταία αλλαγή κωδικού': 'lstchg', 'Κύρια ομάδα': 'gid', 'Όνομα κύριας ομάδας' : 'primary_group', 'Κέλυφος': 'shell', 'UID': 'uid', 'Γραφείο': 'office', 'Κρυπτογραφημένος κωδικός': 'password', 'Κωδικός': 'plainpw', 'Λήξη': 'expire', 'Μέγιστη διάρκεια': 'max', 'Προειδοποίηση': 'warn', 'Κατάλογος': 'directory', 'Ελάχιστη διάρκεια': 'min', 'Άλλο': 'other', 'Ομάδες': 'groups', 'Τηλ. γραφείου': 'wphone', 'Ανενεργός': 'inact', 'Ονοματεπώνυμο': 'rname', 'Τηλ. οικίας': 'hphone'}
 
@@ -71,9 +72,9 @@ class CSV:
     def write(self, fname, system, users):
         f = open(fname, 'w')
         writer = csv.DictWriter(f, fieldnames=libuser.CSV_USER_FIELDS)
-        writer.writerow(dict((n,n) for n in libuser.CSV_USER_FIELDS))
+        writer.writerow(dict((n, n) for n in libuser.CSV_USER_FIELDS))
         for user in users:
-            u_dict = dict( (key, user.__dict__[o_key] if user.__dict__[o_key] is not None else '') for key, o_key in self.fields_map.items())
+            u_dict = dict((key, user.__dict__[o_key] if user.__dict__[o_key] is not None else '') for key, o_key in self.fields_map.items())
             u_dict['Κωδικός'] = '' # We don't have the plain password
             u_dict['Ομάδες'] = list(u_dict['Ομάδες'])
             # Convert the groups value to a proper gname:gid pairs formatted string
@@ -200,6 +201,6 @@ class DHCP():
 
         dnss = sorted([value for key, value in locals().items() if key.startswith('dns') and value and value != '0.0.0.0'])
 
-        self.dhcp_info.update(ip=ip,mask=mask,route=route,dnss=dnss)
+        self.dhcp_info.update(ip=ip, mask=mask, route=route, dnss=dnss)
 
         return self.dhcp_info

@@ -1,13 +1,14 @@
 # This file is part of sch-scripts, https://launchpad.net/sch-scripts
 # Copyright 2009-2018 the sch-scripts team, see AUTHORS.
 # SPDX-License-Identifier: GPL-3.0-or-later
+# pylint: disable= invalid-name, line-too-long, unused-argument
 """
 New user form.
 """
-from gi.repository import Gtk, Gdk
-import dialogs
 import os
 import re
+from gi.repository import Gtk, Gdk
+import dialogs
 import common
 import libuser
 import config
@@ -19,7 +20,7 @@ class UserForm(object):
         self.builder = Gtk.Builder()
         self.builder.add_from_file('user_form.ui')
 
-        self.roles = {i : config.parser.get('Roles', i).replace('$$teachers', self.system.teachers) for i in config.parser.options('Roles')}
+        self.roles = {i : config.PARSER.get('Roles', i).replace('$$teachers', self.system.teachers) for i in config.PARSER.options('Roles')}
         self.selected_role = None
 
         self.dialog = self.builder.get_object('dialog')
@@ -71,7 +72,7 @@ class UserForm(object):
     def groups_visible_func(self, model, itr, x):
         primary_group = not model[itr][3] or self.username.get_text() in model[itr][0].members
         show_user_group = self.show_sys_groups or model[itr][0].is_user_group()
-        show_private_group = config.parser.getboolean('GUI', 'show_private_groups') or not model[itr][0].is_private()
+        show_private_group = config.PARSER.getboolean('GUI', 'show_private_groups') or not model[itr][0].is_private()
         return (show_user_group and show_private_group) or primary_group
 
     def on_show_sys_groups_toggled(self, widget):
@@ -438,7 +439,7 @@ class ReviewUserDialog(UserForm):
         self.builder.connect_signals(self)
 
         self.username.set_text(user.name)
-        if user.password not in ['!','*', ''] or user.plainpw:
+        if user.password not in ['!', '*', ''] or user.plainpw:
             self.password.set_text('\n'*8)
             self.password_repeat.set_text('\n'*8)
         self.uid_entry.set_text(str(user.uid))

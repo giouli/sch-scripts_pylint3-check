@@ -2,12 +2,12 @@
 # This file is part of sch-scripts, https://launchpad.net/sch-scripts
 # Copyright 2009-2018 the sch-scripts team, see AUTHORS.
 # SPDX-License-Identifier: GPL-3.0-or-later
+# pylint: disable= invalid-name, no-self-use, line-too-long, too-many-arguments, too-many-instance-attributes, too-many-public-methods
 """
 User handling classes and functions.
 """
-from twisted.internet import inotify
-from twisted.python import filepath
 import pwd
+import os
 import spwd
 import grp
 import operator
@@ -15,26 +15,30 @@ import subprocess
 import re
 import crypt
 import random
+from twisted.internet import inotify
+from twisted.python import filepath
 import common
 import iso843
 
-FIRST_SYSTEM_UID=0
-LAST_SYSTEM_UID=999
 
-FIRST_SYSTEM_GID=0
-LAST_SYSTEM_GID=999
 
-FIRST_UID=1000
-LAST_UID=29999
+FIRST_SYSTEM_UID = 0
+LAST_SYSTEM_UID = 999
 
-FIRST_GID=1000
-LAST_GID=29999
+FIRST_SYSTEM_GID = 0
+LAST_SYSTEM_GID = 999
+
+FIRST_UID = 1000
+LAST_UID = 29999
+
+FIRST_GID = 1000
+LAST_GID = 29999
 NAME_REGEX = "^[a-z][-a-z0-9_]*$"
 HOME_PREFIX = "/home"
 
 USER_FIELDS = ['Όνομα χρήστη', 'UID', 'Κύρια ομάδα', 'Ονοματεπώνυμο', 'Γραφείο',
-'Τηλ. γραφείου', 'Τηλ. οικίας', 'Άλλο', 'Κατάλογος', 'Κέλυφος', 'Ομάδες',
-'Τελευταία αλλαγή κωδικού', 'Ελάχιστη διάρκεια', 'Μέγιστη διάρκεια', 'Προειδοποίηση', 'Ανενεργός', 'Λήξη']
+               'Τηλ. γραφείου', 'Τηλ. οικίας', 'Άλλο', 'Κατάλογος', 'Κέλυφος', 'Ομάδες',
+               'Τελευταία αλλαγή κωδικού', 'Ελάχιστη διάρκεια', 'Μέγιστη διάρκεια', 'Προειδοποίηση', 'Ανενεργός', 'Λήξη']
 
 ['Username', 'UID', 'GID', 'Primary Group Name', 'Real name', 'Office', 'Office phone', 'Home phone', 'Other', 'Directory', 'Shell', 'Groups', 'Last password change', 'Minimum days', 'Maximum days', 'Warn', 'Inactive', 'Expiration', 'Encrypted password', 'Password']
 CSV_USER_FIELDS = USER_FIELDS[:]
@@ -219,8 +223,8 @@ class System(Set):
         super(System, self).__init__()
         self.load()
         # These might be updated from shared_folders, if they're used
-        self.teachers='teachers'
-        self.share_groups=[self.teachers]
+        self.teachers = 'teachers'
+        self.share_groups = [self.teachers]
 
         # INotifier for /etc/group and /etc/shadow
         self.system_event = Event()
@@ -350,8 +354,8 @@ class System(Set):
             gecos += [''] * (5 - len(gecos)) # Pad with empty strings so we have exactly 5 items
             rname, office, wphone, hphone, other = gecos
             u = User(p.pw_name, p.pw_uid, p.pw_gid, rname, office, wphone, hphone,
-                other, p.pw_dir, p.pw_shell, [grp.getgrgid(p.pw_gid).gr_name], s.sp_lstchg, s.sp_min, s.sp_max, s.sp_warn,
-                s.sp_inact, s.sp_expire, s.sp_pwd)
+                     other, p.pw_dir, p.pw_shell, [grp.getgrgid(p.pw_gid).gr_name], s.sp_lstchg, s.sp_min, s.sp_max, s.sp_warn,
+                     s.sp_inact, s.sp_expire, s.sp_pwd)
             self.users[u.name] = u
 
         groups = grp.getgrall()
@@ -422,8 +426,8 @@ class System(Set):
         """
         Converts a plain text password to a sha-512 encrypted one.
         """
-        alphabet='0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'
-        salt=''.join([ random.choice(alphabet) for i in range(8) ])
+        alphabet = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'
+        salt = ''.join([random.choice(alphabet) for i in range(8)])
 
         return crypt.crypt(plainpw, "$6$%s$" % salt)
 

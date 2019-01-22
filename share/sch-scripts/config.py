@@ -1,61 +1,64 @@
 # This file is part of sch-scripts, https://launchpad.net/sch-scripts
 # Copyright 2009-2018 the sch-scripts team, see AUTHORS.
 # SPDX-License-Identifier: GPL-3.0-or-later
+# pylint: disable= invalid-name, line-too-long
 """
 Configuration handling.
 """
 import configparser
 import os
 
-path = os.path.expanduser('~/.config/sch-scripts/')
-settings_f = os.path.join(path, 'settings')
+PATH = os.path.expanduser('~/.config/sch-scripts/')
+SETTINGS_F = os.path.join(PATH, 'settings')
 
-gui_defaults = {'show_system_groups' : False,
+GUI_DEFAULTS = {'show_system_groups' : False,
                 'show_private_groups' : False,
                 'visible_user_columns' : 'all',
                 'requests_checked_roles' : '',
                 'requests_checked_groups' : ''
                }
-roles_defaults = {
-                  'καθηγητής' : 'adm,cdrom,epoptes,fuse,plugdev,sambashare,vboxusers,$$teachers',
-                  'διαχειριστής' : 'adm,cdrom,dip,epoptes,fuse,lpadmin,plugdev,sambashare,sudo,vboxusers,$$teachers',
-                  'μαθητής' : 'fuse,sambashare,vboxusers',
-                  'προσωπικό' : 'adm,cdrom,fuse,plugdev,sambashare,vboxusers'
-                 }
+ROLES_DEFAULTS = {
+    'καθηγητής' : 'adm,cdrom,epoptes,fuse,plugdev,sambashare,vboxusers,$$teachers',
+    'διαχειριστής' : 'adm,cdrom,dip,epoptes,fuse,lpadmin,plugdev,sambashare,sudo,vboxusers,$$teachers',
+    'μαθητής' : 'fuse,sambashare,vboxusers',
+    'προσωπικό' : 'adm,cdrom,fuse,plugdev,sambashare,vboxusers'
+}
 
-parser = configparser.ConfigParser()
+PARSER = configparser.ConfigParser()
 
 def save():
-    f = open(settings_f, 'w')
-    parser.write(f)
+    """Saves the changes in settings."""
+    f = open(SETTINGS_F, 'w')
+    PARSER.write(f)
     f.close()
 
 def setdefaults(overwrite=False):
-    if not parser.has_section('GUI'):
-        parser.add_section('GUI')
+    """Sets the default attributes."""
+    if not PARSER.has_section('GUI'):
+        PARSER.add_section('GUI')
 
-    for k, v in gui_defaults.items():
-        if overwrite or not parser.has_option('GUI', k):
-            parser.set('GUI', k, str(v))
+    for k, v in GUI_DEFAULTS.items():
+        if overwrite or not PARSER.has_option('GUI', k):
+            PARSER.set('GUI', k, str(v))
 
-    if not parser.has_section('Roles'):
-        parser.add_section('Roles')
+    if not PARSER.has_section('Roles'):
+        PARSER.add_section('Roles')
 
-    for k, v in roles_defaults.items():
+    for k, v in ROLES_DEFAULTS.items():
         # TODO: new sch-scripts versions are not able to append groups like
         # 'fuse' to the saved user Roles, so don't read the user settings
         # at all until we reapproach the issue.
-        # if overwrite or not parser.has_option('Roles', k):
-            parser.set('Roles', k, str(v))
+        # if overwrite or not PARSER.has_option('Roles', k):
+        PARSER.set('Roles', k, str(v))
 
 
     save()
 
-if not os.path.isdir(path):
-    os.makedirs(path)
+if not os.path.isdir(PATH):
+    os.makedirs(PATH)
 
-if not os.path.isfile(settings_f):
+if not os.path.isfile(SETTINGS_F):
     setdefaults()
 
-parser.read(settings_f)
+PARSER.read(SETTINGS_F)
 setdefaults()

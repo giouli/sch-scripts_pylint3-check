@@ -2,25 +2,23 @@
 # This file is part of sch-scripts, https://launchpad.net/sch-scripts
 # Copyright 2009-2018 the sch-scripts team, see AUTHORS.
 # SPDX-License-Identifier: GPL-3.0-or-later
+# pylint: disable= invalid-name, line-too-long, unused-argument, no-self-use
 """
 Sch-scripts.
 """
 import getpass
-import gi
-gi.require_version('Gtk', '3.0')
-from gi.repository import Gtk
 import glob
 import locale
 import os
 import socket
 import subprocess
 import sys
-from dbus.mainloop.glib import DBusGMainLoop
-DBusGMainLoop(set_as_default=True)
-from twisted.internet import gtk3reactor
-gtk3reactor.install()
-from twisted.internet import reactor, defer
+import gi
+from gi.repository import Gtk
 
+from dbus.mainloop.glib import DBusGMainLoop
+from twisted.internet import gtk3reactor
+from twisted.internet import reactor, defer
 import about_dialog
 import common
 import config
@@ -37,13 +35,16 @@ import parsers
 import shared_folders
 import user_form
 import version
+DBusGMainLoop(set_as_default=True)
+gtk3reactor.install()
+gi.require_version('Gtk', '3.0')
+
 
 class Gui:
     def __init__(self):
         self.system = libuser.system
-        self.sf=shared_folders.SharedFolders(self.system)
-        self.conf = config.parser
-
+        self.sf = shared_folders.SharedFolders(self.system)
+        self.conf = config.PARSER
         self.builder = Gtk.Builder()
         self.builder.add_from_file('sch-scripts.ui')
         self.builder.connect_signals(self)

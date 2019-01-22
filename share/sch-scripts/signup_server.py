@@ -2,17 +2,16 @@
 # This file is part of sch-scripts, https://launchpad.net/sch-scripts
 # Copyright 2009-2018 the sch-scripts team, see AUTHORS.
 # SPDX-License-Identifier: GPL-3.0-or-later
+# pylint: disable= invalid-name, line-too-long, unused-argument
 """
 Signup server and form.
 """
-import gi
-gi.require_version('Gtk', '3.0')
-from gi.repository import Gtk
 import os
 import time
+import gi
+from gi.repository import Gtk
 from twisted.internet.protocol import Factory
 from twisted.internet import gtk3reactor
-gtk3reactor.install()
 from twisted.internet import reactor
 from twisted.protocols.basic import LineReceiver
 
@@ -20,6 +19,8 @@ import common
 import config
 import dialogs
 import user_form
+gi.require_version('Gtk', '3.0')
+gtk3reactor.install()
 
 class Registrations(LineReceiver):
     def __init__(self, connections, requests, gui, system, groups, roles):
@@ -163,7 +164,7 @@ class UI:
         self.reject_tb = self.builder.get_object('reject_tb')
         self.review_tb = self.builder.get_object('review_tb')
         self.selection = self.builder.get_object('treeview-selection')
-        self.roles = {i : config.parser.get('Roles', i).replace('$$teachers', self.system.teachers) for i in config.parser.options('Roles')}
+        self.roles = {i : config.PARSER.get('Roles', i).replace('$$teachers', self.system.teachers) for i in config.PARSER.options('Roles')}
         self.window.show()
 
     def strtime(self, t):
@@ -268,7 +269,7 @@ class UI:
         requests = [row[0] for row in self.requests_list]
         users = [req.user for req in requests]
         usernames = ', '.join([u.name for u in users])
-        r=dialogs.AskDialog("Θα δημιουργηθούν οι παρακάτω χρήστες:\n%s\n\nΣυνέχεια;" % usernames, "Δημιουργία χρηστών").showup()
+        r = dialogs.AskDialog("Θα δημιουργηθούν οι παρακάτω χρήστες:\n%s\n\nΣυνέχεια;" % usernames, "Δημιουργία χρηστών").showup()
         if r == Gtk.ResponseType.YES:
             for user in users:
                 if user.primary_group not in self.system.groups:
@@ -284,7 +285,7 @@ class UI:
 
     def on_close_button_clicked(self, widget):
         if len(self.requests_list):
-            r=dialogs.AskDialog("Θέλετε σίγουρα να τερματίσετε την εφαρμογή αιτήσεων; Όλες οι εκκρεμείς αιτήσεις θα χαθούν.", "Επιβεβαίωση").showup()
+            r = dialogs.AskDialog("Θέλετε σίγουρα να τερματίσετε την εφαρμογή αιτήσεων; Όλες οι εκκρεμείς αιτήσεις θα χαθούν.", "Επιβεβαίωση").showup()
             if r == Gtk.ResponseType.YES:
                 reactor.stop()
         else:
@@ -321,14 +322,14 @@ class SettingsDialog:
         self.dlg.destroy()
 
     def populate_roles(self):
-         check_list = config.parser.get('GUI', 'requests_checked_roles').split(',')
-         for role in config.parser.options('Roles'):
+        check_list = config.PARSER.get('GUI', 'requests_checked_roles').split(',')
+        for role in config.PARSER.options('Roles'):
             check = role in check_list
             self.roles_list.append([check, role])
-         self.set_header_checkbutton(self.check_all_roles, self.roles_list)
+        self.set_header_checkbutton(self.check_all_roles, self.roles_list)
 
     def populate_groups(self):
-        check_list = config.parser.get('GUI', 'requests_checked_groups').split(',')
+        check_list = config.PARSER.get('GUI', 'requests_checked_groups').split(',')
         for group in self.system.groups.values():
             if group.is_user_group() and not group.is_private():
                 check = group.name in check_list
@@ -381,8 +382,8 @@ class SettingsDialog:
 
     def on_continue_clicked(self, widget):
         self.dlg.hide()
-        config.parser.set('GUI', 'requests_checked_groups', ','.join([r[1] for r in self.groups_list if r[0]]))
-        config.parser.set('GUI', 'requests_checked_roles', ','.join([r[1] for r in self.roles_list if r[0]]))
+        config.PARSER.set('GUI', 'requests_checked_groups', ','.join([r[1] for r in self.groups_list if r[0]]))
+        config.PARSER.set('GUI', 'requests_checked_roles', ','.join([r[1] for r in self.roles_list if r[0]]))
         config.save()
         startServer(self.system, self.get_selected_groups(), self.get_selected_roles())
 

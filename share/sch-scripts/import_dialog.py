@@ -2,21 +2,24 @@
 # This file is part of sch-scripts, https://launchpad.net/sch-scripts
 # Copyright 2009-2018 the sch-scripts team, see AUTHORS.
 # SPDX-License-Identifier: GPL-3.0-or-later
+# pylint: disable= invalid-name, line-too-long, unused-argument
 """
 Import users dialog.
 """
-import gi
-gi.require_version('Gtk', '3.0')
-gi.require_version('Gdk', '3.0')
-from gi.repository import Gtk, Gdk
+
 import os
 import re
 import sys
+import gi
+from gi.repository import Gtk, Gdk
 
 import common
 import dialogs
 import libuser
 import user_form
+gi.require_version('Gtk', '3.0')
+gi.require_version('Gdk', '3.0')
+
 
 # NOTE: User.plainpw overrides the User.password if it's set
 class ImportDialog:
@@ -32,11 +35,11 @@ class ImportDialog:
         self.builder.add_from_file(gladefile)
         self.dialog = self.builder.get_object('import_dialog')
 
-        dic = {"on_dialog_destroy" : self.Exit,
-               "on_apply" : self.Apply,
-               "on_auto_resolve" : self.ResolveConflicts,
+        dic = {"on_dialog_destroy" : self.exit,
+               "on_apply" : self.apply,
+               "on_auto_resolve" : self.resolve_conflicts,
                "on_delete_users_activate" : self.on_delete_users_activate,
-               "on_cancel" : self.Cancel}
+               "on_cancel" : self.cancel}
 
         self.builder.connect_signals(dic)
 
@@ -47,26 +50,26 @@ class ImportDialog:
 
         self.states = {'ok' : Gtk.STOCK_OK, 'error' : Gtk.STOCK_DIALOG_WARNING}
         self.dialog.show_all()
-        self.TreeView()
-        self.FillTree(self.set)
+        self.tree_view()
+        self.fill_tree(self.set)
 
-    def TreeView(self):
+    def tree_view(self):
         """Make the liststore, the first 20 cells refers to users values,
         the second 20 cells refers to color foreach of first 20 cells, the
         third 20 cells refers to conflicts and the last cell refers to first
         column image.
         """
         types = [str, int, int, str, str, str, str, str, str, str, str, str,
-                                       int, int, int, int, int, int, str, str]
+                 int, int, int, int, int, int, str, str]
         types.extend([str]*41)
 
         self.list = Gtk.ListStore(*types)
         self.tree.set_model(self.list)
 
-        self.tree.connect("button_press_event", self.Click)
-        self.tree.connect("key_press_event", self.Delete)
+        self.tree.connect("button_press_event", self.click)
+        self.tree.connect("key_press_event", self.delete)
         self.tree.set_has_tooltip(True)
-        self.tree.connect("query-tooltip", self.Tooltip)
+        self.tree.connect("query-tooltip", self.tooltip)
         self.tree.set_rubber_banding(True)
 
         # Make the columns in the preview treeview
@@ -78,7 +81,7 @@ class ImportDialog:
 
         for (counter, header) in enumerate(libuser.CSV_USER_FIELDS):
             text_rend = Gtk.CellRendererText()
-            text_rend.connect("edited", self.EditedText, self.list, counter)
+            text_rend.connect("edited", self.edited_text, self.list, counter)
             col = Gtk.TreeViewColumn(header, text_rend, text=counter,
                                      foreground=counter+20, editable=True)
             col.set_resizable(True)
@@ -86,10 +89,10 @@ class ImportDialog:
             self.tree.append_column(col)
         self.tree.get_column(19).set_visible(False)
 
-    def FillTree(self, new_set):
+    def fill_tree(self, new_set):
         """Fill the preview popup dialog with new users."""
         for u in new_set.users.values():
-            self.AutoComplete(u)
+            self.auto_complete(u)
             data = [u.name, u.uid, u.gid, u.primary_group, u.rname, u.office,
                     u.wphone, u.hphone, u.other, u.directory, u.shell,
                     ",".join(u.groups), u.lstchg, u.min, u.max, u.warn,
@@ -101,20 +104,20 @@ class ImportDialog:
                 data.append('') # cell's problem or ''
             data.append(self.states['ok']) # row's status
             row = self.list[self.list.append(data)]
-            self.SetRowFromObject(row)
-        self.DetectConflicts()
-        self.CheckIdenticalUsers()
+            self.set_row_from_object(row)
+        self.detect_conflicts()
+        self.check_identical_users()
 
-    def SetRowFromObject(self, row):
+    def set_row_from_object(self, row):
         u = self.set.users[row[0]]
         data = [u.name, u.uid, u.gid, u.primary_group, u.rname, u.office,
-                    u.wphone, u.hphone, u.other, u.directory, u.shell,
-                    ",".join(u.groups), u.lstchg, u.min, u.max, u.warn,
-                    u.inact, u.expire, u.password, u.plainpw]
+                u.wphone, u.hphone, u.other, u.directory, u.shell,
+                ",".join(u.groups), u.lstchg, u.min, u.max, u.warn,
+                u.inact, u.expire, u.password, u.plainpw]
         for i in range(len(data)):
             row[i] = data[i]
 
-    def CheckIdenticalUsers(self, other=libuser.system):
+    def check_identical_users(self, other=libuser.system):
         """Check if there are users in the list that are identical to
         a user in the system and ask for removal."""
         attrs = ['name', 'uid', 'gid', 'primary_group', 'rname', 'office',
@@ -145,11 +148,11 @@ class ImportDialog:
         resp = dialogs.AskDialog(msg, "Βρέθηκαν πανομοιότυποι χρήστες").showup()
         if resp == Gtk.ResponseType.YES:
             for iter_ in identical:
-                self.RemoveRow(iter_)
-            self.DetectConflicts()
+                self.remove_row(iter_)
+            self.detect_conflicts()
 
 
-    def AutoComplete(self, user): # TODO: Maybe move me to libuser?
+    def auto_complete(self, user): # TODO: Maybe move me to libuser?
         """Fills the missing information of user, where possible."""
         #TODO: Complete the username from real name, this can't be done now
         # since we are using a dict to store users with username as a key
@@ -202,7 +205,7 @@ class ImportDialog:
         if user.plainpw is None:
             user.plainpw = ''
 
-    def SetRowProps(self, row, col, prob, color=None, state=None):
+    def set_row_props(self, row, col, prob, color=None, state=None):
         row[col+40] = prob
         if color:
             row[col+20] = color
@@ -227,7 +230,7 @@ class ImportDialog:
             else:
                 row[60] = self.states['error']
 
-    def DetectConflicts(self):
+    def detect_conflicts(self):
         """Detects and marks the conflicts in the treeview based on the user
         object.
 
@@ -251,7 +254,7 @@ class ImportDialog:
             u = self.set.users[row[0]]
             # Clear the currently marked conflicts, if any
             for cell in range(0, 20):
-                self.SetRowProps(row, cell, '')
+                self.set_row_props(row, cell, '')
 
             # FIXME: Possibly not an issue, but problems with system users
             # will override problems with new users.
@@ -269,7 +272,7 @@ class ImportDialog:
                                      #and (for later): executed only once, since
                                      #the edit dialog won't allow illegal input
             def invalidate(n):
-                self.SetRowProps(row, n, 'char')
+                self.set_row_props(row, n, 'char')
             if not libuser.system.name_is_valid(u.name):
                 invalidate(0)
             if not libuser.system.uid_is_valid(u.uid):
@@ -302,24 +305,24 @@ class ImportDialog:
 
             # Duplicate checking (New users)
             if u.name in passed_users['names']:
-                self.SetRowProps(row, 0, 'dup')
+                self.set_row_props(row, 0, 'dup')
             if u.uid in passed_users['uids']:
-                self.SetRowProps(row, 1, 'dup')
+                self.set_row_props(row, 1, 'dup')
             #if u.gid in passed_users['gids']: # We don't care for > 1 users having the same primary group
-            #    self.SetRowProps(row, 2, 'dup')
+            #    self.set_row_props(row, 2, 'dup')
             if u.directory in passed_users['dirs']:
-                self.SetRowProps(row, 9, 'dup')
+                self.set_row_props(row, 9, 'dup')
 
             # Conflict checking (Existing system users)
             if u.name in libuser.system.users:
-                self.SetRowProps(row, 0, 'con')
+                self.set_row_props(row, 0, 'con')
             if u.uid in sys_users['uids']:
-                self.SetRowProps(row, 1, 'con')
+                self.set_row_props(row, 1, 'con')
             # Check if the given GID belongs to the given group name
             if u.primary_group in libuser.system.groups:
                 should_be = libuser.system.groups[u.primary_group].gid
                 if u.gid != should_be:
-                    self.SetRowProps(row, 2, 'mismatch %s' % should_be)
+                    self.set_row_props(row, 2, 'mismatch %s' % should_be)
             else:
                 if u.gid in sys_users['gids']:
                     should_be = None
@@ -328,11 +331,11 @@ class ImportDialog:
                             should_be = g.name
                             break
                     if should_be != u.primary_group:
-                        self.SetRowProps(row, 3, 'mismatch %s' % should_be)
+                        self.set_row_props(row, 3, 'mismatch %s' % should_be)
             #if u.gid in sys_users['gids']: # We don't care for > 1 users having the same primary group
-            #    self.SetRowProps(row, 2, 'con')
+            #    self.set_row_props(row, 2, 'con')
             if u.directory in sys_users['dirs']:
-                self.SetRowProps(row, 9, 'con')
+                self.set_row_props(row, 9, 'con')
             else:
                 # Special case, we want to use existing home dirs if they are not already used.
                 if os.path.isdir(u.directory) and u.directory not in sys_users['dirs']:
@@ -340,11 +343,11 @@ class ImportDialog:
                     #print "Homedir for user %s exists in the FS." % u.name # XXX: Debug
                     dir_stat = os.stat(u.directory)
                     if u.uid != int(dir_stat.st_uid):
-                        self.SetRowProps(row, 1, 'hijack')
-                        self.SetRowProps(row, 9, 'hijack')
+                        self.set_row_props(row, 1, 'hijack')
+                        self.set_row_props(row, 9, 'hijack')
                     if u.gid != dir_stat.st_gid:
-                        self.SetRowProps(row, 2, 'hijack')
-                        self.SetRowProps(row, 9, 'hijack')
+                        self.set_row_props(row, 2, 'hijack')
+                        self.set_row_props(row, 9, 'hijack')
                     #print "\tUser: - %s:%s -" % (u.uid, u.gid) # XXX: Debug
                     #print "\tDir : - %s:%s -" % (dir_stat.st_uid, dir_stat.st_gid) # XXX: Debug
 
@@ -358,7 +361,7 @@ class ImportDialog:
 
         self.apply.set_sensitive(not errors_found)
 
-    def ResolveConflicts(self, widget=None):
+    def resolve_conflicts(self, widget=None):
         # All the system users
         sys_users = {'uids' : [], 'gids' : [], 'dirs' : []}
         sys_users['uids'] = [user.uid for user in libuser.system.users.values()]
@@ -395,21 +398,21 @@ class ImportDialog:
                 new_users['uids'].append(new_uid)
                 log_uid(u.name, u.uid, new_uid)
                 u.uid = new_uid
-                self.SetRowProps(row, 1, '')
+                self.set_row_props(row, 1, '')
 
             elif row[1+ofs] == 'hijack':
                 dir_uid = os.stat(u.directory).st_uid
                 new_users['uids'].append(dir_uid)
                 log_uid(u.name, u.uid, dir_uid)
                 u.uid = dir_uid
-                self.SetRowProps(row, 1, '')
+                self.set_row_props(row, 1, '')
 
             #if row[2+ofs] in ['dup', 'con']:
             #    new_gid = libuser.system.get_free_gid(exclude=new_users['gids'])
             #    new_users['gids'].append(new_gid)
             #    log_gid(u.name, u.gid, new_gid)
             #    u.uid = new_uid
-            #    self.SetRowProps(row, 2, '')
+            #    self.set_row_props(row, 2, '')
 
             if 'mismatch' in row[2+ofs]:
                 new_gid = int(row[2+ofs].split()[1])
@@ -418,14 +421,14 @@ class ImportDialog:
                 if u.primary_group in self.set.groups:
                     self.set.groups[u.primary_group].gid = new_gid
                 u.gid = new_gid
-                self.SetRowProps(row, 2, '')
+                self.set_row_props(row, 2, '')
 
             if row[2+ofs] == 'hijack':
                 dir_gid = os.stat(u.directory).st_gid
                 new_users['gids'].append(dir_gid)
                 log_gid(u.name, u.gid, dir_gid)
                 u.gid = dir_gid
-                self.SetRowProps(row, 2, '')
+                self.set_row_props(row, 2, '')
 
             if 'mismatch' in row[3+ofs]:
                 new_gname = row[3+ofs].split()[1]
@@ -442,8 +445,8 @@ class ImportDialog:
                     else:
                         del self.set.groups[u.primary_group].members[u.name]
                 u.primary_group = new_gname
-                self.SetRowProps(row, 3, '')
-            self.SetRowFromObject(row)
+                self.set_row_props(row, 3, '')
+            self.set_row_from_object(row)
 
         num = len(log)
         if num > 0:
@@ -452,16 +455,16 @@ class ImportDialog:
             buf.set_text('\n'.join(log))
             log_dlg.run()
             log_dlg.hide()
-            self.DetectConflicts()
+            self.detect_conflicts()
         else:
             dialogs.WarningDialog('Δεν ήταν δυνατή η αυτόματη επίλυση κάποιου προβλήματος').showup()
 
-    def Edit(self, widget, user):
+    def edit(self, widget, user):
         form = user_form.ReviewUserDialog(libuser.system, user, role='')
         form.dialog.set_transient_for(self.dialog)
         form.dialog.set_modal(True)
 
-    def Apply(self, widget):
+    def apply(self, widget):
         text = "Να δημιουργηθούν οι νέοι χρήστες;"
         response = dialogs.AskDialog(text, "Confirm").showup()
         if response == Gtk.ResponseType.YES:
@@ -470,10 +473,10 @@ class ImportDialog:
             sys_gids = [g.gid for g in libuser.system.groups.values()]
             for u in self.set.users.values():
                 if u.primary_group not in libuser.system.groups:
-                   if u.primary_group not in new_groups:
+                    if u.primary_group not in new_groups:
                         g_obj = libuser.Group(u.primary_group, u.gid)
                         new_groups[u.primary_group] = g_obj
-                   new_groups[u.primary_group].members[u.name] = u
+                    new_groups[u.primary_group].members[u.name] = u
 
             for u in self.set.users.values():
                 for g in u.groups:
@@ -503,13 +506,13 @@ class ImportDialog:
         self.dialog.destroy()
 
 
-    def Cancel(self, widget):
+    def cancel(self, widget):
         self.dialog.destroy()
 
-    def Exit(self, widget, event):
+    def exit(self, widget, event):
         self.dialog.destroy()
 
-    def Tooltip(self, widget, x, y, keyboard_tip, tooltip):
+    def tooltip(self, widget, x, y, keyboard_tip, tooltip):
         if not widget.get_tooltip_context(x, y, keyboard_tip):
             return False
         else:
@@ -546,7 +549,7 @@ class ImportDialog:
                 widget.set_tooltip_cell(tooltip, path, col, None)
                 return True
 
-    def Click(self, treeview, event):
+    def click(self, treeview, event):
         '''if event.button == 1 and event.type == Gdk.EventType._2BUTTON_PRESS:
             selection = treeview.get_selection()
             model, paths = selection.get_selected_rows()
@@ -565,13 +568,13 @@ class ImportDialog:
         model, paths = selection.get_selected_rows()
         iters = [model.get_iter(path) for path in paths]
         for i in iters:
-            self.RemoveRow(i)
-        self.DetectConflicts()
+            self.remove_row(i)
+        self.detect_conflicts()
 
-    def EditedText(self, cell, path, new_text, model, col):
+    def edited_text(self, cell, path, new_text, model, col):
         username = model[path][0]
         u = self.set.users[username]
-        int_columns = [1,2,12,13,14,15,16,17]
+        int_columns = [1, 2, 12, 13, 14, 15, 16, 17]
         attrs = ['name', 'uid', 'gid', 'primary_group', 'rname', 'office',
                  'wphone', 'hphone', 'other', 'directory', 'shell', 'groups',
                  'lstchg', 'min', 'max', 'warn', 'inact', 'expire', 'password',
@@ -597,23 +600,23 @@ class ImportDialog:
                 u.password = libuser.system.encrypt(u.plainpw)
             else:
                 u.__dict__[attrs[col]] = new_text
-        self.SetRowFromObject(model[path])
-        self.DetectConflicts()
+        self.set_row_from_object(model[path])
+        self.detect_conflicts()
 
-    def Delete(self, treeview, event):
+    def delete(self, treeview, event):
         if Gdk.keyval_name(event.keyval) == "Delete":
             selection = treeview.get_selection()
             model, paths = selection.get_selected_rows()
             iters = [model.get_iter(path) for path in paths]
             for i in iters:
-                self.RemoveRow(i)
-            self.DetectConflicts()
+                self.remove_row(i)
+            self.detect_conflicts()
 
-    def RemoveRow(self, iter_):
+    def remove_row(self, iter_):
         username = self.list[iter_][0]
         self.list.remove(iter_)
         self.set.remove_user(self.set.users[username])
 
 if __name__ == "__main__":
-    interface = ImportDialog()
+    INTERFACE = ImportDialog()
     Gtk.main()

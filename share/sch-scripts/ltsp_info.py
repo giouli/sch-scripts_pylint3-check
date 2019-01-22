@@ -4,13 +4,13 @@
 """
 Show the output of ltsp-info in a dialog.
 """
-import gi
-gi.require_version('Gtk', '3.0')
-from gi.repository import Gtk
 import re
 import textwrap
-
+import gi
+from gi.repository import Gtk
 import common
+gi.require_version('Gtk', '3.0')
+
 
 class LtspInfo:
     def __init__(self, main_window):
@@ -21,12 +21,12 @@ class LtspInfo:
         self.dialog = self.builder.get_object("dialog1")
         self.dialog.set_transient_for(main_window)
         self.buffer = self.builder.get_object("textbuffer1")
-        self.Fill()
+        self.fill()
 
-    def Close(self, widget):
+    def close(self, widget):
         self.dialog.destroy()
 
-    def Fill(self):
+    def fill(self):
         success, response = common.run_command(['ltsp-info', '-v'])
         self.buffer.set_text(response)
         self.dialog.show()

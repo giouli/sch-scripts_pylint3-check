@@ -1,11 +1,15 @@
 # This file is part of sch-scripts, https://launchpad.net/sch-scripts
 # Copyright 2009-2018 the sch-scripts team, see AUTHORS.
 # SPDX-License-Identifier: GPL-3.0-or-later
+# pylint: disable= unused-wildcard-import, line-too-long, wildcard-import, c-extension-no-member
 """
 Maintenance form.
 """
+import gc
+import mimetypes
+import os
+import functools
 import gi
-gi.require_version('Gtk', '3.0')
 from gi.repository import Gtk
 import apt
 import aptdaemon.client
@@ -13,15 +17,15 @@ from aptdaemon.enums import *
 import aptdaemon.errors
 from aptdaemon.gtk3widgets import AptErrorDialog, AptProgressDialog
 import apt_pkg
-import gc
-import mimetypes
-import os
-import functools
+
 
 import dialogs
+gi.require_version('Gtk', '3.0')
+
+
 
 class Package:
-    def __init__(self, src,  cache=None):
+    def __init__(self, src, cache=None):
         if cache is None:
             self.name, self.sum, self.size, self.desc, self.childs = os.path.basename(src), \
             mimetypes.guess_type(src)[0], os.path.getsize(src), 'Debian package', []
@@ -46,9 +50,6 @@ class MaintenanceDialog(object):
         self.builder.add_from_file('maintenance.ui')
         self.builder.connect_signals(self)
 
-        '''
-        Retrieve main_dlg
-        '''
         self.main_dlg = self.builder.get_object('main_dlg')
         self.main_dlg_tview = self.builder.get_object('main_dlg_tview')
         self.main_dlg_tstore = self.builder.get_object('main_dlg_tstore')
@@ -59,6 +60,7 @@ class MaintenanceDialog(object):
         self.main_dlg.set_default_response(Gtk.ResponseType.CANCEL)
 
     def populate_treeview(self):
+        """AptDeamon Callbacks"""
         tview_pkgs = []
         for ppkg in self.pkgs:
             if ppkg.name.startswith('linux-image'):
@@ -80,9 +82,6 @@ class MaintenanceDialog(object):
                 piter = self.main_dlg_tstore.append(None, [ppkg, None, desc, size, \
                                                   Gtk.IconSize.LARGE_TOOLBAR, None, None, False])
 
-    '''
-    AptDeamon Callbacks
-    '''
     def on_reply(self, trans):
         self.main_dlg.hide()
         trans.connect('finished', self.on_trans_finished)
@@ -117,10 +116,9 @@ class MaintenanceDialog(object):
         self.prog_dlg.destroy()
         self.main_dlg.destroy()
 
-    '''
-    Callbacks
-    '''
+
     def on_main_dlg_pkg_toggle_toggled(self, widget, path):
+        """Callbacks"""
         self.main_dlg_tstore[path][5] = not self.main_dlg_tstore[path][5]
         if not self.main_dlg_tstore[path][5]:
             self.pkgs.remove(self.main_dlg_tstore[path][0])
@@ -136,11 +134,11 @@ class MaintenanceDialog(object):
             self.main_dlg.set_response_sensitive(Gtk.ResponseType.OK, True)
             if len(self.pkgs) == 1:
                 self.main_dlg_lbl_space.set_text(
-                '%d πακέτο έχει επιλέγει, %sB χώρου στο δίσκο θα ελευθερωθούν.' \
+                    '%d πακέτο έχει επιλέγει, %sB χώρου στο δίσκο θα ελευθερωθούν.' \
                  %(len(self.pkgs), apt_pkg.size_to_str(sum(pkg.size for pkg in self.pkgs))))
             else:
                 self.main_dlg_lbl_space.set_text(
-                '%d πακέτα έχουν επιλέγει, %sB χώρου στο δίσκο θα ελευθερωθούν.' \
+                    '%d πακέτα έχουν επιλέγει, %sB χώρου στο δίσκο θα ελευθερωθούν.' \
                  %(len(self.pkgs), apt_pkg.size_to_str(sum(pkg.size for pkg in self.pkgs))))
         else:
             self.main_dlg.set_response_sensitive(Gtk.ResponseType.OK, False)
@@ -155,7 +153,7 @@ class Purge(MaintenanceDialog):
         self.cache.open()
         self.main_dlg.set_title('Αφαίρεση παλιών πυρήνων...')
         self.main_dlg_lbl_title.set_markup(
-                '<b><big>Βρέθηκαν οι παρακάτω παλιοί πυρήνες στο σύστημα\n\n</big></b>' \
+            '<b><big>Βρέθηκαν οι παρακάτω παλιοί πυρήνες στο σύστημα\n\n</big></b>' \
                 'Μπορείτε να επιλέξετε αυτούς που επιθυμείτε να αφαιρεθούν.')
         self.main_dlg_img_lbl.set_from_icon_name('applications-other', Gtk.IconSize.SMALL_TOOLBAR)
         self.main_dlg_img_lbl.set_pixel_size(-1)
@@ -166,11 +164,11 @@ class Purge(MaintenanceDialog):
 
         if len(self.pkgs) == 1:
             self.main_dlg_lbl_space.set_text(
-            '%d πακέτο έχει επιλέγει, %sB χώρου στο δίσκο θα ελευθερωθούν.' \
+                '%d πακέτο έχει επιλέγει, %sB χώρου στο δίσκο θα ελευθερωθούν.' \
              %(len(self.pkgs), apt_pkg.size_to_str(sum(pkg.size for pkg in self.pkgs))))
         else:
             self.main_dlg_lbl_space.set_text(
-            '%d πακέτα έχουν επιλέγει, %sB χώρου στο δίσκο θα ελευθερωθούν.' \
+                '%d πακέτα έχουν επιλέγει, %sB χώρου στο δίσκο θα ελευθερωθούν.' \
              %(len(self.pkgs), apt_pkg.size_to_str(sum(pkg.size for pkg in self.pkgs))))
         self.populate_treeview()
         self.main_dlg.show_all()
@@ -215,10 +213,8 @@ class Purge(MaintenanceDialog):
         del self.cache
         gc.collect()
 
-    '''
-    Callbacks
-    '''
     def on_main_dlg_response(self, main_dlg, response):
+        """Callbacks"""
         if response != Gtk.ResponseType.OK:
             self.clear_cache()
             self.main_dlg.destroy()
@@ -244,7 +240,7 @@ class Clean(MaintenanceDialog):
         super(Clean, self).__init__(parent)
         self.main_dlg.set_title('Καθαρισμός μνήμης πακέτων...')
         self.main_dlg_lbl_title.set_markup(
-                '<b><big>Βρέθηκαν τα παρακάτω αρχεία στην μνήμη\n</big></b>')
+            '<b><big>Βρέθηκαν τα παρακάτω αρχεία στην μνήμη\n</big></b>')
         self.main_dlg_img_lbl.set_from_icon_name('package-x-generic', Gtk.IconSize.SMALL_TOOLBAR)
         self.main_dlg_img_lbl.set_pixel_size(-1)
         if not self.find():
@@ -281,10 +277,8 @@ class Clean(MaintenanceDialog):
         self.main_dlg_tview.get_columns()[0].set_title('Αρχείο')
 
 
-    '''
-    Callbacks
-    '''
     def on_main_dlg_response(self, main_dlg, response):
+        """Callbacks"""
         if response != Gtk.ResponseType.OK:
             self.main_dlg.destroy()
             return
@@ -306,7 +300,7 @@ class AutoRemove(MaintenanceDialog):
         self.cache.open()
         self.main_dlg.set_title('Διαγραφή ορφανών πακέτων...')
         self.main_dlg_lbl_title.set_markup(
-                '<b><big>Βρέθηκαν τα παρακάτω ορφανά πακέτα στο σύστημα\n</big></b>')
+            '<b><big>Βρέθηκαν τα παρακάτω ορφανά πακέτα στο σύστημα\n</big></b>')
         self.main_dlg_img_lbl.set_from_icon_name('applications-other', Gtk.IconSize.SMALL_TOOLBAR)
         self.main_dlg_img_lbl.set_pixel_size(-1)
         if not self.find():
@@ -342,10 +336,9 @@ class AutoRemove(MaintenanceDialog):
         del self.cache
         gc.collect()
 
-    '''
-    Callbacks
-    '''
+
     def on_main_dlg_response(self, main_dlg, response):
+        """Callbacks"""
         if response != Gtk.ResponseType.OK:
             self.clear_cache()
             self.main_dlg.destroy()
