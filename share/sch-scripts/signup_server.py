@@ -23,6 +23,7 @@ gi.require_version('Gtk', '3.0')
 gtk3reactor.install()
 
 class Registrations(LineReceiver):
+    """Shows the requests made to the server."""
     def __init__(self, connections, requests, gui, system, groups, roles):
         self.connections = connections
         self.requests = requests
@@ -36,12 +37,14 @@ class Registrations(LineReceiver):
         self.id_hostname = None
 
     def connectionMade(self):
+        """Gets the port, the ip and informs that a new connection is made to the server."""
         self.ip = self.transport.getPeer().host
         self.port = self.transport.getPeer().port
         self.connections.append(self)
         print("New connection from %s:%s" % (self.ip, self.port))
 
     def connectionLost(self, reason):
+        """If the connection is lost it informs tha the connection with the current ip and port is closed."""
         print("Connection with %s:%s was closed." % (self.ip, self.port))
         if self in self.connections:
             del self.connections[self.connections.index(self)]
@@ -168,9 +171,11 @@ class UI:
         self.window.show()
 
     def strtime(self, t):
+        """Returns a string representing the date, controlled by an explicit format string."""
         return time.strftime("%d/%m/%Y %T", t)
 
     def user_autocomplete(self, user):
+        """Autocomplete the user's attributes."""
         if user.directory in [None, '']:
             user.directory = os.path.join(libuser.HOME_PREFIX, user.name)
         if user.uid in [None, '']:
@@ -216,6 +221,7 @@ class UI:
         self.builder.get_object('apply_button').set_sensitive(True)
 
     def update_row(self, row, role=None):
+        """Updates a user's row."""
         request = row[0]
         if role is not None:
             request.role = role
@@ -232,6 +238,7 @@ class UI:
         row[6] = ','.join([g for g in request.user.groups if g and g not in role_groups])
 
     def get_selected_rows(self):
+        """Returns the selected rows."""
         paths = self.selection.get_selected_rows()[1]
         selected = [self.requests_list[path] for path in paths]
         return selected
@@ -249,6 +256,7 @@ class UI:
             self.review_tb.set_sensitive(False)
 
     def on_reject_tb_clicked(self, widget):
+        """Rejects and deletes the selected user applies."""
         selected = self.get_selected_rows()
         msg = "Θέλετε σίγουρα να διαγραφούν τα παρακάτω αιτήματα από τη λίστα;\n\n"
         msg += ', '.join([row[4] for row in selected])
@@ -266,6 +274,7 @@ class UI:
         user_form.ReviewUserDialog(self.system, request.user, request.role, cb)
 
     def on_apply_button_clicked(self, widget):
+        """Accept the applicatons and create the users."""
         requests = [row[0] for row in self.requests_list]
         users = [req.user for req in requests]
         usernames = ', '.join([u.name for u in users])
@@ -284,6 +293,7 @@ class UI:
                 self.builder.get_object('apply_button').set_sensitive(False)
 
     def on_close_button_clicked(self, widget):
+        """Closes the user's requests dialog."""
         if len(self.requests_list):
             r = dialogs.AskDialog("Θέλετε σίγουρα να τερματίσετε την εφαρμογή αιτήσεων; Όλες οι εκκρεμείς αιτήσεις θα χαθούν.", "Επιβεβαίωση").showup()
             if r == Gtk.ResponseType.YES:
@@ -292,6 +302,7 @@ class UI:
             reactor.stop()
 
     def on_window_delete_event(self, widget, event):
+        """Stops the procedure."""
         reactor.stop()
 
 

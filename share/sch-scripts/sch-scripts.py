@@ -91,6 +91,7 @@ class Gui:
 ## General helper functions
 
     def edit_file(self, filename):
+        """Function for editing a file."""
         subprocess.Popen(['xdg-open', filename], stdin=open(os.devnull))
         # TODO: Maybe throw an error message if not os.path.isfile(filename)
 
@@ -102,12 +103,14 @@ class Gui:
         self.run_as_sudo_user(['xdg-open', link])
 
     def get_selected_users(self):
+        """Function for returning selected users."""
         selection = self.users_tree.get_selection()
         paths = selection.get_selected_rows()[1]
         selected = [self.users_sort[path][0] for path in paths]
         return selected
 
     def get_selected_groups(self):
+        """Function for returning selected groups."""
         selection = self.groups_tree.get_selection()
         paths = selection.get_selected_rows()[1]
         selected = [self.groups_sort[path][0] for path in paths]
@@ -136,7 +139,7 @@ class Gui:
             self.groups_model.append([group, group.gid, group.name])
 
     def repopulate_treeviews(self):
-        # Preserve the selected groups and users
+        """Preserves the selected groups and users, clears and refill the treeviews and reselects the previously selected groups and users, if possible"""
         groups_selection = self.groups_tree.get_selection()
         users_selection = self.users_tree.get_selection()
         selected_groups = [i.name for i in self.get_selected_groups()]
@@ -158,6 +161,7 @@ class Gui:
                 users_selection.select_iter(users_iters[uname])
 
     def set_user_visibility(self, model, rowiter, options):
+        """Sets if a user is visible."""
         user = model[rowiter][0]
         selected = self.get_selected_groups()
         # FIXME: The list comprehension here costs
@@ -165,6 +169,7 @@ class Gui:
                 or user in [u for g in selected for u in g.members.values()]
 
     def set_group_visibility(self, model, rowiter, options):
+        """Sets if a group is private."""
         group = model[rowiter][0]
         return (self.show_private_groups or not group.is_private()) and (self.show_system_groups or group.is_user_group())
 
@@ -403,6 +408,7 @@ class Gui:
         user_form.EditUserDialog(self.system, self.get_selected_users()[0])
 
     def on_mi_delete_user_activate(self, widget):
+        """Deletes users."""
         users = self.get_selected_users()
         users_n = len(users)
         if users_n == 1:
@@ -429,6 +435,7 @@ class Gui:
                 self.system.delete_user(user, rm_homes)
 
     def on_mi_remove_user_activate(self, widget):
+        """Removes users from groups."""
         users = self.get_selected_users()
         groups = self.get_selected_groups()
         users_n = len(users)
@@ -453,6 +460,7 @@ class Gui:
         group_form.EditGroupDialog(self.system, self.sf, self.get_selected_groups()[0])
 
     def on_mi_delete_group_activate(self, widget):
+        """Deletes groups."""
         groups = self.get_selected_groups()
         groups_n = len(groups)
         if groups_n == 1:
@@ -470,12 +478,15 @@ class Gui:
 ## Help menu
 
     def on_mi_home_activate(self, widget):
+        """If help is needed, opens a link."""
         self.open_link('http://ts.sch.gr/wiki/Linux/LTSP')
 
     def on_mi_report_bug_activate(self, widget):
+        """If there is a bug to be reported, opens a link."""
         self.open_link('https://bugs.launchpad.net/sch-scripts')
 
     def on_mi_ask_question_activate(self, widget):
+        """If there is a question for sch-scripts, opens a link."""
         self.open_link('https://answers.launchpad.net/sch-scripts')
 
     def on_helpdesk_ticket_activate(self, widget):
@@ -494,9 +505,11 @@ class Gui:
                        (user, host, lang))
 
     def on_mi_forum_activate(self, widget):
+        """For more information in a forum, opens a link."""
         self.open_link('http://alkisg.mysch.gr/steki/index.php?board=67.0')
 
     def on_mi_map_activate(self, widget):
+        """For more information in who uses Ubuntu LTSP, opens a link."""
         self.open_link('http://ts.sch.gr/wiki/Linux/LTSP/Προχωρημένα/Χάρτης')
 
     def on_mi_lts_conf_manpage_activate(self, widget):

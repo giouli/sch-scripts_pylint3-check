@@ -14,6 +14,7 @@ import libuser
 import config
 
 class UserForm(object):
+    """The form of a new user."""
     def __init__(self, system):
         self.system = system
         self.mode = None
@@ -70,6 +71,7 @@ class UserForm(object):
             self.role_combo.append_text(role)
 
     def groups_visible_func(self, model, itr, x):
+        """Shows the user's group."""
         primary_group = not model[itr][3] or self.username.get_text() in model[itr][0].members
         show_user_group = self.show_sys_groups or model[itr][0].is_user_group()
         show_private_group = config.PARSER.getboolean('GUI', 'show_private_groups') or not model[itr][0].is_private()
@@ -84,6 +86,7 @@ class UserForm(object):
             self.groups_sort.set_sort_column_id(1, Gtk.SortType.ASCENDING)
 
     def on_role_combo_changed(self, widget):
+        """Modifies or adds a role."""
         role = widget.get_active_text()
         self.selected_role = role
         for row in self.active_from_role:
@@ -99,6 +102,7 @@ class UserForm(object):
 
 
     def on_uid_changed(self, widget):
+        """Modifies the user id."""
         uid = widget.get_text()
         uid_valid_icon = self.builder.get_object('uid_valid')
         try:
@@ -128,6 +132,7 @@ class UserForm(object):
         self.builder.get_object('set_primary_button').set_sensitive(len(widget.get_selected_rows()[1]) == 1)
 
     def on_set_primary_button_clicked(self, widget):
+        """Sets the group as primary."""
         # The paths list will always contain 1 element, I just use
         # get_selected_rows here instead of get_selected for extra features
         # such as context menu actions which would work with multiple selection
@@ -146,6 +151,7 @@ class UserForm(object):
         self.pgid.set_text(str(row[0].gid))
 
     def unset_primary(self):
+        """Unmark a primary group."""
         if self.primary_group:
             self.primary_group[2] = self.primary_group[5]
             self.primary_group[3] = True
@@ -153,6 +159,7 @@ class UserForm(object):
             self.primary_group = None
 
     def set_group_primary(self, row):
+        """Sets a new groupas primary."""
         # Unset the previous primary group
         self.unset_primary()
         row[2] = True # Activate this group
@@ -163,36 +170,43 @@ class UserForm(object):
         self.primary_group = row
 
     def on_gcos_other_entry_changed(self, widget):
+        """Change an entry on gcos field."""
         icon = self.get_icon(self.system.gecos_is_valid(widget.get_text()))
         self.builder.get_object('other_valid').set_from_stock(icon, Gtk.IconSize.BUTTON)
         self.set_apply_sensitivity()
 
     def on_gcos_home_phone_entry_changed(self, widget):
+        """Change the home phone entry on gcos field."""
         icon = self.get_icon(self.system.gecos_is_valid(widget.get_text()))
         self.builder.get_object('home_phone_valid').set_from_stock(icon, Gtk.IconSize.BUTTON)
         self.set_apply_sensitivity()
 
     def on_gcos_office_phone_entry_changed(self, widget):
+        """Change the office phone entry on gcos field."""
         icon = self.get_icon(self.system.gecos_is_valid(widget.get_text()))
         self.builder.get_object('office_phone_valid').set_from_stock(icon, Gtk.IconSize.BUTTON)
         self.set_apply_sensitivity()
 
     def on_gcos_office_entry_changed(self, widget):
+        """Change the office entry on gcos field."""
         icon = self.get_icon(self.system.gecos_is_valid(widget.get_text()))
         self.builder.get_object('office_valid').set_from_stock(icon, Gtk.IconSize.BUTTON)
         self.set_apply_sensitivity()
 
     def on_gcos_name_entry_changed(self, widget):
+        """Change the name entry on gcos field."""
         icon = self.get_icon(self.system.gecos_is_valid(widget.get_text()))
         self.builder.get_object('full_name_valid').set_from_stock(icon, Gtk.IconSize.BUTTON)
         self.set_apply_sensitivity()
 
     def on_password_repeat_entry_changed(self, widget):
+        """Repeat the password entry."""
         icon = self.get_icon(self.password_repeat.get_text() == self.password.get_text())
         self.builder.get_object('password_retype_valid').set_from_stock(icon, Gtk.IconSize.BUTTON)
         self.set_apply_sensitivity()
 
     def on_password_entry_changed(self, widget):
+        """Change the password entry."""
         icon = self.get_icon(self.password_repeat.get_text() == self.password.get_text())
         self.builder.get_object('password_retype_valid').set_from_stock(icon, Gtk.IconSize.BUTTON)
 
@@ -201,6 +215,7 @@ class UserForm(object):
         self.set_apply_sensitivity()
 
     def on_username_entry_changed(self, widget):
+        """Change the username entry."""
         username = self.username.get_text()
         valid_name = self.system.name_is_valid(username)
         free_name = username not in self.system.users
@@ -214,6 +229,7 @@ class UserForm(object):
         self.set_apply_sensitivity()
 
     def on_homedir_entry_changed(self, widget):
+        """Change the homedir entry."""
         home = widget.get_text()
         try:
             gid = int(self.pgid.get_text())
@@ -297,6 +313,7 @@ class UserForm(object):
         self.set_apply_sensitivity()
 
     def get_icon(self, check):
+        """Gets icon."""
         if check:
             return Gtk.STOCK_OK
         return Gtk.STOCK_CANCEL
@@ -308,12 +325,15 @@ class UserForm(object):
         self.builder.get_object('apply_button').set_sensitive(s)
 
     def on_dialog_delete_event(self, widget, event):
+        """Closes the dialog."""
         self.dialog.destroy()
 
     def on_cancel_clicked(self, widget):
+        """Cancels the procedure and closes the dialog."""
         self.dialog.destroy()
 
 class NewUserDialog(UserForm):
+    """Opens a dialog to create a new user."""
     def __init__(self, system):
         super(NewUserDialog, self).__init__(system)
         self.mode = 'new'
@@ -328,6 +348,7 @@ class NewUserDialog(UserForm):
         self.dialog.show()
 
     def on_apply_clicked(self, widget):
+        """Applies the changes on the user."""
         user = libuser.User()
         user.name = self.username.get_text()
         user.rname = self.gc_name.get_text()
@@ -358,6 +379,7 @@ class NewUserDialog(UserForm):
         self.dialog.destroy()
 
 class EditUserDialog(UserForm):
+    """Opens a dialog to edit the user's attributes."""
     def __init__(self, system, user):
         super(EditUserDialog, self).__init__(system)
         self.mode = 'edit'
@@ -399,6 +421,7 @@ class EditUserDialog(UserForm):
         self.dialog.show()
 
     def on_apply_clicked(self, widget):
+        """Applies the changes on the user."""
         username = self.user.name
         self.user.name = self.username.get_text()
         self.user.rname = self.gc_name.get_text()
@@ -430,6 +453,7 @@ class EditUserDialog(UserForm):
         self.dialog.destroy()
 
 class ReviewUserDialog(UserForm):
+    """Opens a dialog to view and edit the user's attributes."""
     def __init__(self, system, user, role='', callback=None):
         super(ReviewUserDialog, self).__init__(system)
         self.callback = callback
@@ -479,6 +503,7 @@ class ReviewUserDialog(UserForm):
         self.dialog.show()
 
     def on_apply_clicked(self, widget):
+        """Applies the changes on the user."""
         self.user.name = self.username.get_text()
         self.user.rname = self.gc_name.get_text()
         self.user.uid = int(self.uid_entry.get_text())

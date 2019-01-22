@@ -47,6 +47,7 @@ CSV_USER_FIELDS.extend(['Κρυπτογραφημένος κωδικός', 'Κω
 
 
 class User:
+    """Make the user's fields for the form."""
     def __init__(self, name=None, uid=None, gid=None, rname="", office="", wphone="",
                  hphone="", other="", directory=None, shell="/bin/bash", groups=None, lstchg=None,
                  min=0, max=99999, warn=7, inact=-1, expire=-1, password="*", plainpw=None):
@@ -89,6 +90,7 @@ class User:
 
 
 class Group:
+    """Make the group's fields for the form."""
     def __init__(self, name=None, gid=None, members=None, password=""):
         self.name, self.gid, self.members, self.password = \
             name, gid, members, password
@@ -174,6 +176,7 @@ class Set(object):
         return gid not in [group.gid for group in self.groups.values()]
 
     def get_free_uid(self, start=FIRST_UID, end=LAST_UID, reverse=False, ignore=None, exclude=None):
+        """Find and return a free user id."""
         used_uids = [user.uid for user in self.users.values()]
         if exclude is not None:
             used_uids.extend(exclude)
@@ -190,6 +193,7 @@ class Set(object):
         return uid
 
     def get_free_gid(self, start=FIRST_UID, end=LAST_UID, reverse=False, ignore=None, exclude=None):
+        """Find and return a free group id"""
         used_gids = [group.gid for group in self.groups.values()]
         if exclude is not None:
             used_gids.extend(exclude)
@@ -219,6 +223,7 @@ class Event:
 
 
 class System(Set):
+    """Commands for system modifications."""
     def __init__(self):
         super(System, self).__init__()
         self.load()
@@ -247,6 +252,7 @@ class System(Set):
                 self.add_user(user)
 
     def edit_group(self, groupname, group):
+        """Edits a group."""
         common.run_command(['groupmod', '-g', str(group.gid), '-n', group.name, groupname])
         for user in group.members.values():
             common.run_command(['usermod', '-a', '-G', group.name, user.name])
@@ -255,6 +261,7 @@ class System(Set):
         common.run_command(['groupdel', group.name])
 
     def add_user(self, user, create_home=True):
+        """Adds a new user."""
         cmd = ["useradd"]
         if create_home:
             cmd.extend(['-m', '-d', user.directory])
@@ -267,7 +274,7 @@ class System(Set):
         return [str(i) for i in t]
 
     def update_user(self, username, user):
-        # Main values
+        """Updates the main values of a user."""
         cmd = ['usermod']
         cmd.extend(['-d', user.directory])
         cmd.extend(['-g', user.gid])
@@ -311,6 +318,7 @@ class System(Set):
         common.run_command(cmd)
 
     def delete_user(self, user, remove_home=False):
+        """Deletes a user."""
         cmd = ['userdel']
         if remove_home:
             cmd.append('-r')
@@ -318,26 +326,30 @@ class System(Set):
         common.run_command(cmd)
 
     def add_user_to_groups(self, user, groups):
+        """Adds a user to a group."""
         groups = ','.join([gr.name for gr in groups])
         common.run_command(['usermod', '-a', '-G', groups, user.name])
 
     def remove_user_from_groups(self, user, groups):
+        """Removes a user from a group."""
         groups = [gr.name for gr in groups]
         new_groups = [group for group in user.groups if group not in groups]
         new_groups_str = ','.join(new_groups)
         common.run_command(['usermod', '-G', new_groups_str, user.name])
 
     def lock_user(self, user):
+        """Locks a certain user."""
         common.run_command(['usermod', '-L', user.name])
 
     def unlock_user(self, user):
+        """Unlocks a certain user."""
         common.run_command(['usermod', '-U', user.name])
 
     def user_is_locked(self, user):
         return user.password is None or user.password[0] in "!*"
 
-    # Generic operations
     def load(self):
+        """Generic operations"""
         pwds = pwd.getpwall()
         spwds = spwd.getspall()
         sn = {}
@@ -382,6 +394,7 @@ class System(Set):
         self.libuser_event.notify('event')
 
     def get_valid_shells(self):
+        """Checks validity of shells"""
         try:
             f = open("/etc/shells")
             shells = [line.strip() for line in f.readlines() if line.strip()[0] != '#']
@@ -392,18 +405,23 @@ class System(Set):
         return shells
 
     def uid_is_valid(self, uid):
+        """Checks validity of user id"""
         return uid >= FIRST_SYSTEM_UID and uid <= LAST_UID
 
     def gid_is_valid(self, gid):
+        """Checks validity of group id"""
         return gid >= FIRST_SYSTEM_GID and gid <= LAST_GID
 
     def uid_is_free(self, uid):
+        """Checks if user id is free."""
         return self.uid_is_valid(uid) and uid not in [user.uid for user in self.users.values()]
 
     def gid_is_free(self, gid):
+        """Checks if group id is free."""
         return self.gid_is_valid(gid) and gid not in [group.gid for group in self.groups.values()]
 
     def get_free_uids(self, starting=FIRST_UID, ending=LAST_UID):
+        """Finds and returns free user ids."""
         used_uids = [user.uid for user in self.users.values()]
 
         free_uids = range(FIRST_UID, LAST_UID+1)
@@ -413,13 +431,15 @@ class System(Set):
         return free_uids
 
     def name_is_valid(self, name):
+        """Checks validity of the name"""
         return re.match(NAME_REGEX, name)
 
     def gecos_is_valid(self, field):
-        '''This is for checking gecos *fields*, not entire gecos strings'''
+        """This is for checking gecos *fields*, not entire gecos strings"""
         return ':' not in field and ',' not in field
 
     def shell_is_valid(self, shell):
+        """Check shell validity"""
         return shell in self.get_valid_shells()
 
     def encrypt(self, plainpw):
@@ -431,16 +451,16 @@ class System(Set):
 
         return crypt.crypt(plainpw, "$6$%s$" % salt)
 
-    # Event functions
     def connect_event(self, func):
+        """Event functions"""
         self.libuser_event.connect(func)
 
-    # Event callback
     def on_system_changed(self, event):
+        """Event callback"""
         self.reload()
 
-    # INotifier callback
     def on_fd_changed(self, ignored, filename, mask):
+        """INotifier callback"""
         # For debugging use _watchpoint & _watchpaths
         self.notifier.ignore(filename)
         self.notifier._addWatch(filename, self.mask, False, [self.on_fd_changed])
@@ -453,6 +473,7 @@ if __name__ == '__main__':
     print("\nSystem groups:", ', '.join(system.groups))
 
     def analytical():
+        """Shows the systmen's users and groups."""
         print("System users:")
         for user in system.users.values():
             print(" ", user.name)

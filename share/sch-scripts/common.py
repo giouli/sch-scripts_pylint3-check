@@ -32,8 +32,10 @@ def run_command(cmd, poll=False):
         return p
 
 def days_since_epoch():
+    """Returns the days since epoch."""
     epoch = datetime.datetime.utcfromtimestamp(0)
     return (datetime.datetime.today() - epoch).days
 
 def date():
+    """Returns the current date."""
     return datetime.date.today()

@@ -19,6 +19,7 @@ import libuser
 # chrgrp's the user dirs to "teachers".
 
 class SharedFolders():
+    """Controls the usage of shared folders."""
     def __init__(self, system=None):
         """Initialization."""
         if system is None:

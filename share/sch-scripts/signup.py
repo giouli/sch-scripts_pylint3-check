@@ -20,6 +20,7 @@ gi.require_version('Gtk', '3.0')
 
 
 class Connection:
+    """Connects to the server."""
     def __init__(self, host, port):
         # Create a new socket and connect to the server
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -42,35 +43,42 @@ class Connection:
         return self.sock.recv(4096).strip().decode()
 
     def close(self):
+        """Closes the server connection."""
         self._send("BYE")
         self.sock.close()
 
     def get_groups(self):
+        """Gets and returns the groups."""
         groups = self._send("GET_GROUPS")
         if groups != '':
             return groups.split(',')
         return []
 
     def get_roles(self):
+        """Gets and returns the roles."""
         roles = self._send("GET_ROLES")
         if roles != '':
             return roles.split(',')
         return []
 
     def user_exists(self, username):
+        """Informs if the user exists."""
         return self._send("USER_EXISTS %s" % username) == "YES"
 
     def realname_regex(self):
+        """Validates the real name."""
         if self.n_reg is None:
             self.n_reg = self._send("REALNAME_REGEX")
         return self.n_reg
 
     def username_regex(self):
+        """Validates the username."""
         if self.u_reg is None:
             self.u_reg = self._send("USER_REGEX")
         return self.u_reg
 
     def password_regex(self):
+        """Validates the password."""
         if self.p_reg is None:
             self.p_reg = self._send("PASS_REGEX")
         return self.p_reg
@@ -82,6 +90,7 @@ class Connection:
 
 
 class UserForm(object):
+    """Connects to the server and shows a user form for signing up."""
     def __init__(self, host='server', port=790):
         try:
             self.connection = Connection(host, port)
@@ -140,6 +149,7 @@ class UserForm(object):
         self.groups_store[path][0] = not self.groups_store[path][0]
 
     def get_icon(self, check):
+        """Gets the icon."""
         if check:
             return Gtk.STOCK_OK
         return Gtk.STOCK_DIALOG_ERROR
@@ -148,6 +158,7 @@ class UserForm(object):
         return ''.join(c for c in s if c.isalpha())
 
     def get_suggestions(self, name):
+        """Gives suggestions for the new entries."""
         tokens = []
         for tok in name.split():
             t = self.to_alpha(tok).lower()
@@ -167,6 +178,7 @@ class UserForm(object):
         return sug
 
     def on_realname_entry_changed(self, widget):
+        """Change the entry of the realname."""
         name = widget.get_text()
         icon = self.get_icon(re.match(self.connection.realname_regex(), name, re.UNICODE))
         self.username_combo.remove_all()
@@ -181,6 +193,7 @@ class UserForm(object):
         self.set_apply_sensitivity()
 
     def on_password_entry_changed(self, widget):
+        """Change the entry of the password."""
         password = widget.get_text()
         password_repeat = self.retype_password.get_text()
         icon = self.get_icon(password == password_repeat)
@@ -191,6 +204,7 @@ class UserForm(object):
         self.set_apply_sensitivity()
 
     def on_retype_password_entry_changed(self, widget):
+        """Retype the password."""
         password = self.password.get_text()
         password_repeat = widget.get_text()
         icon = self.get_icon(password == password_repeat)
@@ -198,6 +212,7 @@ class UserForm(object):
         self.set_apply_sensitivity()
 
     def on_username_entry_changed(self, widget):
+        """Change the username entry."""
         username = self.username_entry.get_text()
         valid_name = re.match(self.connection.username_regex(), username, re.UNICODE)
         free_name = not self.connection.user_exists(username)
@@ -212,12 +227,15 @@ class UserForm(object):
         self.builder.get_object('apply_button').set_sensitive(s)
 
     def on_dialog_delete_event(self, widget, event):
+        """Closes the dialog."""
         self.quit()
 
     def on_cancel_clicked(self, widget):
+        """Cancels the procedure."""
         self.quit()
 
     def on_apply_clicked(self, widget):
+        """Applies the changes and shows the corresponding messages."""
         realname = self.realname.get_text()
         username = self.username_entry.get_text()
         password = self.encrypt(self.password.get_text())
@@ -247,11 +265,13 @@ class UserForm(object):
         self.quit()
 
     def encrypt(self, pwd):
+        """Encrypts the password."""
         alphabet = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'
         salt = ''.join([random.choice(alphabet) for i in range(8)])
         return crypt.crypt(pwd, "$6$%s$" % salt)
 
     def quit(self):
+        """Closes the dialog and disconnects from the server."""
         self.dialog.destroy()
         if self.connection:
             self.connection.close()

@@ -11,6 +11,7 @@ gi.require_version('Gtk', '3.0')
 
 
 class AboutDialog:
+    """About dialog"""
     def __init__(self, main_window):
         self.builder = Gtk.Builder()
         self.builder.add_from_file("about_dialog.ui")

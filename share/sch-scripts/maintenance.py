@@ -43,6 +43,7 @@ class Package:
 
 
 class MaintenanceDialog(object):
+    """Retrieve main_dlg"""
     def __init__(self, parent):
         self.pkgs = []
         self.apt_client = aptdaemon.client.AptClient()

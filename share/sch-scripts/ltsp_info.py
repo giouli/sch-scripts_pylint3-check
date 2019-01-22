@@ -13,6 +13,7 @@ gi.require_version('Gtk', '3.0')
 
 
 class LtspInfo:
+    """Show the output of ltsp-info in a dialog."""
     def __init__(self, main_window):
         gladefile = "ltsp_info.ui"
         self.builder = Gtk.Builder()
@@ -24,9 +25,11 @@ class LtspInfo:
         self.fill()
 
     def close(self, widget):
+        """Closes the dialog."""
         self.dialog.destroy()
 
     def fill(self):
+        """ """
         success, response = common.run_command(['ltsp-info', '-v'])
         self.buffer.set_text(response)
         self.dialog.show()

@@ -87,6 +87,7 @@ def subnet_to_bits(subnet):
 ## Define Network Manager classes
 
 class Network_Manager_DBus(object):
+    """Return NetworkManager DBus"""
     def __init__(self, object_path, interface_name):
         """
         Return NetworkManager DBus
@@ -100,6 +101,7 @@ class Network_Manager_DBus(object):
 
 
 class Network_Manager(Network_Manager_DBus):
+    """For Network Manager"""
     def __init__(self):
         """
         Return NetworkManager interface from NetworkManager object
@@ -133,6 +135,7 @@ class Network_Manager(Network_Manager_DBus):
 
 
 class ActiveConnection(Network_Manager_DBus):
+    """For Active Connection"""
     def __init__(self, active_connection_name):
         """
         Return Active interface from ActiveConnection/X object
@@ -150,6 +153,7 @@ class ActiveConnection(Network_Manager_DBus):
 
 
 class Device(Network_Manager_DBus):
+    """For Device interface and characteristics"""
     def __init__(self, device_name):
         """
         Return Device interface from Devices/X object
@@ -171,6 +175,7 @@ class Device(Network_Manager_DBus):
 
 
 class Device_Wired(Network_Manager_DBus):
+    """For WiredDevice interface and characteristics"""
     def __init__(self, device_name):
         """
         Return WiredDevice interface from Devices/X object
@@ -194,6 +199,7 @@ class Device_Wired(Network_Manager_DBus):
 
 
 class IP4_Config(Network_Manager_DBus):
+    """For IP4_Config"""
     def __init__(self, ip4config_name):
         """
         Return IP4Config interface from IP4Config/X object
@@ -212,6 +218,7 @@ class IP4_Config(Network_Manager_DBus):
 
 
 class Settings(Network_Manager_DBus):
+    """For the Settings"""
     def __init__(self):
         """
         Return Settings interface from Settings object
@@ -228,6 +235,7 @@ class Settings(Network_Manager_DBus):
 
 
 class Connection_Settings(Network_Manager_DBus):
+    """For the Connection_Settings"""
     def __init__(self, connection_settings_name):
         """
         Return Connection interface from Setting/X object
@@ -287,6 +295,7 @@ class Info:
 ## Define Interface class
 
 class Interface:
+    """For the Interface"""
     def __init__(self, ip4config_path, device_path, interface, driver, device_type, mac, speed, carrier):
         """
         Contains all the information about a connection
@@ -417,6 +426,7 @@ class Page:
 ## Define Ip_Dialog class
 
 class Ip_Dialog:
+    """Initialize some values, connect to NetworkManager, hide some widget and show loading widget until dhcp request finished"""
     def __init__(self, parent):
         # Init some values
         self.parent = parent
@@ -453,7 +463,7 @@ class Ip_Dialog:
         GObject.idle_add(self.initialize_interfaces)
 
     def initialize_interfaces(self):
-        # Find devices
+        """Find devices, populate GUI, show all widgets and destroy loading widget, set the appropriate method to each device and if subnet has change alert message which define devices with different subnet."""
         self.settings = Settings()
         device_paths = self.nm.get_devices()
         if len(device_paths) == 0:
@@ -518,10 +528,7 @@ class Ip_Dialog:
             self.main_dlg_notebook.set_tab_reorderable(page.grid, True)
 
     def set_default(self):
-        # By default active is 4, no creation to all interfaces.
-        # We care about the first only, so we purpose one method
-        # only for the first interface. All other interfaces
-        # maintained to 4.
+        """By default active is 4, no creation to all interfaces. We care about the first only, so we purpose one method only for the first interface. All other interfaces maintained to 4."""
         carrier_interfaces = [interface for interface in self.interfaces if interface.carrier == 1]
         if len(carrier_interfaces) == 0:
             self.interfaces[0].page.method_entry.set_active(1)
@@ -648,9 +655,9 @@ class Ip_Dialog:
         else:
             self.main_dlg.set_response_sensitive(Gtk.ResponseType.OK, False)
 
-## Callbacks
 
     def on_method_entry_changed(self, method_entry, interface):
+        """Callbacks"""
         reset_ltsp_method = True
         for l_interface in self.interfaces:
             if l_interface.page.method_entry.get_active() == 3:
@@ -719,6 +726,7 @@ class Ip_Dialog:
         self.check_button()
 
     def on_ip_entry_changed(self, ip_entry, interface):
+        """Callbacks"""
         if interface.page.ip_entry.get_text() != 'Δεν βρέθηκε διεύθυνση':
             ip = interface.page.ip_entry.get_text()
             sub_ip = '.'.join(interface.ip.split('.')[0:3])+'.'
@@ -739,6 +747,7 @@ class Ip_Dialog:
             self.check_button()
 
     def on_ip_dialog_response(self, main_dlg, response):
+        """Callbacks"""
         if response != Gtk.ResponseType.OK:
             self.main_dlg.destroy()
             return

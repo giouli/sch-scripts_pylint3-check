@@ -14,6 +14,7 @@ import libuser
 FIELDS_MAP = {'Όνομα χρήστη': 'name', 'Τελευταία αλλαγή κωδικού': 'lstchg', 'Κύρια ομάδα': 'gid', 'Όνομα κύριας ομάδας' : 'primary_group', 'Κέλυφος': 'shell', 'UID': 'uid', 'Γραφείο': 'office', 'Κρυπτογραφημένος κωδικός': 'password', 'Κωδικός': 'plainpw', 'Λήξη': 'expire', 'Μέγιστη διάρκεια': 'max', 'Προειδοποίηση': 'warn', 'Κατάλογος': 'directory', 'Ελάχιστη διάρκεια': 'min', 'Άλλο': 'other', 'Ομάδες': 'groups', 'Τηλ. γραφείου': 'wphone', 'Ανενεργός': 'inact', 'Ονοματεπώνυμο': 'rname', 'Τηλ. οικίας': 'hphone'}
 
 class CSV:
+    """Parser for Comma-separated values."""
     def __init__(self):
         self.fields_map = FIELDS_MAP
 
@@ -90,6 +91,7 @@ class CSV:
 
 
 class passwd():
+    """Parser for password."""
     # passwd format: username:password (or x):UID:GID:gecos:home:shell
     # shadow format: username:password (or */!):last change:min:max:warn:inact:expire:reserved
     # group format: group_name:password (or x):GID:user_list
@@ -158,6 +160,7 @@ class passwd():
 
 
 class DHCP():
+    """Parser for Dynamic Host Configuration Protocol."""
     def __init__(self):
         self.dhcp_info = {}
 
