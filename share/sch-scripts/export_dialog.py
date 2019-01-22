@@ -10,7 +10,7 @@ import parsers
 import common
 
 class ExportDialog:
-    """Export users dialog."""
+    """Choose a filename and export the attributes of a user."""
     def __init__(self, system, users):
         self.csv = parsers.CSV()
         chooser = Gtk.FileChooserDialog(title="Επιλέξτε όνομα αρχείου για εξαγωγή",
