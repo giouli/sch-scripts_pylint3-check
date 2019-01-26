@@ -3,8 +3,8 @@
 # Copyright 2009-2018 the sch-scripts team, see AUTHORS.
 # SPDX-License-Identifier: GPL-3.0-or-later
 # pylint: disable= invalid-name, line-too-long
-"""
-Transliterate and transcript according to iso843:
+"""Transliterate and transcript according to iso843.
+
 http://www.sete.gr/files/Media/Egkyklioi/040707Latin-Greek.pdf
 """
 import re
@@ -49,7 +49,7 @@ _REG7 = '('+_RE_REG7.lower()+'|'+_RE_REG7.upper()+')('+_RE_REG8.lower()+'|'+_RE_
 
 
 def transcript(string, accents=True):
-    """Transcription of Greek characters into Latin characters"""
+    """Transcription of Greek characters into Latin characters."""
     string = re.sub(_REG1, replace_v, string)
     string = re.sub(_REG2, replace_f, string)
     string = re.sub(_REG3, replace_b, string)
@@ -77,7 +77,7 @@ def transcript(string, accents=True):
 
 
 def transliterate(string, accents=True):
-    """Transliteration of Greek characters into Latin characters"""
+    """Transliteration of Greek characters into Latin characters."""
     string = re.sub(_REG6, replace_ou, string)
 
     letters = []
@@ -185,5 +185,5 @@ def replace_ou(m):
 
 
 def strip_accents(string):
-    """Strippes from accent marks."""
+    """Strip from accent marks."""
     return ''.join((c for c in unicodedata.normalize('NFD', string) if unicodedata.category(c) != 'Mn'))

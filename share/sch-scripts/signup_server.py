@@ -3,9 +3,8 @@
 # Copyright 2009-2018 the sch-scripts team, see AUTHORS.
 # SPDX-License-Identifier: GPL-3.0-or-later
 # pylint: disable= invalid-name, line-too-long, unused-argument
-"""
-Signup server and form.
-"""
+"""Signup server and form."""
+
 import os
 import time
 import gi
@@ -23,7 +22,8 @@ gi.require_version('Gtk', '3.0')
 gtk3reactor.install()
 
 class Registrations(LineReceiver):
-    """Shows the requests made to the server."""
+    """Show the requests made to the server."""
+    
     def __init__(self, connections, requests, gui, system, groups, roles):
         self.connections = connections
         self.requests = requests
@@ -37,14 +37,22 @@ class Registrations(LineReceiver):
         self.id_hostname = None
 
     def connectionMade(self):
-        """Gets the port, the ip and informs that a new connection is made to the server."""
+        """New connection.
+        
+        Get the port, the ip and informs that a new connection 
+        is made to the server.
+        """
         self.ip = self.transport.getPeer().host
         self.port = self.transport.getPeer().port
         self.connections.append(self)
         print("New connection from %s:%s" % (self.ip, self.port))
 
     def connectionLost(self, reason):
-        """If the connection is lost it informs tha the connection with the current ip and port is closed."""
+        """Connection lost.
+        
+        If the connection is lost it inform that the connection with the 
+        current ip and port is closed.
+        """
         print("Connection with %s:%s was closed." % (self.ip, self.port))
         if self in self.connections:
             del self.connections[self.connections.index(self)]
@@ -171,7 +179,11 @@ class UI:
         self.window.show()
 
     def strtime(self, t):
-        """Returns a string representing the date, controlled by an explicit format string."""
+        """Date.
+        
+        Return a string representing the date, 
+        controlled by an explicit format string.
+        """
         return time.strftime("%d/%m/%Y %T", t)
 
     def user_autocomplete(self, user):
@@ -221,7 +233,7 @@ class UI:
         self.builder.get_object('apply_button').set_sensitive(True)
 
     def update_row(self, row, role=None):
-        """Updates a user's row."""
+        """Update a user's row."""
         request = row[0]
         if role is not None:
             request.role = role
@@ -238,7 +250,7 @@ class UI:
         row[6] = ','.join([g for g in request.user.groups if g and g not in role_groups])
 
     def get_selected_rows(self):
-        """Returns the selected rows."""
+        """Return the selected rows."""
         paths = self.selection.get_selected_rows()[1]
         selected = [self.requests_list[path] for path in paths]
         return selected
@@ -256,7 +268,7 @@ class UI:
             self.review_tb.set_sensitive(False)
 
     def on_reject_tb_clicked(self, widget):
-        """Rejects and deletes the selected user applies."""
+        """Reject and deletes the selected user applies."""
         selected = self.get_selected_rows()
         msg = "Θέλετε σίγουρα να διαγραφούν τα παρακάτω αιτήματα από τη λίστα;\n\n"
         msg += ', '.join([row[4] for row in selected])
@@ -293,7 +305,7 @@ class UI:
                 self.builder.get_object('apply_button').set_sensitive(False)
 
     def on_close_button_clicked(self, widget):
-        """Closes the user's requests dialog."""
+        """Close the user's requests dialog."""
         if len(self.requests_list):
             r = dialogs.AskDialog("Θέλετε σίγουρα να τερματίσετε την εφαρμογή αιτήσεων; Όλες οι εκκρεμείς αιτήσεις θα χαθούν.", "Επιβεβαίωση").showup()
             if r == Gtk.ResponseType.YES:
@@ -302,7 +314,7 @@ class UI:
             reactor.stop()
 
     def on_window_delete_event(self, widget, event):
-        """Stops the procedure."""
+        """Stop the procedure."""
         reactor.stop()
 
 
@@ -348,9 +360,11 @@ class SettingsDialog:
         self.set_header_checkbutton(self.check_all_groups, self.groups_list)
 
     def get_selected_roles(self):
+        """Return selected roles."""
         return [r[1] for r in self.roles_list if r[0]]
 
     def get_selected_groups(self):
+        """Return selected groups."""
         return [r[1] for r in self.groups_list if r[0]]
 
     def set_header_checkbutton(self, button, store):

@@ -3,9 +3,8 @@
 # Copyright 2009-2018 the sch-scripts team, see AUTHORS.
 # SPDX-License-Identifier: GPL-3.0-or-later
 # pylint: disable= invalid-name, line-too-long, unused-argument, no-self-use, redefined-outer-name
-"""
-Shared folders.
-"""
+"""Shared folders."""
+
 import os
 import shlex
 import stat
@@ -19,7 +18,8 @@ import libuser
 # chrgrp's the user dirs to "teachers".
 
 class SharedFolders():
-    """Controls the usage of shared folders."""
+    """Control the usage of shared folders."""
+    
     def __init__(self, system=None):
         """Initialization."""
         if system is None:
@@ -36,7 +36,7 @@ class SharedFolders():
         self.save_config()
 
     def ensure_dir(self, dir, mode, uid=-1, gid=-1):
-        """Ensures that dir exists with the specified mode, uid and gid."""
+        """Ensure that dir exists with the specified mode, uid and gid."""
         if not os.path.isdir(dir):
             os.mkdir(dir)
         s = os.stat(dir)
@@ -116,7 +116,9 @@ class SharedFolders():
 
     def rename(self, src, dst):
         """Rename folder src to group dst.
-           Call groupmod to rename the group before calling this function."""
+        
+        Call groupmod to rename the group before calling this function.
+        """
         if dst not in self.system.groups:
             sys.stderr.write("%s is not a valid group.\n" % dst)
             return
@@ -190,6 +192,7 @@ SHARE_GROUPS="%s"
         return list(set(self.system.groups) & set(groups))
 
 def usage():
+    """Print usage info about shared-folders."""
     return """Χρήση: shared-folders [ΕΝΤΟΛΕΣ]
 
 Διαχειρίζεται κοινόχρηστους φακέλους για συγκεκριμένες ομάδες χρηστών,

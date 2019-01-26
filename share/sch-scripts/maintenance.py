@@ -2,9 +2,8 @@
 # Copyright 2009-2018 the sch-scripts team, see AUTHORS.
 # SPDX-License-Identifier: GPL-3.0-or-later
 # pylint: disable= unused-wildcard-import, line-too-long, wildcard-import, c-extension-no-member
-"""
-Maintenance form.
-"""
+"""Maintenance form."""
+
 import gc
 import mimetypes
 import os
@@ -43,7 +42,8 @@ class Package:
 
 
 class MaintenanceDialog(object):
-    """Retrieve main_dlg"""
+    """Retrieve main_dlg."""
+    
     def __init__(self, parent):
         self.pkgs = []
         self.apt_client = aptdaemon.client.AptClient()
@@ -61,7 +61,7 @@ class MaintenanceDialog(object):
         self.main_dlg.set_default_response(Gtk.ResponseType.CANCEL)
 
     def populate_treeview(self):
-        """AptDeamon Callbacks"""
+        """AptDeamon Callbacks.""" 
         tview_pkgs = []
         for ppkg in self.pkgs:
             if ppkg.name.startswith('linux-image'):
@@ -119,7 +119,7 @@ class MaintenanceDialog(object):
 
 
     def on_main_dlg_pkg_toggle_toggled(self, widget, path):
-        """Callbacks"""
+        """Callbacks."""
         self.main_dlg_tstore[path][5] = not self.main_dlg_tstore[path][5]
         if not self.main_dlg_tstore[path][5]:
             self.pkgs.remove(self.main_dlg_tstore[path][0])
@@ -215,7 +215,7 @@ class Purge(MaintenanceDialog):
         gc.collect()
 
     def on_main_dlg_response(self, main_dlg, response):
-        """Callbacks"""
+        """Callbacks."""
         if response != Gtk.ResponseType.OK:
             self.clear_cache()
             self.main_dlg.destroy()
@@ -279,7 +279,7 @@ class Clean(MaintenanceDialog):
 
 
     def on_main_dlg_response(self, main_dlg, response):
-        """Callbacks"""
+        """Callbacks."""
         if response != Gtk.ResponseType.OK:
             self.main_dlg.destroy()
             return
@@ -339,7 +339,7 @@ class AutoRemove(MaintenanceDialog):
 
 
     def on_main_dlg_response(self, main_dlg, response):
-        """Callbacks"""
+        """Callbacks."""
         if response != Gtk.ResponseType.OK:
             self.clear_cache()
             self.main_dlg.destroy()

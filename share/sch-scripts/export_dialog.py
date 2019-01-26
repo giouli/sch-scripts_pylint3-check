@@ -1,9 +1,8 @@
 # This file is part of sch-scripts, https://launchpad.net/sch-scripts
 # Copyright 2009-2018 the sch-scripts team, see AUTHORS.
 # SPDX-License-Identifier: GPL-3.0-or-later
-"""
-Export users dialog.
-"""
+"""Export users dialog."""
+
 import os
 from gi.repository import Gtk
 import parsers
@@ -11,6 +10,7 @@ import common
 
 class ExportDialog:
     """Choose a filename and export the attributes of a user."""
+    
     def __init__(self, system, users):
         self.csv = parsers.CSV()
         chooser = Gtk.FileChooserDialog(title="Επιλέξτε όνομα αρχείου για εξαγωγή",

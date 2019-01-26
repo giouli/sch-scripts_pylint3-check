@@ -3,9 +3,8 @@
 # Copyright 2009-2018 the sch-scripts team, see AUTHORS.
 # SPDX-License-Identifier: GPL-3.0-or-later
 # pylint: disable= invalid-name, line-too-long, unused-argument, no-self-use
-"""
-Sch-scripts.
-"""
+"""Sch-scripts."""
+
 import getpass
 import glob
 import locale
@@ -132,14 +131,18 @@ class Gui:
 ## Groups and users treeviews
 
     def populate_treeviews(self):
-        """Fill the users and groups treeviews from the system"""
+        """Fill the users and groups treeviews from the system."""
         for user in self.system.users.values():
             self.users_model.append([user, user.uid, user.name, user.primary_group, user.rname, user.office, user.wphone, user.hphone, user.other, user.directory, user.shell, user.lstchg, user.min, user.max, user.warn, user.inact, user.expire])
         for group in self.system.groups.values():
             self.groups_model.append([group, group.gid, group.name])
 
     def repopulate_treeviews(self):
-        """Preserves the selected groups and users, clears and refill the treeviews and reselects the previously selected groups and users, if possible"""
+        """Repopulate treeviews.
+        
+        Preserve the selected groups and users, clear and refill the treeviews
+        and reselect the previously selected groups and users, if possible.
+        """
         groups_selection = self.groups_tree.get_selection()
         users_selection = self.users_tree.get_selection()
         selected_groups = [i.name for i in self.get_selected_groups()]
@@ -161,7 +164,7 @@ class Gui:
                 users_selection.select_iter(users_iters[uname])
 
     def set_user_visibility(self, model, rowiter, options):
-        """Sets if a user is visible."""
+        """Set if a user is visible."""
         user = model[rowiter][0]
         selected = self.get_selected_groups()
         # FIXME: The list comprehension here costs
@@ -169,11 +172,12 @@ class Gui:
                 or user in [u for g in selected for u in g.members.values()]
 
     def set_group_visibility(self, model, rowiter, options):
-        """Sets if a group is private."""
+        """Set if a group is private."""
         group = model[rowiter][0]
         return (self.show_private_groups or not group.is_private()) and (self.show_system_groups or group.is_user_group())
 
     def on_groups_selection_changed(self, selection):
+        """Edit selected group."""
         self.users_filter.refilter()
         mi_edit_group = self.builder.get_object('mi_edit_group')
         mi_delete_group = self.builder.get_object('mi_delete_group')
@@ -192,6 +196,7 @@ class Gui:
             mi_delete_group.set_sensitive(True)
 
     def on_users_selection_changed(self, selection):
+        """Edit selected user."""
         mi_edit_user = self.builder.get_object('mi_edit_user')
         mi_delete_user = self.builder.get_object('mi_delete_user')
         mi_remove_user = self.builder.get_object('mi_remove_user')
@@ -277,6 +282,7 @@ class Gui:
         create_users.NewUsersDialog(self.system, self.sf)
 
     def on_mi_import_passwd_activate(self, widget):
+        """Import password file dialog."""
         chooser = Gtk.FileChooserDialog(title="Επιλέξτε το αρχείο passwd προς εισαγωγή",
                                         action=Gtk.FileChooserAction.OPEN,
                                         buttons=(Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL,
@@ -307,6 +313,10 @@ class Gui:
             chooser.destroy()
 
     def on_mi_import_csv_activate(self, widget):
+        """Import csv file.
+        
+        If the file is empty return false.
+        """
         chooser = Gtk.FileChooserDialog(title="Επιλέξτε το αρχείο CSV προς εισαγωγή",
                                         action=Gtk.FileChooserAction.OPEN,
                                         buttons=(Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL,
@@ -330,6 +340,7 @@ class Gui:
             chooser.destroy()
 
     def on_mi_export_csv_activate(self, widget):
+        """Export csv file."""
         users = self.get_selected_users()
         if len(users) == 0:
             if self.show_system_groups:
@@ -344,6 +355,12 @@ class Gui:
         ip_dialog.Ip_Dialog(self.main_window)
 
     def on_mi_ltsp_update_image_activate(self, widget):
+        """Ltsp-update-image. 
+        
+        Generates a compressed squashfs image from an LTSP chroot 
+        and exports it. Temporarily remove user accounts, logs, 
+        caches etc from the chroot before exporting the image.
+        """
         message = "Θέλετε σίγουρα να προχωρήσετε στην δημοσίευση του εικονικού δίσκου;"
         second_message = "Ανάλογα με την ταχύτητα του επεξεργαστή σας και το μέγεθος του δίσκου σας, αυτή η διαδικασία μπορεί να χρειαστεί γύρω στα 10 λεπτά. Στη συνέχεια (επαν)εκκινήστε τους σταθμούς εργασίας."
         dlg = dialogs.AskDialog(message)
@@ -353,6 +370,7 @@ class Gui:
             subprocess.Popen(['./run-in-terminal', 'ltsp-update-image', '--cleanup', '/'])
 
     def on_mi_ltsp_revert_image_activate(self, widget):
+        """Swap chroot.img with chroot.img.old and update kernels."""
         message = "Θέλετε σίγουρα να προχωρήσετε στην επαναφορά του εικονικού δίσκου σε προηγούμενη έκδοση;"
         dlg = dialogs.AskDialog(message)
         response = dlg.showup()
@@ -360,17 +378,21 @@ class Gui:
             subprocess.Popen(['./run-in-terminal', 'ltsp-update-image', '--revert', '/'])
 
     def on_mi_edit_lts_conf_activate(self, widget):
+        """Edit file lts.conf."""
         for file in glob.glob('/var/lib/tftpboot/ltsp/*/lts.conf'):
             self.edit_file(file)
 
     def on_mi_edit_pxelinux_cfg_activate(self, widget):
+        """Edit file pxelinux.cfg."""
         for file in glob.glob('/var/lib/tftpboot/ltsp/*/pxelinux.cfg/default'):
             self.edit_file(file)
 
     def on_mi_edit_shared_folders_activate(self, widget):
+        """Edit shared-folders."""
         self.edit_file('/etc/default/shared-folders')
 
     def on_mi_edit_dnsmasq_conf_activate(self, widget):
+        """Edit ltsp-server-dnsmasq.conf."""
         self.edit_file('/etc/dnsmasq.d/ltsp-server-dnsmasq.conf')
 
     def on_mi_purge_kernels_activate(self, widget):
@@ -402,13 +424,15 @@ class Gui:
 ## Users menu
 
     def on_mi_new_user_activate(self, widget):
+        """New user dialog activate."""
         user_form.NewUserDialog(self.system)
 
     def on_mi_edit_user_activate(self, widget):
+        """Edit user dialog activate."""
         user_form.EditUserDialog(self.system, self.get_selected_users()[0])
 
     def on_mi_delete_user_activate(self, widget):
-        """Deletes users."""
+        """Delete users dialog activate."""
         users = self.get_selected_users()
         users_n = len(users)
         if users_n == 1:
@@ -435,7 +459,7 @@ class Gui:
                 self.system.delete_user(user, rm_homes)
 
     def on_mi_remove_user_activate(self, widget):
-        """Removes users from groups."""
+        """Remove users from groups dialog."""
         users = self.get_selected_users()
         groups = self.get_selected_groups()
         users_n = len(users)
@@ -454,13 +478,15 @@ class Gui:
 ## Groups menu
 
     def on_mi_new_group_activate(self, widget):
+        """New group dialog activate."""
         group_form.NewGroupDialog(self.system, self.sf)
 
     def on_mi_edit_group_activate(self, widget):
+        """Edit group dialog activate."""
         group_form.EditGroupDialog(self.system, self.sf, self.get_selected_groups()[0])
 
     def on_mi_delete_group_activate(self, widget):
-        """Deletes groups."""
+        """Delete groups dialog activate."""
         groups = self.get_selected_groups()
         groups_n = len(groups)
         if groups_n == 1:
@@ -525,6 +551,7 @@ class Gui:
 # To export a man page:
 # help2man -L el -s 8 -o sch-scripts.8 -N ./sch-scripts && man ./sch-scripts.8
 def usage():
+    """Print sch-scripts usage info."""
     print("""Χρήση: sch-scripts [ΕΠΙΛΟΓΕΣ]
 
 Παρέχει ένα σύνολο εξαρτήσεων για την αυτοματοποίηση της εγκατάστασης
@@ -544,6 +571,7 @@ def usage():
 
 
 def print_version():
+    """Print sch-scripts version and copyright info."""
     print("""sch-scripts %s
 Copyright (C) 2009-2018 Άλκης Γεωργόπουλος <alkisg@gmail.com>, Φώτης Τσάμης <ftsamis@gmail.com>.
 Άδεια χρήσης GPLv3+: GNU GPL έκδοσης 3 ή νεότερη <http://gnu.org/licenses/gpl.html>.

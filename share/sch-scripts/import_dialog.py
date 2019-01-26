@@ -3,9 +3,7 @@
 # Copyright 2009-2018 the sch-scripts team, see AUTHORS.
 # SPDX-License-Identifier: GPL-3.0-or-later
 # pylint: disable= invalid-name, line-too-long, unused-argument
-"""
-Import users dialog.
-"""
+"""Import users dialog."""
 
 import os
 import re
@@ -24,6 +22,7 @@ gi.require_version('Gdk', '3.0')
 # NOTE: User.plainpw overrides the User.password if it's set
 class ImportDialog:
     """Import users dialog."""
+    
     def __init__(self, new_set):
         self.set = new_set
         # Remove the system users from the set
@@ -55,7 +54,9 @@ class ImportDialog:
         self.fill_tree(self.set)
 
     def tree_view(self):
-        """Make the liststore, the first 20 cells refers to users values,
+        """Make the liststore.
+        
+        The first 20 cells refers to users values,
         the second 20 cells refers to color foreach of first 20 cells, the
         third 20 cells refers to conflicts and the last cell refers to first
         column image.
@@ -110,7 +111,7 @@ class ImportDialog:
         self.check_identical_users()
 
     def set_row_from_object(self, row):
-        """Fills in the row with given data."""
+        """Fill in the row with given data."""
         u = self.set.users[row[0]]
         data = [u.name, u.uid, u.gid, u.primary_group, u.rname, u.office,
                 u.wphone, u.hphone, u.other, u.directory, u.shell,
@@ -120,8 +121,11 @@ class ImportDialog:
             row[i] = data[i]
 
     def check_identical_users(self, other=libuser.system):
-        """Check if there are users in the list that are identical to
-        a user in the system and ask for removal."""
+        """Check identical users.
+        
+        If there are users in the list that are identical to 
+        a user in the system and ask for removal.
+        """
         attrs = ['name', 'uid', 'gid', 'primary_group', 'rname', 'office',
                  'wphone', 'hphone', 'other', 'directory', 'shell', 'min',
                  'max', 'warn', 'inact', 'expire', 'password']
@@ -155,7 +159,7 @@ class ImportDialog:
 
 
     def auto_complete(self, user): # TODO: Maybe move me to libuser?
-        """Fills the missing information of user, where possible."""
+        """Fill the missing information of user, where possible."""
         #TODO: Complete the username from real name, this can't be done now
         # since we are using a dict to store users with username as a key
         #  - Needs design change -
@@ -208,7 +212,7 @@ class ImportDialog:
             user.plainpw = ''
 
     def set_row_props(self, row, col, prob, color=None, state=None):
-        """Sets how the rows will appear."""
+        """Set how the rows will appear."""
         row[col+40] = prob
         if color:
             row[col+20] = color
@@ -234,9 +238,10 @@ class ImportDialog:
                 row[60] = self.states['error']
 
     def detect_conflicts(self):
-        """Detects and marks the conflicts in the treeview based on the user
+        """Detect conflicts.
+        
+        Detects and marks the conflicts in the treeview based on the user
         object.
-
         Here we don't check for conflicts with secondary groups as they are
         easily resolvable.
         """
@@ -275,7 +280,7 @@ class ImportDialog:
                                      #and (for later): executed only once, since
                                      #the edit dialog won't allow illegal input
             def invalidate(n):
-                """Checks the validity of the attributes of a user and if there are any conflicts."""
+                """Check the validity of the attributes of a user and if there are any conflicts."""
                 self.set_row_props(row, n, 'char')
             if not libuser.system.name_is_valid(u.name):
                 invalidate(0)
@@ -380,7 +385,7 @@ class ImportDialog:
 
         log = []
         def log_msg(item, user, a, b):
-            """Shows a message with the change applied on a user."""
+            """Show a message with the change applied on a user."""
             txt = "Αλλάχθηκε το %s του χρήστη '%s' από %s σε %s." % (item, user, a, b)
             log.append(txt)
             return txt
@@ -466,13 +471,13 @@ class ImportDialog:
             dialogs.WarningDialog('Δεν ήταν δυνατή η αυτόματη επίλυση κάποιου προβλήματος').showup()
 
     def edit(self, widget, user):
-        """Opens a dialog to edit user."""
+        """Open a dialog to edit user."""
         form = user_form.ReviewUserDialog(libuser.system, user, role='')
         form.dialog.set_transient_for(self.dialog)
         form.dialog.set_modal(True)
 
     def apply(self, widget):
-        """Applies the changes in order to create a new group and add users in it."""
+        """Apply the changes in order to create a new group and add users in it."""
         text = "Να δημιουργηθούν οι νέοι χρήστες;"
         response = dialogs.AskDialog(text, "Confirm").showup()
         if response == Gtk.ResponseType.YES:
@@ -515,15 +520,15 @@ class ImportDialog:
 
 
     def cancel(self, widget):
-        """Cancles the procedure and closes the dialog."""
+        """Cancle the procedure and closes the dialog."""
         self.dialog.destroy()
 
     def exit(self, widget, event):
-        """Exits the procedure and closes the dialog."""
+        """Exit the procedure and closes the dialog."""
         self.dialog.destroy()
 
     def tooltip(self, widget, x, y, keyboard_tip, tooltip):
-        """Shows the error messages in each case in a form of a tooltip."""
+        """Show the error messages in each case in a form of a tooltip."""
         if not widget.get_tooltip_context(x, y, keyboard_tip):
             return False
         else:
@@ -583,7 +588,7 @@ class ImportDialog:
         self.detect_conflicts()
 
     def edited_text(self, cell, path, new_text, model, col):
-        """Sets the attributes of a user."""
+        """Set the attributes of a user."""
         username = model[path][0]
         u = self.set.users[username]
         int_columns = [1, 2, 12, 13, 14, 15, 16, 17]
@@ -616,7 +621,7 @@ class ImportDialog:
         self.detect_conflicts()
 
     def delete(self, treeview, event):
-        """Deletes the selected rows."""
+        """Delete the selected rows."""
         if Gdk.keyval_name(event.keyval) == "Delete":
             selection = treeview.get_selection()
             model, paths = selection.get_selected_rows()
@@ -626,7 +631,7 @@ class ImportDialog:
             self.detect_conflicts()
 
     def remove_row(self, iter_):
-        """Removes a row with a user."""
+        """Remove a row with a user."""
         username = self.list[iter_][0]
         self.list.remove(iter_)
         self.set.remove_user(self.set.users[username])

@@ -2,9 +2,8 @@
 # Copyright 2009-2018 the sch-scripts team, see AUTHORS.
 # SPDX-License-Identifier: GPL-3.0-or-later
 # pylint: disable= invalid-name, line-too-long
-"""
-Parsers.
-"""
+"""Parsers."""
+
 import csv
 import os
 import configparser
@@ -15,6 +14,7 @@ FIELDS_MAP = {'Όνομα χρήστη': 'name', 'Τελευταία αλλαγ�
 
 class CSV:
     """Parser for Comma-separated values."""
+    
     def __init__(self):
         self.fields_map = FIELDS_MAP
 
@@ -92,6 +92,7 @@ class CSV:
 
 class passwd():
     """Parser for password."""
+    
     # passwd format: username:password (or x):UID:GID:gecos:home:shell
     # shadow format: username:password (or */!):last change:min:max:warn:inact:expire:reserved
     # group format: group_name:password (or x):GID:user_list
@@ -161,6 +162,7 @@ class passwd():
 
 class DHCP():
     """Parser for Dynamic Host Configuration Protocol."""
+    
     def __init__(self):
         self.dhcp_info = {}
 

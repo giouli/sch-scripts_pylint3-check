@@ -1,10 +1,9 @@
 # This file is part of sch-scripts, https://launchpad.net/sch-scripts
 # Copyright 2009-2018 the sch-scripts team, see AUTHORS.
 # SPDX-License-Identifier: GPL-3.0-or-later
-# pylint: disable= invalid-name, line-too-long
-"""
-Configuration handling.
-"""
+# pylint: disable= invalid-name
+"""Configuration handling."""
+
 import configparser
 import os
 
@@ -19,7 +18,8 @@ GUI_DEFAULTS = {'show_system_groups' : False,
                }
 ROLES_DEFAULTS = {
     'καθηγητής' : 'adm,cdrom,epoptes,fuse,plugdev,sambashare,vboxusers,$$teachers',
-    'διαχειριστής' : 'adm,cdrom,dip,epoptes,fuse,lpadmin,plugdev,sambashare,sudo,vboxusers,$$teachers',
+    'διαχειριστής' : 'adm,cdrom,dip,epoptes,fuse,lpadmin,plugdev,'
+                     'sambashare,sudo,vboxusers,$$teachers',
     'μαθητής' : 'fuse,sambashare,vboxusers',
     'προσωπικό' : 'adm,cdrom,fuse,plugdev,sambashare,vboxusers'
 }
@@ -27,13 +27,13 @@ ROLES_DEFAULTS = {
 PARSER = configparser.ConfigParser()
 
 def save():
-    """Saves the changes in settings."""
+    """Save the changes in settings."""
     f = open(SETTINGS_F, 'w')
     PARSER.write(f)
     f.close()
 
 def setdefaults(overwrite=False):
-    """Sets the default attributes."""
+    """Set the default attributes."""
     if not PARSER.has_section('GUI'):
         PARSER.add_section('GUI')
 

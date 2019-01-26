@@ -1,10 +1,9 @@
 # This file is part of sch-scripts, https://launchpad.net/sch-scripts
 # Copyright 2009-2018 the sch-scripts team, see AUTHORS.
 # SPDX-License-Identifier: GPL-3.0-or-later
-# pylint: disable= invalid-name, line-too-long, unused-argument
-"""
-Create users dialog.
-"""
+# pylint: disable= invalid-name, unused-argument
+"""Create users dialog."""
+
 import datetime
 import gi
 from gi.repository import Gtk
@@ -16,6 +15,7 @@ gi.require_version('Gtk', '3.0')
 
 class NewUsersDialog:
     """Create users dialog."""
+    
     def __init__(self, system, sf):
         self.system = system
         self.sf = sf
@@ -43,7 +43,7 @@ class NewUsersDialog:
         self.dialog.show()
 
     def on_template_changed(self, widget=None):
-        """Checks the validity of characters in the classes entry and checks the validity of characters in the username entry."""
+        """Check the validity of characters in the classes entry and in the username entry."""
         classes_str = self.glade.get_object('classes_entry').get_text().strip()
         self.classes = classes_str.split()
         self.computers = self.glade.get_object('computers_number_spin').\
@@ -107,7 +107,11 @@ class NewUsersDialog:
             'Θα δημιουργηθούν οι παρακάτω %d λογαριασμοί' %users_number)
 
     def on_button_apply_clicked(self, widget):
-        """Creates groups for all the listed classes, adds teachers to group, creates shared folders and finally, creates the users"""
+        """On click apply changes.
+        
+        Create groups for all the listed classes, adds teachers to group,
+        create shared folders and finally, create the users.
+        """
         self.computers = self.glade.get_object('computers_number_spin').\
             get_value_as_int()
         self.groups_tmpl = self.glade.get_object('groups_template_entry').\
@@ -208,15 +212,15 @@ class NewUsersDialog:
         button_close.set_sensitive(True)
 
     def on_progress_button_close_clicked(self, widget):
-        """Closes the dialog before the process is completed."""
+        """Close the dialog before the process is completed."""
         self.dialog.destroy()
 
     def on_button_cancel_clicked(self, widget):
-        """Cancels the process."""
+        """Cancel the process."""
         self.dialog.destroy()
 
     def on_button_help_clicked(self, widget):
-        """Shows a help dialog."""
+        """Show a help dialog."""
         dialog = self.glade.get_object('help_dialog')
         dialog.run()
         dialog.hide()

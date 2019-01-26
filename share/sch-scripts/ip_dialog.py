@@ -2,9 +2,8 @@
 # Copyright 2009-2018 the sch-scripts team, see AUTHORS.
 # SPDX-License-Identifier: GPL-3.0-or-later
 # pylint: disable=line-too-long, invalid-name, too-many-arguments, too-many-branches, too-many-statements, too-few-public-methods
-"""
-Connection information and creation dialog.
-"""
+"""Connection information and creation dialog."""
+
 import re
 import uuid
 import struct, socket
@@ -50,23 +49,17 @@ TITLE_SUCCESS = 'Επιτυχία'
 ## Define global functions
 
 def string_to_int32(address):
-    """
-    Convert ip to int32
-    """
+    """Convert ip to int32."""
     return struct.unpack("I", socket.inet_aton(address))[0]
 
 
 def int32_to_string(num):
-    """
-    Convert int32 to ip
-    """
+    """Convert int32 to ip."""
     return socket.inet_ntoa(struct.pack("I", num))
 
 
 def bits_to_subnet(bits):
-    """
-    Convert bits to subnet mask
-    """
+    """Convert bits to subnet mask."""
     try:
         bits = int(bits)
         if bits <= 0 or bits > 32:
@@ -78,20 +71,17 @@ def bits_to_subnet(bits):
 
 
 def subnet_to_bits(subnet):
-    """
-    Convert mask to bits
-    """
+    """Convert mask to bits."""
     return sum([bin(int(x)).count('1') for x in subnet.split('.')])
 
 
 ## Define Network Manager classes
 
 class Network_Manager_DBus(object):
-    """Return NetworkManager DBus"""
+    """Return NetworkManager DBus."""
+    
     def __init__(self, object_path, interface_name):
-        """
-        Return NetworkManager DBus
-        """
+        """Return NetworkManager DBus."""
         self.proxy = BUS.get_object(DBUS_SERVICE_NAME, object_path)
         self.interface = dbus.Interface(self.proxy, interface_name)
         try:
@@ -101,31 +91,24 @@ class Network_Manager_DBus(object):
 
 
 class Network_Manager(Network_Manager_DBus):
-    """For Network Manager"""
+    """For Network Manager."""
+    
     def __init__(self):
-        """
-        Return NetworkManager interface from NetworkManager object
-        """
+        """Return NetworkManager interface from NetworkManager object."""
         self.object_path = '/org/freedesktop/NetworkManager'
         self.interface_name = 'org.freedesktop.NetworkManager'
         super(Network_Manager, self).__init__(self.object_path, self.interface_name)
 
     def get_devices(self):
-        """
-        Return Device object
-        """
+        """Return Device object."""
         return self.interface.GetDevices()
 
     def get_active_connections(self):
-        """
-        Return current active connections
-        """
+        """Return current active connections."""
         return self.properties['ActiveConnections']
 
     def get_active_connections_settings_path(self):
-        """
-        Return Settings path of the active connections
-        """
+        """Return Settings path of the active connections."""
         active_connections_settings_path = []
         for active_conenction in self.get_active_connections():
             activeconnection = ActiveConnection(active_conenction)
@@ -135,37 +118,31 @@ class Network_Manager(Network_Manager_DBus):
 
 
 class ActiveConnection(Network_Manager_DBus):
-    """For Active Connection"""
+    """For Active Connection."""
+    
     def __init__(self, active_connection_name):
-        """
-        Return Active interface from ActiveConnection/X object
-        """
+        """Return Active interface from ActiveConnection/X object."""
         self.object_path = active_connection_name
         self.interface_name = 'org.freedesktop.NetworkManager.Connection.Active'
         super(ActiveConnection, self).__init__(self.object_path, self.interface_name)
 
     def get_properties(self):
-        """
-        Return Active characteristics objects
-        """
+        """Return Active characteristics objects."""
         connection_settings = self.properties['Connection']
         return connection_settings
 
 
 class Device(Network_Manager_DBus):
-    """For Device interface and characteristics"""
+    """For Device interface and characteristics."""
+    
     def __init__(self, device_name):
-        """
-        Return Device interface from Devices/X object
-        """
+        """Return Device interface from Devices/X object."""
         self.object_path = device_name
         self.interface_name = 'org.freedesktop.NetworkManager.Device'
         super(Device, self).__init__(self.object_path, self.interface_name)
 
     def get_properties(self):
-        """
-        Return Device characteristics objects
-        """
+        """Return Device characteristics objects."""
         ip4config_path = self.properties['Ip4Config']
         interface = self.properties['Interface']
         driver = self.properties['Driver']
@@ -175,19 +152,16 @@ class Device(Network_Manager_DBus):
 
 
 class Device_Wired(Network_Manager_DBus):
-    """For WiredDevice interface and characteristics"""
+    """For WiredDevice interface and characteristics."""
+    
     def __init__(self, device_name):
-        """
-        Return WiredDevice interface from Devices/X object
-        """
+        """Return WiredDevice interface from Devices/X object."""
         self.object_path = device_name
         self.interface_name = 'org.freedesktop.NetworkManager.Device.Wired'
         super(Device_Wired, self).__init__(self.object_path, self.interface_name)
 
     def get_properties(self):
-        """
-        Return WiredDevice characteristics objectss
-        """
+        """Return WiredDevice characteristics objectss."""
         mac = self.properties['HwAddress']
         speed = self.properties['Speed']
         if speed == 0:
@@ -199,55 +173,46 @@ class Device_Wired(Network_Manager_DBus):
 
 
 class IP4_Config(Network_Manager_DBus):
-    """For IP4_Config"""
+    """For IP4_Config."""
+    
     def __init__(self, ip4config_name):
-        """
-        Return IP4Config interface from IP4Config/X object
-        """
+        """Return IP4Config interface from IP4Config/X object."""
         self.object_path = ip4config_name
         self.interface_name = 'org.freedesktop.NetworkManager.IP4Config'
         super(IP4_Config, self).__init__(self.object_path, self.interface_name)
 
     def get_properties(self):
-        """
-        Return ip, subnet, route and dns values
-        """
+        """Return ip, subnet, route and dns values."""
         ip, mask, route = self.properties['Addresses'][0]
         dnss = self.properties['Nameservers']
         return ip, mask, route, dnss
 
 
 class Settings(Network_Manager_DBus):
-    """For the Settings"""
+    """For the Settings."""
+    
     def __init__(self):
-        """
-        Return Settings interface from Settings object
-        """
+        """Return Settings interface from Settings object."""
         self.object_path = '/org/freedesktop/NetworkManager/Settings'
         self.interface_name = 'org.freedesktop.NetworkManager.Settings'
         super(Settings, self).__init__(self.object_path, self.interface_name)
 
     def get_list_connections(self):
-        """
-        Return all connection settings (Setting object)
-        """
+        """Return all connection settings (Setting object)."""
         return self.interface.ListConnections()
 
 
 class Connection_Settings(Network_Manager_DBus):
-    """For the Connection_Settings"""
+    """For the Connection_Settings."""
+    
     def __init__(self, connection_settings_name):
-        """
-        Return Connection interface from Setting/X object
-        """
+        """Return Connection interface from Setting/X object."""
         self.object_path = connection_settings_name
         self.interface_name = 'org.freedesktop.NetworkManager.Settings.Connection'
         super(Connection_Settings, self).__init__(self.object_path, self.interface_name)
 
     def get_settings(self):
-        """
-        Return connection settings, eg: ipv4, dns, etc
-        """
+        """Return connection settings, eg: ipv4, dns, etc."""
         return self.interface.GetSettings()
 
 
@@ -265,9 +230,7 @@ class Info:
         self.subnet = None
 
     def set_values(self, dict=None):
-        """
-        Set info values
-        """
+        """Set info values."""
         if dict:
             self.ip = dict['ip']
             self.mask = dict['mask']
@@ -276,18 +239,14 @@ class Info:
             self._calculate_subnet()
 
     def get_values(self, dnss=False):
-        """
-        Return info as dict
-        """
+        """Return info as dict."""
         if dnss:
             return {'ip': self.ip, 'mask': self.mask, 'route': self.route, 'dnss': self.dnss}
         else:
             return {'ip': self.ip, 'mask': self.mask, 'route': self.route}
 
     def _calculate_subnet(self):
-        """
-        Calculate subnet
-        """
+        """Calculate subnet."""
         if self.ip:
             self.subnet = '.'.join(self.ip.split('.')[:3]) + '.0'
 
@@ -295,11 +254,10 @@ class Info:
 ## Define Interface class
 
 class Interface:
-    """For the Interface"""
+    """For the Interface."""
+    
     def __init__(self, ip4config_path, device_path, interface, driver, device_type, mac, speed, carrier):
-        """
-        Contains all the information about a connection
-        """
+        """Contain all the information about a connection."""
         self.ip4config_path, self.device_path, self.interface, self.driver, self.device_type, self.mac,\
         self.speed, self.carrier = ip4config_path, device_path, interface, driver, device_type, mac, speed, carrier
 
@@ -314,7 +272,7 @@ class Interface:
         self._set_ips()
 
     def __getattr__(self, item):
-        # Return first dhcp values and then existing values
+        """Return first dhcp values and then existing values."""
         if self.dhcp_request_info.subnet:
             try:
                 return getattr(self.dhcp_request_info, item)
@@ -426,7 +384,12 @@ class Page:
 ## Define Ip_Dialog class
 
 class Ip_Dialog:
-    """Initialize some values, connect to NetworkManager, hide some widget and show loading widget until dhcp request finished"""
+    """Ip Dialog.
+    
+    Initialize some values, connect to NetworkManager, 
+    hide some widget and show loading widget until dhcp request finished
+    """
+    
     def __init__(self, parent):
         # Init some values
         self.parent = parent
@@ -463,7 +426,13 @@ class Ip_Dialog:
         GObject.idle_add(self.initialize_interfaces)
 
     def initialize_interfaces(self):
-        """Find devices, populate GUI, show all widgets and destroy loading widget, set the appropriate method to each device and if subnet has change alert message which define devices with different subnet."""
+        """Initialize interfaces.
+        
+        Find devices, populate GUI, show all widgets and destroy loading widget,
+        set the appropriate method to each device and 
+        if subnet has change alert message,
+        which define devices with different subnet.
+        """
         self.settings = Settings()
         device_paths = self.nm.get_devices()
         if len(device_paths) == 0:
@@ -528,7 +497,12 @@ class Ip_Dialog:
             self.main_dlg_notebook.set_tab_reorderable(page.grid, True)
 
     def set_default(self):
-        """By default active is 4, no creation to all interfaces. We care about the first only, so we purpose one method only for the first interface. All other interfaces maintained to 4."""
+        """Set default.
+        
+        By default active is 4, no creation to all interfaces.
+        We care about the first only, so we purpose one method only for the first interface.
+        All other interfaces maintained to 4.
+        """
         carrier_interfaces = [interface for interface in self.interfaces if interface.carrier == 1]
         if len(carrier_interfaces) == 0:
             self.interfaces[0].page.method_entry.set_active(1)
@@ -657,7 +631,7 @@ class Ip_Dialog:
 
 
     def on_method_entry_changed(self, method_entry, interface):
-        """Callbacks"""
+        """Callbacks."""
         reset_ltsp_method = True
         for l_interface in self.interfaces:
             if l_interface.page.method_entry.get_active() == 3:
@@ -726,7 +700,7 @@ class Ip_Dialog:
         self.check_button()
 
     def on_ip_entry_changed(self, ip_entry, interface):
-        """Callbacks"""
+        """Callbacks."""
         if interface.page.ip_entry.get_text() != 'Δεν βρέθηκε διεύθυνση':
             ip = interface.page.ip_entry.get_text()
             sub_ip = '.'.join(interface.ip.split('.')[0:3])+'.'
@@ -747,7 +721,7 @@ class Ip_Dialog:
             self.check_button()
 
     def on_ip_dialog_response(self, main_dlg, response):
-        """Callbacks"""
+        """Callbacks."""
         if response != Gtk.ResponseType.OK:
             self.main_dlg.destroy()
             return

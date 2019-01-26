@@ -2,9 +2,8 @@
 # Copyright 2009-2018 the sch-scripts team, see AUTHORS.
 # SPDX-License-Identifier: GPL-3.0-or-later
 # pylint: disable= invalid-name, line-too-long, unused-argument
-"""
-New group form.
-"""
+"""New group form."""
+
 import re
 import os
 import subprocess
@@ -14,6 +13,7 @@ import shared_folders
 
 class GroupForm(object):
     """Creating a group."""
+    
     def __init__(self, system, sf):
         self.system = system
         self.sf = sf
@@ -46,17 +46,17 @@ class GroupForm(object):
             self.users_store.append([user_obj, False, user, activatable])
 
     def on_show_sys_users_toggled(self, widget):
-        """Shows the system users."""
+        """Show the system users."""
         self.show_sys_users = not self.show_sys_users
         self.users_filter.refilter()
 
     def users_visible_func(self, model, itr, x):
-        """Shows if the users are visible in the system."""
+        """Show if the users are visible in the system."""
         system_user = model[itr][0].is_system_user()
         return self.show_sys_users or not system_user
 
     def on_name_entry_changed(self, widget):
-        """Edites the name entry after checking if the new entry is availabe and valid."""
+        """Edite the name entry after checking if the new entry is availabe and valid."""
         groupname = widget.get_text()
         valid_name = self.system.name_is_valid(groupname)
         free_name = groupname not in self.system.groups
@@ -98,14 +98,16 @@ class GroupForm(object):
         self.builder.get_object('apply_button').set_sensitive(s)
 
     def on_dialog_delete_event(self, widget, event):
+        """Close the dialog."""
         self.dialog.destroy()
 
     def on_cancel_clicked(self, widget):
-        """Cancels the dialog."""
+        """Cancel the dialog."""
         self.dialog.destroy()
 
 class NewGroupDialog(GroupForm):
-    """Opens a dialog for a new group."""
+    """Open a dialog for a new group."""
+    
     def __init__(self, system, sf):
         self.mode = 'new'
         super(NewGroupDialog, self).__init__(system, sf)
@@ -116,7 +118,7 @@ class NewGroupDialog(GroupForm):
         self.dialog.show()
 
     def on_apply_clicked(self, widget):
-        """Apply the changes for the new group, then closes the dialog."""
+        """Apply the changes for the new group, then close the dialog."""
         name = self.groupname.get_text()
         gid = int(self.gid_entry.get_text())
         members = {u[0].name : u[0] for u in self.users_store if u[1]}
@@ -127,7 +129,11 @@ class NewGroupDialog(GroupForm):
         self.dialog.destroy()
 
 class EditGroupDialog(GroupForm):
-    """Edits an existing group, activates the members of the group and checks if the shared folders are enabled."""
+    """Edit an existing group.
+    
+    Activate the members of the group and check if the shared folders are enabled.
+    """
+    
     def __init__(self, system, sf, group):
         self.mode = 'edit'
         self.group = group
@@ -154,7 +160,7 @@ class EditGroupDialog(GroupForm):
         self.dialog.show()
 
     def on_has_shared_check_toggled(self, widget):
-        """Checks if the shared folders are enabled and shows a warning."""
+        """Check if the shared folders are enabled and show a warning."""
         warn_label = self.builder.get_object('warning')
         if not self.has_shared.get_active() and self.shared_state:
             warn_label.show()
@@ -162,7 +168,11 @@ class EditGroupDialog(GroupForm):
             warn_label.hide()
 
     def on_apply_clicked(self, widget):
-        """Applies the changes, removes the users that are not members of the current group and applies the changes on the shared folders."""
+        """Apply the changes.
+        
+        Remove the users that are not members of the current group 
+        and apply the changes on the shared folders.
+        """
         old_name = self.group.name
         old_gid = self.group.gid
         old_members = self.group.members

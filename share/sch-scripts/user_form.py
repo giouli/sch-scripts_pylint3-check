@@ -2,9 +2,8 @@
 # Copyright 2009-2018 the sch-scripts team, see AUTHORS.
 # SPDX-License-Identifier: GPL-3.0-or-later
 # pylint: disable= invalid-name, line-too-long, unused-argument
-"""
-New user form.
-"""
+"""New user form."""
+
 import os
 import re
 from gi.repository import Gtk, Gdk
@@ -15,6 +14,7 @@ import config
 
 class UserForm(object):
     """The form of a new user."""
+    
     def __init__(self, system):
         self.system = system
         self.mode = None
@@ -71,7 +71,7 @@ class UserForm(object):
             self.role_combo.append_text(role)
 
     def groups_visible_func(self, model, itr, x):
-        """Shows the user's group."""
+        """Show the user's group."""
         primary_group = not model[itr][3] or self.username.get_text() in model[itr][0].members
         show_user_group = self.show_sys_groups or model[itr][0].is_user_group()
         show_private_group = config.PARSER.getboolean('GUI', 'show_private_groups') or not model[itr][0].is_private()
@@ -86,7 +86,7 @@ class UserForm(object):
             self.groups_sort.set_sort_column_id(1, Gtk.SortType.ASCENDING)
 
     def on_role_combo_changed(self, widget):
-        """Modifies or adds a role."""
+        """Modify or add a role."""
         role = widget.get_active_text()
         self.selected_role = role
         for row in self.active_from_role:
@@ -102,7 +102,7 @@ class UserForm(object):
 
 
     def on_uid_changed(self, widget):
-        """Modifies the user id."""
+        """Modify the user's id."""
         uid = widget.get_text()
         uid_valid_icon = self.builder.get_object('uid_valid')
         try:
@@ -132,7 +132,7 @@ class UserForm(object):
         self.builder.get_object('set_primary_button').set_sensitive(len(widget.get_selected_rows()[1]) == 1)
 
     def on_set_primary_button_clicked(self, widget):
-        """Sets the group as primary."""
+        """Set the group as primary."""
         # The paths list will always contain 1 element, I just use
         # get_selected_rows here instead of get_selected for extra features
         # such as context menu actions which would work with multiple selection
@@ -159,7 +159,7 @@ class UserForm(object):
             self.primary_group = None
 
     def set_group_primary(self, row):
-        """Sets a new groupas primary."""
+        """Set a new groupas primary."""
         # Unset the previous primary group
         self.unset_primary()
         row[2] = True # Activate this group
@@ -313,7 +313,7 @@ class UserForm(object):
         self.set_apply_sensitivity()
 
     def get_icon(self, check):
-        """Gets icon."""
+        """Get icon."""
         if check:
             return Gtk.STOCK_OK
         return Gtk.STOCK_CANCEL
@@ -325,15 +325,16 @@ class UserForm(object):
         self.builder.get_object('apply_button').set_sensitive(s)
 
     def on_dialog_delete_event(self, widget, event):
-        """Closes the dialog."""
+        """Close the dialog."""
         self.dialog.destroy()
 
     def on_cancel_clicked(self, widget):
-        """Cancels the procedure and closes the dialog."""
+        """Cancel the procedure and closes the dialog."""
         self.dialog.destroy()
 
 class NewUserDialog(UserForm):
-    """Opens a dialog to create a new user."""
+    """Open a dialog to create a new user."""
+    
     def __init__(self, system):
         super(NewUserDialog, self).__init__(system)
         self.mode = 'new'
@@ -348,7 +349,7 @@ class NewUserDialog(UserForm):
         self.dialog.show()
 
     def on_apply_clicked(self, widget):
-        """Applies the changes on the user."""
+        """Apply the changes on the user."""
         user = libuser.User()
         user.name = self.username.get_text()
         user.rname = self.gc_name.get_text()
@@ -379,7 +380,8 @@ class NewUserDialog(UserForm):
         self.dialog.destroy()
 
 class EditUserDialog(UserForm):
-    """Opens a dialog to edit the user's attributes."""
+    """Open a dialog to edit the user's attributes."""
+    
     def __init__(self, system, user):
         super(EditUserDialog, self).__init__(system)
         self.mode = 'edit'
@@ -421,7 +423,7 @@ class EditUserDialog(UserForm):
         self.dialog.show()
 
     def on_apply_clicked(self, widget):
-        """Applies the changes on the user."""
+        """Apply the changes on the user."""
         username = self.user.name
         self.user.name = self.username.get_text()
         self.user.rname = self.gc_name.get_text()
@@ -453,7 +455,8 @@ class EditUserDialog(UserForm):
         self.dialog.destroy()
 
 class ReviewUserDialog(UserForm):
-    """Opens a dialog to view and edit the user's attributes."""
+    """Open a dialog to view and edit the user's attributes."""
+    
     def __init__(self, system, user, role='', callback=None):
         super(ReviewUserDialog, self).__init__(system)
         self.callback = callback
@@ -503,7 +506,7 @@ class ReviewUserDialog(UserForm):
         self.dialog.show()
 
     def on_apply_clicked(self, widget):
-        """Applies the changes on the user."""
+        """Apply the changes on the user."""
         self.user.name = self.username.get_text()
         self.user.rname = self.gc_name.get_text()
         self.user.uid = int(self.uid_entry.get_text())
