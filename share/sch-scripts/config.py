@@ -1,7 +1,6 @@
 # This file is part of sch-scripts, https://launchpad.net/sch-scripts
 # Copyright 2009-2018 the sch-scripts team, see AUTHORS.
 # SPDX-License-Identifier: GPL-3.0-or-later
-# pylint: disable= invalid-name
 """Configuration handling."""
 
 import configparser
@@ -28,28 +27,28 @@ PARSER = configparser.ConfigParser()
 
 def save():
     """Save the changes in settings."""
-    f = open(SETTINGS_F, 'w')
-    PARSER.write(f)
-    f.close()
+    _file = open(SETTINGS_F, 'w')
+    PARSER.write(_file)
+    _file.close()
 
 def setdefaults(overwrite=False):
     """Set the default attributes."""
     if not PARSER.has_section('GUI'):
         PARSER.add_section('GUI')
 
-    for k, v in GUI_DEFAULTS.items():
+    for k, val in GUI_DEFAULTS.items():
         if overwrite or not PARSER.has_option('GUI', k):
-            PARSER.set('GUI', k, str(v))
+            PARSER.set('GUI', k, str(val))
 
     if not PARSER.has_section('Roles'):
         PARSER.add_section('Roles')
 
-    for k, v in ROLES_DEFAULTS.items():
+    for k, val in ROLES_DEFAULTS.items():
         # TODO: new sch-scripts versions are not able to append groups like
         # 'fuse' to the saved user Roles, so don't read the user settings
         # at all until we reapproach the issue.
         # if overwrite or not PARSER.has_option('Roles', k):
-        PARSER.set('Roles', k, str(v))
+        PARSER.set('Roles', k, str(val))
 
 
     save()

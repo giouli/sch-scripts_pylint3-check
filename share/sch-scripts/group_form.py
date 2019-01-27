@@ -1,7 +1,6 @@
 # This file is part of sch-scripts, https://launchpad.net/sch-scripts
 # Copyright 2009-2018 the sch-scripts team, see AUTHORS.
 # SPDX-License-Identifier: GPL-3.0-or-later
-# pylint: disable= invalid-name, line-too-long, unused-argument
 """New group form."""
 
 import re
@@ -13,11 +12,12 @@ import shared_folders
 
 class GroupForm(object):
     """Creating a group."""
-    
-    def __init__(self, system, sf):
+
+    def __init__(self, system, slf):
         self.system = system
-        self.sf = sf
-        #self.mode = None
+        self.slf = slf
+        self.mode = None
+        self.group = None
         self.builder = Gtk.Builder()
         self.builder.add_from_file('group_form.ui')
 
@@ -45,19 +45,19 @@ class GroupForm(object):
                 activatable = True
             self.users_store.append([user_obj, False, user, activatable])
 
-    def on_show_sys_users_toggled(self, widget):
+    def on_show_sys_users_toggled(self, _widget):
         """Show the system users."""
         self.show_sys_users = not self.show_sys_users
         self.users_filter.refilter()
 
-    def users_visible_func(self, model, itr, x):
+    def users_visible_func(self, model, itr, _x):
         """Show if the users are visible in the system."""
         system_user = model[itr][0].is_system_user()
         return self.show_sys_users or not system_user
 
-    def on_name_entry_changed(self, widget):
+    def on_name_entry_changed(self, _widget):
         """Edite the name entry after checking if the new entry is availabe and valid."""
-        groupname = widget.get_text()
+        groupname = _widget.get_text()
         valid_name = self.system.name_is_valid(groupname)
         free_name = groupname not in self.system.groups
         if self.mode == 'edit':
@@ -70,8 +70,8 @@ class GroupForm(object):
         self.gname_valid_icon.set_from_stock(icon, Gtk.IconSize.BUTTON)
         self.set_apply_sensitivity()
 
-    def on_gid_changed(self, widget):
-        gid = widget.get_text()
+    def on_gid_changed(self, _widget):
+        gid = _widget.get_text()
         try:
             gid = int(gid)
         except:
@@ -86,7 +86,7 @@ class GroupForm(object):
         self.gid_valid_icon.set_from_stock(icon, Gtk.IconSize.BUTTON)
         self.set_apply_sensitivity()
 
-    def on_user_toggled(self, widget, path):
+    def on_user_toggled(self, _widget, path):
         path = self.users_sort[path].path
         path = self.users_sort.convert_path_to_child_path(path)
         path = self.users_filter.convert_path_to_child_path(path)
@@ -94,50 +94,50 @@ class GroupForm(object):
         self.users_store[path][1] = not self.users_store[path][1]
 
     def set_apply_sensitivity(self):
-        s = self.gid_valid_icon.get_stock()[0] == self.gname_valid_icon.get_stock()[0] == Gtk.STOCK_OK
-        self.builder.get_object('apply_button').set_sensitive(s)
+        sen = self.gid_valid_icon.get_stock()[0] == self.gname_valid_icon.get_stock()[0] == Gtk.STOCK_OK
+        self.builder.get_object('apply_button').set_sensitive(sen)
 
-    def on_dialog_delete_event(self, widget, event):
+    def on_dialog_delete_event(self, _widget, _event):
         """Close the dialog."""
         self.dialog.destroy()
 
-    def on_cancel_clicked(self, widget):
+    def on_cancel_clicked(self, _widget):
         """Cancel the dialog."""
         self.dialog.destroy()
 
 class NewGroupDialog(GroupForm):
     """Open a dialog for a new group."""
-    
-    def __init__(self, system, sf):
+
+    def __init__(self, system, slf):
         self.mode = 'new'
-        super(NewGroupDialog, self).__init__(system, sf)
+        super(NewGroupDialog, self).__init__(system, slf)
         self.builder.connect_signals(self)
 
         self.gid_entry.set_text(str(system.get_free_gid()))
 
         self.dialog.show()
 
-    def on_apply_clicked(self, widget):
+    def on_apply_clicked(self, _widget):
         """Apply the changes for the new group, then close the dialog."""
         name = self.groupname.get_text()
         gid = int(self.gid_entry.get_text())
         members = {u[0].name : u[0] for u in self.users_store if u[1]}
-        g = libuser.Group(name, gid, members)
-        self.system.add_group(g)
+        grp = libuser.Group(name, gid, members)
+        self.system.add_group(grp)
         if self.has_shared.get_active():
-            self.sf.add([g.name])
+            self.slf.add([grp.name])
         self.dialog.destroy()
 
 class EditGroupDialog(GroupForm):
     """Edit an existing group.
-    
+
     Activate the members of the group and check if the shared folders are enabled.
     """
-    
-    def __init__(self, system, sf, group):
+
+    def __init__(self, system, slf, group):
         self.mode = 'edit'
         self.group = group
-        super(EditGroupDialog, self).__init__(system, sf)
+        super(EditGroupDialog, self).__init__(system, slf)
         self.builder.connect_signals(self)
 
         self.groupname.set_text(group.name)
@@ -149,7 +149,7 @@ class EditGroupDialog(GroupForm):
                 row[1] = True
 
         # See if the group has shared folders enabled
-        if group.name in self.sf.list_shared():
+        if group.name in self.slf.list_shared():
             self.has_shared.set_active(True)
             self.shared_state = True
         else:
@@ -159,7 +159,7 @@ class EditGroupDialog(GroupForm):
 
         self.dialog.show()
 
-    def on_has_shared_check_toggled(self, widget):
+    def on_has_shared_check_toggled(self, _widget):
         """Check if the shared folders are enabled and show a warning."""
         warn_label = self.builder.get_object('warning')
         if not self.has_shared.get_active() and self.shared_state:
@@ -167,9 +167,9 @@ class EditGroupDialog(GroupForm):
         else:
             warn_label.hide()
 
-    def on_apply_clicked(self, widget):
+    def on_apply_clicked(self, _widget):
         """Apply the changes.
-        
+
         Remove the users that are not members of the current group 
         and apply the changes on the shared folders.
         """
@@ -188,16 +188,16 @@ class EditGroupDialog(GroupForm):
                 self.system.remove_user_from_groups(user, [self.group])
         if self.shared_state and not self.has_shared.get_active():
             # Shared folders were active but now they are not
-            self.sf.remove([self.group.name])
+            self.slf.remove([self.group.name])
         elif self.has_shared.get_active():
             if not self.shared_state:
                 # Shared folders were not active and now they are
-                self.sf.add([self.group.name])
+                self.slf.add([self.group.name])
             else:
                 # Share folders were and are active, check for name/gid changes
                 if old_name != self.group.name:
-                    self.sf.rename(old_name, self.group.name)
+                    self.slf.rename(old_name, self.group.name)
                 elif old_gid != self.group.gid:
-                    self.sf.mount([self.group.name])
+                    self.slf.mount([self.group.name])
 
         self.dialog.destroy()

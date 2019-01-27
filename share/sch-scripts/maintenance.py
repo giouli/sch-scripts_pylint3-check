@@ -1,7 +1,6 @@
 # This file is part of sch-scripts, https://launchpad.net/sch-scripts
 # Copyright 2009-2018 the sch-scripts team, see AUTHORS.
 # SPDX-License-Identifier: GPL-3.0-or-later
-# pylint: disable= unused-wildcard-import, line-too-long, wildcard-import, c-extension-no-member
 """Maintenance form."""
 
 import gc
@@ -43,7 +42,7 @@ class Package:
 
 class MaintenanceDialog(object):
     """Retrieve main_dlg."""
-    
+
     def __init__(self, parent):
         self.pkgs = []
         self.apt_client = aptdaemon.client.AptClient()
@@ -61,7 +60,7 @@ class MaintenanceDialog(object):
         self.main_dlg.set_default_response(Gtk.ResponseType.CANCEL)
 
     def populate_treeview(self):
-        """AptDeamon Callbacks.""" 
+        """AptDeamon Callbacks."""
         tview_pkgs = []
         for ppkg in self.pkgs:
             if ppkg.name.startswith('linux-image'):

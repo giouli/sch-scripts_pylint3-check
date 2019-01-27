@@ -7,7 +7,7 @@ from gi.repository import Gtk
 
 class AskDialog(Gtk.MessageDialog):
     """Show an Ask message dialog."""
-    
+
     def __init__(self, message, title=""):
         super(AskDialog, self).__init__(type=Gtk.MessageType.WARNING,
                                         flags=Gtk.DialogFlags.MODAL,
@@ -25,7 +25,7 @@ class AskDialog(Gtk.MessageDialog):
 
 class InfoDialog(Gtk.MessageDialog):
     """Show an Info message dialog."""
-    
+
     def __init__(self, message, title=""):
         super(InfoDialog, self).__init__(type=Gtk.MessageType.INFO,
                                          flags=Gtk.DialogFlags.MODAL,
@@ -41,7 +41,7 @@ class InfoDialog(Gtk.MessageDialog):
 
 class WarningDialog(Gtk.MessageDialog):
     """Show a Warning message dialog."""
-    
+
     def __init__(self, message, title=""):
         super(WarningDialog, self).__init__(type=Gtk.MessageType.WARNING,
                                             flags=Gtk.DialogFlags.MODAL,
@@ -57,7 +57,7 @@ class WarningDialog(Gtk.MessageDialog):
 
 class ErrorDialog(Gtk.MessageDialog):
     """Show an Error message dialog."""
-    
+
     def __init__(self, message, title=""):
         super(ErrorDialog, self).__init__(type=Gtk.MessageType.ERROR,
                                           flags=Gtk.DialogFlags.MODAL,

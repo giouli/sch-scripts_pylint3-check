@@ -2,7 +2,6 @@
 # This file is part of sch-scripts, https://launchpad.net/sch-scripts
 # Copyright 2009-2018 the sch-scripts team, see AUTHORS.
 # SPDX-License-Identifier: GPL-3.0-or-later
-# pylint: disable= invalid-name, line-too-long
 """Transliterate and transcript according to iso843.
 
 http://www.sete.gr/files/Media/Egkyklioi/040707Latin-Greek.pdf
@@ -72,8 +71,7 @@ def transcript(string, accents=True):
 
     if accents:
         return string
-    else:
-        return strip_accents(string)
+    return strip_accents(string)
 
 
 def transliterate(string, accents=True):
@@ -96,92 +94,86 @@ def transliterate(string, accents=True):
 
     if accents:
         return string
-    else:
-        return strip_accents(string)
+    return strip_accents(string)
 
 
-def replace_v(m):
-    response = m.group(0)
-    if m.group(2) == 'ύ' or m.group(2) == 'Ύ':
-        if m.group(1) == 'α':
-            response = response.replace(m.group(1), 'ά')
-        elif m.group(1) == 'Α':
-            response = response.replace(m.group(1), 'Ά')
-        elif m.group(1) == 'ε':
-            response = response.replace(m.group(1), 'έ')
-        elif m.group(1) == 'Ε':
-            response = response.replace(m.group(1), 'Έ')
-        elif m.group(1) == 'η':
-            response = response.replace(m.group(1), 'ή')
-        elif m.group(1) == 'Η':
-            response = response.replace(m.group(1), 'Ή')
+def replace_v(char):
+    response = char.group(0)
+    if char.group(2) == 'ύ' or char.group(2) == 'Ύ':
+        if char.group(1) == 'α':
+            response = response.replace(char.group(1), 'ά')
+        elif char.group(1) == 'Α':
+            response = response.replace(char.group(1), 'Ά')
+        elif char.group(1) == 'ε':
+            response = response.replace(char.group(1), 'έ')
+        elif char.group(1) == 'Ε':
+            response = response.replace(char.group(1), 'Έ')
+        elif char.group(1) == 'η':
+            response = response.replace(char.group(1), 'ή')
+        elif char.group(1) == 'Η':
+            response = response.replace(char.group(1), 'Ή')
 
-    if m.group(2).islower():
-        response = response.replace(m.group(2), 'v')
+    if char.group(2).islower():
+        response = response.replace(char.group(2), 'v')
         return response
-    else:
-        response = response.replace(m.group(2), 'V')
+    response = response.replace(char.group(2), 'V')
+    return response
+
+
+def replace_f(char):
+    response = char.group(0)
+    if char.group(2) == 'ύ' or char.group(2) == 'Ύ':
+        if char.group(1) == 'α':
+            response = response.replace(char.group(1), 'ά')
+        elif char.group(1) == 'Α':
+            response = response.replace(char.group(1), 'Ά')
+        elif char.group(1) == 'ε':
+            response = response.replace(char.group(1), 'έ')
+        elif char.group(1) == 'Ε':
+            response = response.replace(char.group(1), 'Έ')
+        elif char.group(1) == 'η':
+            response = response.replace(char.group(1), 'ή')
+        elif char.group(1) == 'Η':
+            response = response.replace(char.group(1), 'Ή')
+
+    if char.group(2).islower():
+        response = response.replace(char.group(2), 'f')
         return response
+    response = response.replace(char.group(2), 'F')
+    return response
 
 
-def replace_f(m):
-    response = m.group(0)
-    if m.group(2) == 'ύ' or m.group(2) == 'Ύ':
-        if m.group(1) == 'α':
-            response = response.replace(m.group(1), 'ά')
-        elif m.group(1) == 'Α':
-            response = response.replace(m.group(1), 'Ά')
-        elif m.group(1) == 'ε':
-            response = response.replace(m.group(1), 'έ')
-        elif m.group(1) == 'Ε':
-            response = response.replace(m.group(1), 'Έ')
-        elif m.group(1) == 'η':
-            response = response.replace(m.group(1), 'ή')
-        elif m.group(1) == 'Η':
-            response = response.replace(m.group(1), 'Ή')
-
-    if m.group(2).islower():
-        response = response.replace(m.group(2), 'f')
-        return response
-    else:
-        response = response.replace(m.group(2), 'F')
-        return response
-
-
-def replace_b(m):
-    if m.group(0)[0].islower():
+def replace_b(char):
+    if char.group(0)[0].islower():
         return 'b'
-    else:
-        return 'B'
+    return 'B'
 
 
-def replace_g(m):
-    if m.group(0).islower():
-        return _MAPPING_COMPINE_LETTERS[m.group(0)]
-    elif m.group(0).isupper():
-        return _MAPPING_COMPINE_LETTERS[m.group(0).lower()].upper()
+def replace_g(char):
+    if char.group(0).islower():
+        return _MAPPING_COMPINE_LETTERS[char.group(0)]
+    elif char.group(0).isupper():
+        return _MAPPING_COMPINE_LETTERS[char.group(0).lower()].upper()
     else:
-        if m.group(0)[0].isupper() and m.group(0)[1].islower():
-            response = _MAPPING_COMPINE_LETTERS[m.group(0).lower()]
+        if char.group(0)[0].isupper() and char.group(0)[1].islower():
+            response = _MAPPING_COMPINE_LETTERS[char.group(0).lower()]
             return response.replace(response[0], response[0].upper())
-        elif m.group(0)[0].islower() and m.group(0)[1].isupper():
-            response = _MAPPING_COMPINE_LETTERS[m.group(0).lower()]
+        elif char.group(0)[0].islower() and char.group(0)[1].isupper():
+            response = _MAPPING_COMPINE_LETTERS[char.group(0).lower()]
             return response.replace(response[1], response[1].upper())
 
 
-def replace_ou(m):
-    response = m.group(0)
-    if m.group(0)[1].islower():
-        if m.group(0)[1] == 'ύ':
-            response = response.replace(m.group(0)[1], 'ú')
+def replace_ou(char):
+    response = char.group(0)
+    if char.group(0)[1].islower():
+        if char.group(0)[1] == 'ύ':
+            response = response.replace(char.group(0)[1], 'ú')
             return response
-        else:
-            response = response.replace(m.group(0)[1], 'u')
-            return response
-
-    else:
-        response = response.replace(m.group(0)[1], 'U')
+        response = response.replace(char.group(0)[1], 'u')
         return response
+
+    response = response.replace(char.group(0)[1], 'U')
+    return response
 
 
 def strip_accents(string):

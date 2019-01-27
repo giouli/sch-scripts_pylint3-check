@@ -2,7 +2,6 @@
 # This file is part of sch-scripts, https://launchpad.net/sch-scripts
 # Copyright 2009-2018 the sch-scripts team, see AUTHORS.
 # SPDX-License-Identifier: GPL-3.0-or-later
-# pylint: disable= invalid-name, line-too-long, unused-argument
 """Import users dialog."""
 
 import os
@@ -22,13 +21,13 @@ gi.require_version('Gdk', '3.0')
 # NOTE: User.plainpw overrides the User.password if it's set
 class ImportDialog:
     """Import users dialog."""
-    
+
     def __init__(self, new_set):
         self.set = new_set
         # Remove the system users from the set
-        for u in list(self.set.users.values()):
-            if u.uid is not None and u.is_system_user():
-                self.set.remove_user(u)
+        for usr in list(self.set.users.values()):
+            if usr.uid is not None and usr.is_system_user():
+                self.set.remove_user(usr)
 
         gladefile = "import_dialog.ui"
         self.builder = Gtk.Builder()
@@ -55,7 +54,7 @@ class ImportDialog:
 
     def tree_view(self):
         """Make the liststore.
-        
+
         The first 20 cells refers to users values,
         the second 20 cells refers to color foreach of first 20 cells, the
         third 20 cells refers to conflicts and the last cell refers to first
@@ -93,16 +92,16 @@ class ImportDialog:
 
     def fill_tree(self, new_set):
         """Fill the preview popup dialog with new users."""
-        for u in new_set.users.values():
-            self.auto_complete(u)
-            data = [u.name, u.uid, u.gid, u.primary_group, u.rname, u.office,
-                    u.wphone, u.hphone, u.other, u.directory, u.shell,
-                    ",".join(u.groups), u.lstchg, u.min, u.max, u.warn,
-                    u.inact, u.expire, u.password, u.plainpw]
+        for usr in new_set.users.values():
+            self.auto_complete(usr)
+            data = [usr.name, usr.uid, usr.gid, usr.primary_group, usr.rname, usr.office,
+                    usr.wphone, usr.hphone, usr.other, usr.directory, usr.shell,
+                    ",".join(usr.groups), usr.lstchg, usr.min, usr.max, usr.warn,
+                    usr.inact, usr.expire, usr.password, usr.plainpw]
             # Fill the cells with default values
-            for i in range(20):
+            for _i in range(20):
                 data.append("black") # cell's foreground color
-            for i in range(20):
+            for _i in range(20):
                 data.append('') # cell's problem or ''
             data.append(self.states['ok']) # row's status
             row = self.list[self.list.append(data)]
@@ -112,17 +111,17 @@ class ImportDialog:
 
     def set_row_from_object(self, row):
         """Fill in the row with given data."""
-        u = self.set.users[row[0]]
-        data = [u.name, u.uid, u.gid, u.primary_group, u.rname, u.office,
-                u.wphone, u.hphone, u.other, u.directory, u.shell,
-                ",".join(u.groups), u.lstchg, u.min, u.max, u.warn,
-                u.inact, u.expire, u.password, u.plainpw]
+        usr = self.set.users[row[0]]
+        data = [usr.name, usr.uid, usr.gid, usr.primary_group, usr.rname, usr.office,
+                usr.wphone, usr.hphone, usr.other, usr.directory, usr.shell,
+                ",".join(usr.groups), usr.lstchg, usr.min, usr.max, usr.warn,
+                usr.inact, usr.expire, usr.password, usr.plainpw]
         for i in range(len(data)):
             row[i] = data[i]
 
     def check_identical_users(self, other=libuser.system):
         """Check identical users.
-        
+
         If there are users in the list that are identical to 
         a user in the system and ask for removal.
         """
@@ -167,11 +166,11 @@ class ImportDialog:
         if user.directory in [None, '']:
             user.directory = os.path.join(libuser.HOME_PREFIX, user.name)
         if user.uid in [None, '']:
-            set_uids = [user.uid for u in self.set.users.values()]
+            set_uids = [user.uid for usr in self.set.users.values()]
             user.uid = libuser.system.get_free_uid(exclude=set_uids)
 
-        set_gids = [u.gid for u in self.set.users.values()]
-        sys_gids = {g.gid : g for g in self.set.groups.values()}
+        set_gids = [usr.gid for usr in self.set.users.values()]
+        sys_gids = {grp.gid : grp for grp in self.set.groups.values()}
         if user.gid in [None, '']:
             if user.primary_group in [None, '']:
                 user.primary_group = user.name
@@ -239,7 +238,7 @@ class ImportDialog:
 
     def detect_conflicts(self):
         """Detect conflicts.
-        
+
         Detects and marks the conflicts in the treeview based on the user
         object.
         Here we don't check for conflicts with secondary groups as they are
@@ -259,7 +258,7 @@ class ImportDialog:
         passed_users = {'names' : [], 'uids' : [], 'gids' : [], 'dirs' : []}
         errors_found = False
         for row in self.list:
-            u = self.set.users[row[0]]
+            usr = self.set.users[row[0]]
             # Clear the currently marked conflicts, if any
             for cell in range(0, 20):
                 self.set_row_props(row, cell, '')
@@ -279,98 +278,100 @@ class ImportDialog:
             # Illegal input checking #FIXME: This should be in a separate function
                                      #and (for later): executed only once, since
                                      #the edit dialog won't allow illegal input
-            def invalidate(n):
+            def invalidate(numb):
                 """Check the validity of the attributes of a user and if there are any conflicts."""
-                self.set_row_props(row, n, 'char')
-            if not libuser.system.name_is_valid(u.name):
+                self.set_row_props(row, numb, 'char')
+            if not libuser.system.name_is_valid(usr.name):
                 invalidate(0)
-            if not libuser.system.uid_is_valid(u.uid):
+            if not libuser.system.uid_is_valid(usr.uid):
                 invalidate(1)
-            if not libuser.system.gid_is_valid(u.gid):
+            if not libuser.system.gid_is_valid(usr.gid):
                 invalidate(2)
-            if not libuser.system.name_is_valid(u.primary_group):
+            if not libuser.system.name_is_valid(usr.primary_group):
                 invalidate(3)
-            if not libuser.system.gecos_is_valid(u.rname):
+            if not libuser.system.gecos_is_valid(usr.rname):
                 invalidate(4)
-            if not libuser.system.gecos_is_valid(u.office):
+            if not libuser.system.gecos_is_valid(usr.office):
                 invalidate(5)
-            if not libuser.system.gecos_is_valid(u.wphone):
+            if not libuser.system.gecos_is_valid(usr.wphone):
                 invalidate(6)
-            if not libuser.system.gecos_is_valid(u.hphone):
+            if not libuser.system.gecos_is_valid(usr.hphone):
                 invalidate(7)
-            if not libuser.system.gecos_is_valid(u.other):
+            if not libuser.system.gecos_is_valid(usr.other):
                 invalidate(8)
             # Not checking homedir validity
-            if not libuser.system.shell_is_valid(u.shell):
+            if not libuser.system.shell_is_valid(usr.shell):
                 invalidate(10)
-            for group in u.groups:
+            for group in usr.groups:
                 if not libuser.system.name_is_valid(group):
                     invalidate(11)
                     break
-            chage = [u.lstchg, u.min, u.max, u.warn, u.inact, u.expire]
-            for n, attr in enumerate(chage, 12):
+            chage = [usr.lstchg, usr.min, usr.max, usr.warn, usr.inact, usr.expire]
+            for numb, attr in enumerate(chage, 12):
                 if attr > 2147483647 or attr < -1:
-                    invalidate(n)
+                    invalidate(numb)
 
             # Duplicate checking (New users)
-            if u.name in passed_users['names']:
+            if usr.name in passed_users['names']:
                 self.set_row_props(row, 0, 'dup')
-            if u.uid in passed_users['uids']:
+            if usr.uid in passed_users['uids']:
                 self.set_row_props(row, 1, 'dup')
-            #if u.gid in passed_users['gids']: # We don't care for > 1 users having the same primary group
+            #if usr.gid in passed_users['gids']:
+            # We don't care for > 1 users having the same primary group
             #    self.set_row_props(row, 2, 'dup')
-            if u.directory in passed_users['dirs']:
+            if usr.directory in passed_users['dirs']:
                 self.set_row_props(row, 9, 'dup')
 
             # Conflict checking (Existing system users)
-            if u.name in libuser.system.users:
+            if usr.name in libuser.system.users:
                 self.set_row_props(row, 0, 'con')
-            if u.uid in sys_users['uids']:
+            if usr.uid in sys_users['uids']:
                 self.set_row_props(row, 1, 'con')
             # Check if the given GID belongs to the given group name
-            if u.primary_group in libuser.system.groups:
-                should_be = libuser.system.groups[u.primary_group].gid
-                if u.gid != should_be:
+            if usr.primary_group in libuser.system.groups:
+                should_be = libuser.system.groups[usr.primary_group].gid
+                if usr.gid != should_be:
                     self.set_row_props(row, 2, 'mismatch %s' % should_be)
             else:
-                if u.gid in sys_users['gids']:
+                if usr.gid in sys_users['gids']:
                     should_be = None
-                    for g in libuser.system.groups.values():
-                        if u.gid == g.gid:
-                            should_be = g.name
+                    for grp in libuser.system.groups.values():
+                        if usr.gid == grp.gid:
+                            should_be = grp.name
                             break
-                    if should_be != u.primary_group:
+                    if should_be != usr.primary_group:
                         self.set_row_props(row, 3, 'mismatch %s' % should_be)
-            #if u.gid in sys_users['gids']: # We don't care for > 1 users having the same primary group
+            #if usr.gid in sys_users['gids']:
+            # We don't care for > 1 users having the same primary group
             #    self.set_row_props(row, 2, 'con')
-            if u.directory in sys_users['dirs']:
+            if usr.directory in sys_users['dirs']:
                 self.set_row_props(row, 9, 'con')
             else:
                 # Special case, we want to use existing home dirs if they are not already used.
-                if os.path.isdir(u.directory) and u.directory not in sys_users['dirs']:
+                if os.path.isdir(usr.directory) and usr.directory not in sys_users['dirs']:
                     # See if the home and the uid:gid of the user are different
-                    #print "Homedir for user %s exists in the FS." % u.name # XXX: Debug
-                    dir_stat = os.stat(u.directory)
-                    if u.uid != int(dir_stat.st_uid):
+                    #print "Homedir for user %s exists in the FS." % usr.name # XXX: Debug
+                    dir_stat = os.stat(usr.directory)
+                    if usr.uid != int(dir_stat.st_uid):
                         self.set_row_props(row, 1, 'hijack')
                         self.set_row_props(row, 9, 'hijack')
-                    if u.gid != dir_stat.st_gid:
+                    if usr.gid != dir_stat.st_gid:
                         self.set_row_props(row, 2, 'hijack')
                         self.set_row_props(row, 9, 'hijack')
-                    #print "\tUser: - %s:%s -" % (u.uid, u.gid) # XXX: Debug
+                    #print "\tUser: - %s:%s -" % (usr.uid, usr.gid) # XXX: Debug
                     #print "\tDir : - %s:%s -" % (dir_stat.st_uid, dir_stat.st_gid) # XXX: Debug
 
-            passed_users['names'].append(u.name)
-            passed_users['uids'].append(u.uid)
-            passed_users['gids'].append(u.gid)
-            passed_users['dirs'].append(u.directory)
+            passed_users['names'].append(usr.name)
+            passed_users['uids'].append(usr.uid)
+            passed_users['gids'].append(usr.gid)
+            passed_users['dirs'].append(usr.directory)
 
             if row[60] == self.states['error']:
                 errors_found = True
 
         self.apply.set_sensitive(not errors_found)
 
-    def resolve_conflicts(self, widget=None):
+    def resolve_conflicts(self, _widget=None):
         """If there are any conflicts found they are resolved."""
         # All the system users
         sys_users = {'uids' : [], 'gids' : [], 'dirs' : []}
@@ -384,78 +385,78 @@ class ImportDialog:
         new_users['dirs'] = [user.directory for user in self.set.users.values()]
 
         log = []
-        def log_msg(item, user, a, b):
+        def log_msg(item, user, attr1, attr2):
             """Show a message with the change applied on a user."""
-            txt = "Αλλάχθηκε το %s του χρήστη '%s' από %s σε %s." % (item, user, a, b)
+            txt = "Αλλάχθηκε το %s του χρήστη '%s' από %s σε %s." % (item, user, attr1, attr2)
             log.append(txt)
             return txt
-        def log_uid(u, f, t):
-            return log_msg('UID', u, f, t)
-        def log_gid(u, f, t):
-            return log_msg('GID', u, f, t)
-        def log_home(u, f, t):
-            return log_msg('Home', u, f, t)
-        def log_group(u, f, t):
-            return log_msg('όνομα του primary group', u, f, t)
+        def log_uid(usr, field1, field2):
+            return log_msg('UID', usr, field1, field2)
+        def log_gid(usr, field1, field2):
+            return log_msg('GID', usr, field1, field2)
+        def _log_home(usr, field1, field2):
+            return log_msg('Home', usr, field1, field2)
+        def log_group(usr, field1, field2):
+            return log_msg('όνομα του primary group', usr, field1, field2)
 
         for row in self.list:
             if row[60] != self.states['error']:
                 continue
-            u = self.set.users[row[0]]
+            usr = self.set.users[row[0]]
             ofs = 40
 
             if row[1+ofs] in ['dup', 'con']:
                 new_uid = libuser.system.get_free_uid(exclude=new_users['uids'])
                 new_users['uids'].append(new_uid)
-                log_uid(u.name, u.uid, new_uid)
-                u.uid = new_uid
+                log_uid(usr.name, usr.uid, new_uid)
+                usr.uid = new_uid
                 self.set_row_props(row, 1, '')
 
             elif row[1+ofs] == 'hijack':
-                dir_uid = os.stat(u.directory).st_uid
+                dir_uid = os.stat(usr.directory).st_uid
                 new_users['uids'].append(dir_uid)
-                log_uid(u.name, u.uid, dir_uid)
-                u.uid = dir_uid
+                log_uid(usr.name, usr.uid, dir_uid)
+                usr.uid = dir_uid
                 self.set_row_props(row, 1, '')
 
             #if row[2+ofs] in ['dup', 'con']:
             #    new_gid = libuser.system.get_free_gid(exclude=new_users['gids'])
             #    new_users['gids'].append(new_gid)
-            #    log_gid(u.name, u.gid, new_gid)
-            #    u.uid = new_uid
+            #    log_gid(usr.name, usr.gid, new_gid)
+            #    usr.uid = new_uid
             #    self.set_row_props(row, 2, '')
 
             if 'mismatch' in row[2+ofs]:
                 new_gid = int(row[2+ofs].split()[1])
                 new_users['gids'].append(new_gid)
-                log_gid(u.name, u.gid, new_gid)
-                if u.primary_group in self.set.groups:
-                    self.set.groups[u.primary_group].gid = new_gid
-                u.gid = new_gid
+                log_gid(usr.name, usr.gid, new_gid)
+                if usr.primary_group in self.set.groups:
+                    self.set.groups[usr.primary_group].gid = new_gid
+                usr.gid = new_gid
                 self.set_row_props(row, 2, '')
 
             if row[2+ofs] == 'hijack':
-                dir_gid = os.stat(u.directory).st_gid
+                dir_gid = os.stat(usr.directory).st_gid
                 new_users['gids'].append(dir_gid)
-                log_gid(u.name, u.gid, dir_gid)
-                u.gid = dir_gid
+                log_gid(usr.name, usr.gid, dir_gid)
+                usr.gid = dir_gid
                 self.set_row_props(row, 2, '')
 
             if 'mismatch' in row[3+ofs]:
                 new_gname = row[3+ofs].split()[1]
-                log_group(u.name, u.primary_group, new_gname)
+                log_group(usr.name, usr.primary_group, new_gname)
                 if new_gname in self.set.groups:
-                    if u.name not in self.set.groups[new_gname].members:
-                        self.set.groups[new_gname].members[u.name] = u
+                    if usr.name not in self.set.groups[new_gname].members:
+                        self.set.groups[new_gname].members[usr.name] = usr
                 else:
-                    self.set.groups[new_gname] = libuser.Group(new_gname, u.gid)
-                    self.set.groups[new_gname].members[u.name] = u
-                if u.primary_group in self.set.groups:
-                    if self.set.groups[u.primary_group].members.keys() == [u.name]:
-                        del self.set.groups[u.primary_group]
+                    self.set.groups[new_gname] = libuser.Group(new_gname, usr.gid)
+                    self.set.groups[new_gname].members[usr.name] = usr
+                if usr.primary_group in self.set.groups:
+                    if self.set.groups[usr.primary_group].members.keys() == [usr.name]:
+                        del self.set.groups[usr.primary_group]
                     else:
-                        del self.set.groups[u.primary_group].members[u.name]
-                u.primary_group = new_gname
+                        del self.set.groups[usr.primary_group].members[usr.name]
+                usr.primary_group = new_gname
                 self.set_row_props(row, 3, '')
             self.set_row_from_object(row)
 
@@ -470,48 +471,48 @@ class ImportDialog:
         else:
             dialogs.WarningDialog('Δεν ήταν δυνατή η αυτόματη επίλυση κάποιου προβλήματος').showup()
 
-    def edit(self, widget, user):
+    def edit(self, _widget, user):
         """Open a dialog to edit user."""
         form = user_form.ReviewUserDialog(libuser.system, user, role='')
         form.dialog.set_transient_for(self.dialog)
         form.dialog.set_modal(True)
 
-    def apply(self, widget):
+    def apply(self, _widget):
         """Apply the changes in order to create a new group and add users in it."""
         text = "Να δημιουργηθούν οι νέοι χρήστες;"
         response = dialogs.AskDialog(text, "Confirm").showup()
         if response == Gtk.ResponseType.YES:
             new_groups = {}
-            new_gids = [u.gid for u in self.set.users.values()]
-            sys_gids = [g.gid for g in libuser.system.groups.values()]
-            for u in self.set.users.values():
-                if u.primary_group not in libuser.system.groups:
-                    if u.primary_group not in new_groups:
-                        g_obj = libuser.Group(u.primary_group, u.gid)
-                        new_groups[u.primary_group] = g_obj
-                    new_groups[u.primary_group].members[u.name] = u
+            new_gids = [usr.gid for usr in self.set.users.values()]
+            sys_gids = [grp.gid for grp in libuser.system.groups.values()]
+            for usr in self.set.users.values():
+                if usr.primary_group not in libuser.system.groups:
+                    if usr.primary_group not in new_groups:
+                        g_obj = libuser.Group(usr.primary_group, usr.gid)
+                        new_groups[usr.primary_group] = g_obj
+                    new_groups[usr.primary_group].members[usr.name] = usr
 
-            for u in self.set.users.values():
-                for g in u.groups:
-                    if g not in libuser.system.groups:
-                        if g not in new_groups:
-                            g_obj = libuser.Group(g)
-                            if g in self.set.groups:
-                                g_obj.gid = self.set.groups[g].gid
+            for usr in self.set.users.values():
+                for grp in usr.groups:
+                    if grp not in libuser.system.groups:
+                        if grp not in new_groups:
+                            g_obj = libuser.Group(grp)
+                            if grp in self.set.groups:
+                                g_obj.gid = self.set.groups[grp].gid
                             if g_obj.gid in new_gids+sys_gids or g_obj.gid is None:
                                 g_obj.gid = libuser.system.get_free_gid(exclude=new_gids)
                                 new_gids.append(g_obj.gid)
-                            new_groups[g] = g_obj
-                        new_groups[g].members[u.name] = u
+                            new_groups[grp] = g_obj
+                        new_groups[grp].members[usr.name] = usr
 
-            for gr in new_groups.values():
-                gr_tmp = libuser.Group(gr.name, gr.gid)
+            for group in new_groups.values():
+                gr_tmp = libuser.Group(group.name, group.gid)
                 libuser.system.add_group(gr_tmp)
-            for u in self.set.users.values():
-                libuser.system.add_user(u)
-            for gr in new_groups.values():
-                for u in gr.members.values():
-                    libuser.system.add_user_to_groups(u, [gr])
+            for usr in self.set.users.values():
+                libuser.system.add_user(usr)
+            for group in new_groups.values():
+                for usr in group.members.values():
+                    libuser.system.add_user_to_groups(usr, [group])
 
         else:
             return False
@@ -519,21 +520,21 @@ class ImportDialog:
         self.dialog.destroy()
 
 
-    def cancel(self, widget):
+    def cancel(self, _widget):
         """Cancle the procedure and closes the dialog."""
         self.dialog.destroy()
 
-    def exit(self, widget, event):
+    def exit(self, _widget, _event):
         """Exit the procedure and closes the dialog."""
         self.dialog.destroy()
 
-    def tooltip(self, widget, x, y, keyboard_tip, tooltip):
+    def tooltip(self, _widget, attr1, attr2, keyboard_tip, tooltip):
         """Show the error messages in each case in a form of a tooltip."""
-        if not widget.get_tooltip_context(x, y, keyboard_tip):
+        if not _widget.get_tooltip_context(attr1, attr2, keyboard_tip):
             return False
         else:
-            keyboard_mode, cellx, celly, model, path, iter = widget.get_tooltip_context(x, y, keyboard_tip)
-            row_info = widget.get_path_at_pos(int(cellx), int(celly))
+            _keyboard_mode, cellx, celly, model, path, _iter = _widget.get_tooltip_context(attr1, attr2, keyboard_tip)
+            row_info = _widget.get_path_at_pos(int(cellx), int(celly))
             if row_info is not None:
                 col = row_info[1]
 
@@ -562,24 +563,24 @@ class ImportDialog:
                 else:
                     return
 
-                widget.set_tooltip_cell(tooltip, path, col, None)
+                _widget.set_tooltip_cell(tooltip, path, col, None)
                 return True
 
-    def click(self, treeview, event):
-        '''if event.button == 1 and event.type == Gdk.EventType._2BUTTON_PRESS:
+    def click(self, treeview, _event):
+        '''if _event.button == 1 and _event.type == Gdk.EventType._2BUTTON_PRESS:
             selection = treeview.get_selection()
             model, paths = selection.get_selected_rows()
             if len(paths) > 0:
                 user = self.set.users[model[paths[0]][0]]
                 self.Edit(None, user)''' # TODO: Uncomment me when the Dialog editing can be done
-        if event.button == 3 and event.type == Gdk.EventType.BUTTON_PRESS:
+        if _event.button == 3 and _event.type == Gdk.EventType.BUTTON_PRESS:
             selection = treeview.get_selection()
-            model, paths = selection.get_selected_rows()
+            _model, paths = selection.get_selected_rows()
             if len(paths) > 0:
-                self.menu.popup(None, None, None, None, event.button, event.time)
+                self.menu.popup(None, None, None, None, _event.button, _event.time)
                 return True
 
-    def on_delete_users_activate(self, widget):
+    def on_delete_users_activate(self, _widget):
         selection = self.tree.get_selection()
         model, paths = selection.get_selected_rows()
         iters = [model.get_iter(path) for path in paths]
@@ -587,10 +588,10 @@ class ImportDialog:
             self.remove_row(i)
         self.detect_conflicts()
 
-    def edited_text(self, cell, path, new_text, model, col):
+    def edited_text(self, _cell, path, new_text, model, col):
         """Set the attributes of a user."""
         username = model[path][0]
-        u = self.set.users[username]
+        usr = self.set.users[username]
         int_columns = [1, 2, 12, 13, 14, 15, 16, 17]
         attrs = ['name', 'uid', 'gid', 'primary_group', 'rname', 'office',
                  'wphone', 'hphone', 'other', 'directory', 'shell', 'groups',
@@ -598,31 +599,31 @@ class ImportDialog:
                  'plainpw']
         if col in int_columns:
             try:
-                u.__dict__[attrs[col]] = int(new_text)
+                usr.__dict__[attrs[col]] = int(new_text)
             except ValueError:
                 return
         else:
             if col == 0:
                 if new_text in self.set.users:
                     return
-                u.name = new_text
-                u.directory = '/home/%s' % new_text
+                usr.name = new_text
+                usr.directory = '/home/%s' % new_text
                 self.set.users[new_text] = self.set.users.pop(username)
-                model[path][0] = u.name
+                model[path][0] = usr.name
             elif col == 11:
-                u.groups = new_text.strip().split(',')
+                usr.groups = new_text.strip().split(',')
             elif col == 19:
                 # Set user.password from plainpw
-                u.plainpw = new_text
-                u.password = libuser.system.encrypt(u.plainpw)
+                usr.plainpw = new_text
+                usr.password = libuser.system.encrypt(usr.plainpw)
             else:
-                u.__dict__[attrs[col]] = new_text
+                usr.__dict__[attrs[col]] = new_text
         self.set_row_from_object(model[path])
         self.detect_conflicts()
 
-    def delete(self, treeview, event):
+    def delete(self, treeview, _event):
         """Delete the selected rows."""
-        if Gdk.keyval_name(event.keyval) == "Delete":
+        if Gdk.keyval_name(_event.keyval) == "Delete":
             selection = treeview.get_selection()
             model, paths = selection.get_selected_rows()
             iters = [model.get_iter(path) for path in paths]

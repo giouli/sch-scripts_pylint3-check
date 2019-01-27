@@ -2,7 +2,6 @@
 # This file is part of sch-scripts, https://launchpad.net/sch-scripts
 # Copyright 2009-2018 the sch-scripts team, see AUTHORS.
 # SPDX-License-Identifier: GPL-3.0-or-later
-# pylint: disable= invalid-name, no-self-use, line-too-long, too-many-arguments, too-many-instance-attributes, too-many-public-methods
 """User handling classes and functions."""
 
 import pwd
@@ -47,7 +46,7 @@ CSV_USER_FIELDS.extend(['Κρυπτογραφημένος κωδικός', 'Κω
 
 class User:
     """Make the user's fields for the form."""
-    
+
     def __init__(self, name=None, uid=None, gid=None, rname="", office="", wphone="",
                  hphone="", other="", directory=None, shell="/bin/bash", groups=None, lstchg=None,
                  min=0, max=99999, warn=7, inact=-1, expire=-1, password="*", plainpw=None):
@@ -80,7 +79,7 @@ class User:
 
     def get_ids_from_home(self, base='/home'):
         """Get ids.
-        
+
         Return the owner's UID and GID of the /home/<username>
         if this exists or None.
         """
@@ -93,7 +92,7 @@ class User:
 
 class Group:
     """Make the group's fields for the form."""
-    
+
     def __init__(self, name=None, gid=None, members=None, password=""):
         self.name, self.gid, self.members, self.password = \
             name, gid, members, password
@@ -114,7 +113,7 @@ class Group:
 #       when the user/group_object.name changes. python sets would be good.
 class Set(object):
     """A set of User and Group objects."""
-    
+
     def __init__(self, users=None, groups=None):
         self.users = {} if users is None else users
         self.groups = {} if groups is None else groups
@@ -133,11 +132,11 @@ class Set(object):
         """
         for group in user.groups:
             if group in self.groups:
-                g = self.groups[group]
-                if g.is_private() and g.name == user.name:
-                    del self.groups[g.name]
+                grup = self.groups[group]
+                if grup.is_private() and grup.name == user.name:
+                    del self.groups[grup.name]
                 else:
-                    del g.members[user.name]
+                    del grup.members[user.name]
         del self.users[user.name]
 
     def add_group(self, group):
@@ -184,13 +183,13 @@ class Set(object):
         used_uids = [user.uid for user in self.users.values()]
         if exclude is not None:
             used_uids.extend(exclude)
-        xr = range(start, end+1)
+        val = range(start, end+1)
         if reverse:
-            xr = reversed(xr)
+            val = reversed(val)
 
         uid = None
 
-        for i in xr:
+        for i in val:
             if i == ignore or i not in used_uids:
                 uid = i
                 break
@@ -201,13 +200,13 @@ class Set(object):
         used_gids = [group.gid for group in self.groups.values()]
         if exclude is not None:
             used_gids.extend(exclude)
-        xr = range(start, end+1)
+        val = range(start, end+1)
         if reverse:
-            xr = reversed(xr)
+            val = reversed(val)
 
         gid = None
 
-        for i in xr:
+        for i in val:
             if i == ignore or i not in used_gids:
                 gid = i
                 break
@@ -221,14 +220,14 @@ class Event:
     def connect(self, func):
         self.subscribers.append(func)
 
-    def notify(self, arg=None, *kwargs):
+    def notify(self, arg=None, *_kwargs):
         for subscriber in self.subscribers:
             subscriber(arg)
 
 
 class System(Set):
     """Command for system modifications."""
-    
+
     def __init__(self):
         super(System, self).__init__()
         self.load()
@@ -256,13 +255,15 @@ class System(Set):
             else:
                 self.add_user(user)
 
-    def edit_group(self, groupname, group):
+    @classmethod
+    def edit_group(cls, groupname, group):
         """Edit a group."""
         common.run_command(['groupmod', '-g', str(group.gid), '-n', group.name, groupname])
         for user in group.members.values():
             common.run_command(['usermod', '-a', '-G', group.name, user.name])
 
-    def delete_group(self, group):
+    @classmethod
+    def delete_group(cls, group):
         common.run_command(['groupdel', group.name])
 
     def add_user(self, user, create_home=True):
@@ -275,8 +276,9 @@ class System(Set):
         common.run_command(cmd)
         self.update_user(user.name, user)
 
-    def _strcnv(self, t):
-        return [str(i) for i in t]
+    @classmethod
+    def _strcnv(cls, val):
+        return [str(i) for i in val]
 
     def update_user(self, username, user):
         """Update the main values of a user."""
@@ -322,7 +324,8 @@ class System(Set):
         cmd = self._strcnv(cmd)
         common.run_command(cmd)
 
-    def delete_user(self, user, remove_home=False):
+    @classmethod
+    def delete_user(cls, user, remove_home=False):
         """Delete a user."""
         cmd = ['userdel']
         if remove_home:
@@ -330,62 +333,67 @@ class System(Set):
         cmd.append(user.name)
         common.run_command(cmd)
 
-    def add_user_to_groups(self, user, groups):
+    @classmethod
+    def add_user_to_groups(cls, user, groups):
         """Add a user to a group."""
         groups = ','.join([gr.name for gr in groups])
         common.run_command(['usermod', '-a', '-G', groups, user.name])
 
-    def remove_user_from_groups(self, user, groups):
+    @classmethod
+    def remove_user_from_groups(cls, user, groups):
         """Remove a user from a group."""
         groups = [gr.name for gr in groups]
         new_groups = [group for group in user.groups if group not in groups]
         new_groups_str = ','.join(new_groups)
         common.run_command(['usermod', '-G', new_groups_str, user.name])
 
-    def lock_user(self, user):
+    @classmethod
+    def lock_user(cls, user):
         """Lock a certain user."""
         common.run_command(['usermod', '-L', user.name])
 
-    def unlock_user(self, user):
+    @classmethod
+    def unlock_user(cls, user):
         """Unlock a certain user."""
         common.run_command(['usermod', '-U', user.name])
 
-    def user_is_locked(self, user):
+    @classmethod
+    def user_is_locked(cls, user):
         return user.password is None or user.password[0] in "!*"
 
     def load(self):
         """Generic operations."""
         pwds = pwd.getpwall()
         spwds = spwd.getspall()
-        sn = {}
-        for s in spwds:
-            sn[s.sp_nam] = s
+        val = {}
+        for num in spwds:
+            val[num.sp_nam] = num
 
-        for p in pwds:
-            if p.pw_name in sn:
-                s = sn[p.pw_name]
+        for pas in pwds:
+            if pas.pw_name in val:
+                num = val[pas.pw_name]
             else:
-                s = spwd.struct_spwd([None]*9)
+                num = spwd.struct_spwd([None]*9)
 
-            gecos = p.pw_gecos.split(',', 4)
+            gecos = pas.pw_gecos.split(',', 4)
             gecos += [''] * (5 - len(gecos)) # Pad with empty strings so we have exactly 5 items
             rname, office, wphone, hphone, other = gecos
-            u = User(p.pw_name, p.pw_uid, p.pw_gid, rname, office, wphone, hphone,
-                     other, p.pw_dir, p.pw_shell, [grp.getgrgid(p.pw_gid).gr_name], s.sp_lstchg, s.sp_min, s.sp_max, s.sp_warn,
-                     s.sp_inact, s.sp_expire, s.sp_pwd)
-            self.users[u.name] = u
+            usr = User(pas.pw_name, pas.pw_uid, pas.pw_gid, rname, office, wphone, hphone,
+                       other, pas.pw_dir, pas.pw_shell, [grp.getgrgid(pas.pw_gid).gr_name], num.sp_lstchg, num.sp_min, num.sp_max, num.sp_warn,
+                       num.sp_inact, num.sp_expire, num.sp_pwd)
+            self.users[usr.name] = usr
 
         groups = grp.getgrall()
         for group in groups:
-            g = Group(group.gr_name, group.gr_gid)
+            grup = Group(group.gr_name, group.gr_gid)
             for member in group.gr_mem:
                 if member in self.users:
                     ugroups = self.users[member].groups
                     if group.gr_name not in ugroups:
                         self.users[member].groups.append(group.gr_name)
-                    g.members[member] = self.users[member]
+                    grup.members[member] = self.users[member]
 
-            self.groups[group.gr_name] = g
+            self.groups[group.gr_name] = grup
 
         for user in self.users.values():
             primary_group = grp.getgrgid(user.gid).gr_name
@@ -398,22 +406,25 @@ class System(Set):
         self.load()
         self.libuser_event.notify('event')
 
-    def get_valid_shells(self):
+    @classmethod
+    def get_valid_shells(cls):
         """Check validity of shells."""
         try:
-            f = open("/etc/shells")
-            shells = [line.strip() for line in f.readlines() if line.strip()[0] != '#']
-            f.close()
+            _file = open("/etc/shells")
+            shells = [line.strip() for line in _file.readlines() if line.strip()[0] != '#']
+            _file.close()
         except:
             shells = []
 
         return shells
 
-    def uid_is_valid(self, uid):
+    @classmethod
+    def uid_is_valid(cls, uid):
         """Check validity of user id."""
         return uid >= FIRST_SYSTEM_UID and uid <= LAST_UID
 
-    def gid_is_valid(self, gid):
+    @classmethod
+    def gid_is_valid(cls, gid):
         """Check validity of group id."""
         return gid >= FIRST_SYSTEM_GID and gid <= LAST_GID
 
@@ -425,7 +436,7 @@ class System(Set):
         """Check if group id is free."""
         return self.gid_is_valid(gid) and gid not in [group.gid for group in self.groups.values()]
 
-    def get_free_uids(self, starting=FIRST_UID, ending=LAST_UID):
+    def get_free_uids(self, _starting=FIRST_UID, _ending=LAST_UID):
         """Find and returns free user ids."""
         used_uids = [user.uid for user in self.users.values()]
 
@@ -435,11 +446,13 @@ class System(Set):
 
         return free_uids
 
-    def name_is_valid(self, name):
+    @classmethod
+    def name_is_valid(cls, name):
         """Check validity of the name."""
         return re.match(NAME_REGEX, name)
 
-    def gecos_is_valid(self, field):
+    @classmethod
+    def gecos_is_valid(cls, field):
         """This is for checking gecos *fields*, not entire gecos strings."""
         return ':' not in field and ',' not in field
 
@@ -447,7 +460,8 @@ class System(Set):
         """Check shell validity."""
         return shell in self.get_valid_shells()
 
-    def encrypt(self, plainpw):
+    @classmethod
+    def encrypt(cls, plainpw):
         """Convert a plain text password to a sha-512 encrypted one."""
         alphabet = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'
         salt = ''.join([random.choice(alphabet) for i in range(8)])
@@ -458,31 +472,31 @@ class System(Set):
         """Event functions."""
         self.libuser_event.connect(func)
 
-    def on_system_changed(self, event):
+    def on_system_changed(self, _event):
         """Event callback."""
         self.reload()
 
-    def on_fd_changed(self, ignored, filename, mask):
+    def on_fd_changed(self, _ignored, filename, _mask):
         """INotifier callback."""
         # For debugging use _watchpoint & _watchpaths
         self.notifier.ignore(filename)
         self.notifier._addWatch(filename, self.mask, False, [self.on_fd_changed])
         self.system_event.notify(filename.path)
 
-system = System()
+SYSTEM = System()
 
 if __name__ == '__main__':
-    print("System users:", ', '.join(system.users))
-    print("\nSystem groups:", ', '.join(system.groups))
+    print("System users:", ', '.join(SYSTEM.users))
+    print("\nSystem groups:", ', '.join(SYSTEM.groups))
 
     def analytical():
         """Show the systmen's users and groups."""
         print("System users:")
-        for user in system.users.values():
+        for user in SYSTEM.users.values():
             print(" ", user.name)
             print("   ", ", ".join(user.groups))
         print("\nSystem groups:")
-        for group in system.groups.values():
+        for group in SYSTEM.groups.values():
             print(" ", group.name)
             print("   ", ", ".join(group.members.keys()))
 

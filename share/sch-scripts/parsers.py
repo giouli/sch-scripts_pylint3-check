@@ -1,7 +1,6 @@
 # This file is part of sch-scripts, https://launchpad.net/sch-scripts
 # Copyright 2009-2018 the sch-scripts team, see AUTHORS.
 # SPDX-License-Identifier: GPL-3.0-or-later
-# pylint: disable= invalid-name, line-too-long
 """Parsers."""
 
 import csv
@@ -14,7 +13,7 @@ FIELDS_MAP = {'Όνομα χρήστη': 'name', 'Τελευταία αλλαγ�
 
 class CSV:
     """Parser for Comma-separated values."""
-    
+
     def __init__(self):
         self.fields_map = FIELDS_MAP
 
@@ -39,14 +38,14 @@ class CSV:
                     user.__dict__[attr] = None
             # If plainpw is set, override and update password
             if user.plainpw:
-                user.password = libuser.system.encrypt(user.plainpw)
+                user.password = libuser.SYSTEM.encrypt(user.plainpw)
 
             if user.name:
                 users[user.name] = user
                 user_groups_string = user.groups
                 user.groups = []
-                for g in user_groups_string.split(','):
-                    pair = g.split(':')
+                for grup in user_groups_string.split(','):
+                    pair = grup.split(':')
                     if len(pair) == 2:
                         gname, gid = pair
                         try:
@@ -54,7 +53,7 @@ class CSV:
                         except ValueError:
                             gid = None
                     else: # There is no GID specified for this group
-                        gname = g
+                        gname = grup
                         gid = None
                     if gname != '':
                         user.groups.append(gname)
@@ -71,8 +70,8 @@ class CSV:
 
 
     def write(self, fname, system, users):
-        f = open(fname, 'w')
-        writer = csv.DictWriter(f, fieldnames=libuser.CSV_USER_FIELDS)
+        _file = open(fname, 'w')
+        writer = csv.DictWriter(_file, fieldnames=libuser.CSV_USER_FIELDS)
         writer.writerow(dict((n, n) for n in libuser.CSV_USER_FIELDS))
         for user in users:
             u_dict = dict((key, user.__dict__[o_key] if user.__dict__[o_key] is not None else '') for key, o_key in self.fields_map.items())
@@ -87,12 +86,12 @@ class CSV:
             u_dict['Ομάδες'] = ','.join(final_groups)
 
             writer.writerow(u_dict)
-        f.close()
+        _file.close()
 
 
-class passwd():
+class Passwd():
     """Parser for password."""
-    
+
     # passwd format: username:password (or x):UID:GID:gecos:home:shell
     # shadow format: username:password (or */!):last change:min:max:warn:inact:expire:reserved
     # group format: group_name:password (or x):GID:user_list
@@ -100,69 +99,70 @@ class passwd():
     def __init__(self):
         pass
 
-    def parse(self, pwd, spwd=None, grp=None):
+    @classmethod
+    def parse(cls, pwd, spwd=None, grp=None):
         new_set = libuser.Set()
 
-        with open(pwd) as f:
-            reader = csv.reader(f, delimiter=':', quoting=csv.QUOTE_NONE)
+        with open(pwd) as _file:
+            reader = csv.reader(_file, delimiter=':', quoting=csv.QUOTE_NONE)
             for row in reader:
-                u = libuser.User()
-                u.name = row[0]
-                u.password = row[1]
-                u.uid = int(row[2])
-                u.gid = int(row[3])
+                usr = libuser.User()
+                usr.name = row[0]
+                usr.password = row[1]
+                usr.uid = int(row[2])
+                usr.gid = int(row[3])
                 gecos = row[4].split(',', 4)
                 gecos += [''] * (5 - len(gecos)) # Pad with empty strings so we have exactly 5 items
-                u.rname, u.office, u.wphone, u.hphone, u.other = gecos
-                u.directory = row[5]
-                u.shell = row[6]
-                new_set.add_user(u)
+                usr.rname, usr.office, usr.wphone, usr.hphone, usr.other = gecos
+                usr.directory = row[5]
+                usr.shell = row[6]
+                new_set.add_user(usr)
 
         if spwd:
-            with open(spwd) as f:
-                reader = csv.reader(f, delimiter=':', quoting=csv.QUOTE_NONE)
+            with open(spwd) as _file:
+                reader = csv.reader(_file, delimiter=':', quoting=csv.QUOTE_NONE)
                 for row in reader:
                     name = row[0]
-                    u = new_set.users[name] # The user must exist in passwd
-                    u.password = row[1]
+                    usr = new_set.users[name] # The user must exist in passwd
+                    usr.password = row[1]
                     nums = ['lstchg', 'min', 'max', 'warn', 'inact', 'expire']
                     for i, att in enumerate(nums, 2):
                         try:
-                            u.__dict__[att] = int(row[i])
+                            usr.__dict__[att] = int(row[i])
                         except:
                             pass
 
         if grp:
-            with open(grp) as f:
-                reader = csv.reader(f, delimiter=':', quoting=csv.QUOTE_NONE)
+            with open(grp) as _file:
+                reader = csv.reader(_file, delimiter=':', quoting=csv.QUOTE_NONE)
                 gids_map = {} # This is only used to set the primary_group User attribute
                 for row in reader:
-                    g = libuser.Group()
-                    g.name = row[0]
-                    g.gid = int(row[2])
+                    grup = libuser.Group()
+                    grup.name = row[0]
+                    grup.gid = int(row[2])
                     members = row[3].split(',')
                     if members == ['']:
                         members = []
-                    g.members = {}
+                    grup.members = {}
                     for name in members:
-                        g.members[name] = new_set.users[name]
-                        new_set.users[name].groups.append(g.name)
+                        grup.members[name] = new_set.users[name]
+                        new_set.users[name].groups.append(grup.name)
 
-                    new_set.add_group(g)
-                    gids_map[g.gid] = g.name
+                    new_set.add_group(grup)
+                    gids_map[grup.gid] = grup.name
 
-                for u in new_set.users.values():
-                    u.primary_group = gids_map[u.gid]
-                    if u.primary_group in u.groups:
-                        u.groups.remove(u.primary_group)
-                    #u.groups.append(u.primary_group)
+                for usr in new_set.users.values():
+                    usr.primary_group = gids_map[usr.gid]
+                    if usr.primary_group in usr.groups:
+                        usr.groups.remove(usr.primary_group)
+                    #usr.groups.append(usr.primary_group)
 
         return new_set
 
 
 class DHCP():
     """Parser for Dynamic Host Configuration Protocol."""
-    
+
     def __init__(self):
         self.dhcp_info = {}
 
@@ -182,7 +182,7 @@ class DHCP():
         config = configparser.ConfigParser(allow_no_value=True)
         config.readfp(vconfig_file)
         try:
-            ip = config.get('Root', 'ipv4addr').strip("'")
+            ipad = config.get('Root', 'ipv4addr').strip("'")
         except configparser.NoOptionError:
             return
 
@@ -190,22 +190,22 @@ class DHCP():
         route = config.get('Root', 'ipv4gateway').strip("'")
 
         try:
-            dns0 = config.get('Root', 'ipv4dns0').strip("'")
+            _dns0 = config.get('Root', 'ipv4dns0').strip("'")
         except configparser.NoOptionError:
-            dns0 = None
+            _dns0 = None
 
         try:
-            dns1 = config.get('Root', 'ipv4dns1').strip("'")
+            _dns1 = config.get('Root', 'ipv4dns1').strip("'")
         except configparser.NoOptionError:
-            dns1 = None
+            _dns1 = None
 
         try:
-            dns2 = config.get('Root', 'ipv4dns2').strip("'")
+            _dns2 = config.get('Root', 'ipv4dns2').strip("'")
         except configparser.NoOptionError:
-            dns2 = None
+            _dns2 = None
 
         dnss = sorted([value for key, value in locals().items() if key.startswith('dns') and value and value != '0.0.0.0'])
 
-        self.dhcp_info.update(ip=ip, mask=mask, route=route, dnss=dnss)
+        self.dhcp_info.update(ipad=ipad, mask=mask, route=route, dnss=dnss)
 
         return self.dhcp_info

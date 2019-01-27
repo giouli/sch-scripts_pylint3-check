@@ -13,7 +13,7 @@ gi.require_version('Gtk', '3.0')
 
 class LtspInfo:
     """Show the output of ltsp-info in a dialog."""
-    
+
     def __init__(self, main_window):
         gladefile = "ltsp_info.ui"
         self.builder = Gtk.Builder()

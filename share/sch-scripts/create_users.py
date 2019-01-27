@@ -1,7 +1,6 @@
 # This file is part of sch-scripts, https://launchpad.net/sch-scripts
 # Copyright 2009-2018 the sch-scripts team, see AUTHORS.
 # SPDX-License-Identifier: GPL-3.0-or-later
-# pylint: disable= invalid-name, unused-argument
 """Create users dialog."""
 
 import datetime
@@ -15,10 +14,10 @@ gi.require_version('Gtk', '3.0')
 
 class NewUsersDialog:
     """Create users dialog."""
-    
-    def __init__(self, system, sf):
+
+    def __init__(self, system, slf):
         self.system = system
-        self.sf = sf
+        self.slf = slf
 
         self.glade = Gtk.Builder()
         self.glade.add_from_file('create_users.ui')
@@ -42,7 +41,7 @@ class NewUsersDialog:
         self.glade.get_object('groups_template_entry').set_text("{c} "+" ".join(self.groups))
         self.dialog.show()
 
-    def on_template_changed(self, widget=None):
+    def on_template_changed(self, _widget=None):
         """Check the validity of characters in the classes entry and in the username entry."""
         classes_str = self.glade.get_object('classes_entry').get_text().strip()
         self.classes = classes_str.split()
@@ -97,18 +96,18 @@ class NewUsersDialog:
             for compn in range(1, self.computers+1):
                 if len(self.user_store) == 300:
                     break
-                ev = lambda x: x.replace('{c}', classn.strip()).replace('{i}',
-                                                                        str(compn)).replace('{0i}', '%02d' %compn)
-                self.user_store.append([ev(self.username_tmpl), ev(self.name_tmpl),
-                                        '/home/'+ev(self.username_tmpl), ev(self.password_tmpl)])
+                evl = lambda x: x.replace('{c}', classn.strip()).replace('{i}',
+                                                                         str(compn)).replace('{0i}', '%02d' %compn)
+                self.user_store.append([evl(self.username_tmpl), evl(self.name_tmpl),
+                                        '/home/'+evl(self.username_tmpl), evl(self.password_tmpl)])
 
         users_number = self.computers * len(self.classes)
         self.glade.get_object('users_number_label').set_text(
             'Θα δημιουργηθούν οι παρακάτω %d λογαριασμοί' %users_number)
 
-    def on_button_apply_clicked(self, widget):
+    def on_button_apply_clicked(self, _widget):
         """On click apply changes.
-        
+
         Create groups for all the listed classes, adds teachers to group,
         create shared folders and finally, create the users.
         """
@@ -165,7 +164,7 @@ class NewUsersDialog:
                 for classn in self.classes:
                     while Gtk.events_pending():
                         Gtk.main_iteration()
-                    self.sf.add([classn])
+                    self.slf.add([classn])
 
 
         # And finally, create the users
@@ -177,24 +176,24 @@ class NewUsersDialog:
                 progressbar.set_text('Δημιουργία χρήστη %d από %d...'
                                      %(users_created+1, total_users))
 
-                ev = lambda x: x.replace('{c}', classn.strip()).replace('{i}',
-                                                                        str(compn)).replace('{0i}', '%02d'%compn)
+                evl = lambda x: x.replace('{c}', classn.strip()).replace('{i}',
+                                                                         str(compn)).replace('{0i}', '%02d'%compn)
                 epoch = datetime.datetime.utcfromtimestamp(0)
-                uname = ev(self.username_tmpl)
+                uname = evl(self.username_tmpl)
                 tmp_uid = self.system.get_free_uid(exclude=set_uids)
                 set_uids.append(tmp_uid)
                 tmp_gid = self.system.get_free_gid(exclude=set_gids)
-                tmp_password = ev(self.password_tmpl)
+                tmp_password = evl(self.password_tmpl)
                 # Create the UPG
-                g = libuser.Group(uname, tmp_gid)
-                self.system.add_group(g)
-                u = libuser.User(name=uname, uid=tmp_uid,
-                                 gid=tmp_gid, rname=ev(self.name_tmpl),
-                                 directory=('/home/'+ev(self.username_tmpl)),
-                                 lstchg=(datetime.datetime.today() - epoch).days,
-                                 groups=[classn],
-                                 password=self.system.encrypt(tmp_password))
-                self.system.add_user(u)
+                grp = libuser.Group(uname, tmp_gid)
+                self.system.add_group(grp)
+                usr = libuser.User(name=uname, uid=tmp_uid,
+                                   gid=tmp_gid, rname=evl(self.name_tmpl),
+                                   directory=('/home/'+evl(self.username_tmpl)),
+                                   lstchg=(datetime.datetime.today() - epoch).days,
+                                   groups=[classn],
+                                   password=self.system.encrypt(tmp_password))
+                self.system.add_user(usr)
                 self.system.load()
                 users_created += 1
                 progressbar.set_fraction(float(users_created) / float(total_users))
@@ -211,15 +210,15 @@ class NewUsersDialog:
         progressbar.set_text("Η διαδικασία ολοκληρώθηκε.")
         button_close.set_sensitive(True)
 
-    def on_progress_button_close_clicked(self, widget):
+    def on_prog_button_close_clicked(self, _widget):
         """Close the dialog before the process is completed."""
         self.dialog.destroy()
 
-    def on_button_cancel_clicked(self, widget):
+    def on_button_cancel_clicked(self, _widget):
         """Cancel the process."""
         self.dialog.destroy()
 
-    def on_button_help_clicked(self, widget):
+    def on_button_help_clicked(self, _widget):
         """Show a help dialog."""
         dialog = self.glade.get_object('help_dialog')
         dialog.run()

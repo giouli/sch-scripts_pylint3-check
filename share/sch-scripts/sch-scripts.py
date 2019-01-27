@@ -2,7 +2,6 @@
 # This file is part of sch-scripts, https://launchpad.net/sch-scripts
 # Copyright 2009-2018 the sch-scripts team, see AUTHORS.
 # SPDX-License-Identifier: GPL-3.0-or-later
-# pylint: disable= invalid-name, line-too-long, unused-argument, no-self-use
 """Sch-scripts."""
 
 import getpass
@@ -41,8 +40,8 @@ gi.require_version('Gtk', '3.0')
 
 class Gui:
     def __init__(self):
-        self.system = libuser.system
-        self.sf = shared_folders.SharedFolders(self.system)
+        self.system = libuser.SYSTEM
+        self.shfol = shared_folders.SharedFolders(self.system)
         self.conf = config.PARSER
         self.builder = Gtk.Builder()
         self.builder.add_from_file('sch-scripts.ui')
@@ -89,12 +88,14 @@ class Gui:
 
 ## General helper functions
 
-    def edit_file(self, filename):
+    @classmethod
+    def edit_file(cls, filename):
         """Function for editing a file."""
         subprocess.Popen(['xdg-open', filename], stdin=open(os.devnull))
         # TODO: Maybe throw an error message if not os.path.isfile(filename)
 
-    def run_as_sudo_user(self, cmd):
+    @classmethod
+    def run_as_sudo_user(cls, cmd):
         print('EXECUTE:\t' + '\t'.join(cmd))
         sys.stdout.flush()
 
@@ -117,11 +118,11 @@ class Gui:
 
 ## INotify
 
-    def on_libuser_changed(self, event):
-        self.queue.append(event)
-        d = defer.Deferred()
-        reactor.callLater(1, d.callback, len(self.queue))
-        d.addCallback(self.check_libuser_events)
+    def on_libuser_changed(self, _event):
+        self.queue.append(_event)
+        dif = defer.Deferred()
+        reactor.callLater(1, dif.callback, len(self.queue))
+        dif.addCallback(self.check_libuser_events)
 
     def check_libuser_events(self, len_queue):
         if len_queue == len(self.queue):
@@ -139,7 +140,7 @@ class Gui:
 
     def repopulate_treeviews(self):
         """Repopulate treeviews.
-        
+
         Preserve the selected groups and users, clear and refill the treeviews
         and reselect the previously selected groups and users, if possible.
         """
@@ -163,7 +164,7 @@ class Gui:
             if uname in users_iters:
                 users_selection.select_iter(users_iters[uname])
 
-    def set_user_visibility(self, model, rowiter, options):
+    def set_user_visibility(self, model, rowiter, _options):
         """Set if a user is visible."""
         user = model[rowiter][0]
         selected = self.get_selected_groups()
@@ -171,7 +172,7 @@ class Gui:
         return (len(selected) == 0 and (self.show_system_groups or not user.is_system_user())) \
                 or user in [u for g in selected for u in g.members.values()]
 
-    def set_group_visibility(self, model, rowiter, options):
+    def set_group_visibility(self, model, rowiter, _options):
         """Set if a group is private."""
         group = model[rowiter][0]
         return (self.show_private_groups or not group.is_private()) and (self.show_system_groups or group.is_user_group())
@@ -222,12 +223,12 @@ class Gui:
                 mi_delete_user.set_label('Διαγραφή χρηστών...')
 
 
-    def on_users_tv_button_press_event(self, widget, event):
-        clicked = widget.get_path_at_pos(int(event.x), int(event.y))
+    def on_users_tv_button_press_event(self, _widget, _event):
+        clicked = _widget.get_path_at_pos(int(_event.x), int(_event.y))
 
-        if event.button == 3:
-            menu = self.builder.get_object('mn_users').popup(None, None, None, None, event.button, event.time)
-            selection = widget.get_selection()
+        if _event.button == 3:
+            _menu = self.builder.get_object('mn_users').popup(None, None, None, None, _event.button, _event.time)
+            selection = _widget.get_selection()
             selected = selection.get_selected_rows()[1]
             if clicked:
                 clicked = clicked[0]
@@ -238,12 +239,12 @@ class Gui:
                 selection.unselect_all()
             return True
 
-    def on_groups_tv_button_press_event(self, widget, event):
-        clicked = widget.get_path_at_pos(int(event.x), int(event.y))
+    def on_groups_tv_button_press_event(self, _widget, _event):
+        clicked = _widget.get_path_at_pos(int(_event.x), int(_event.y))
 
-        if event.button == 3:
-            menu = self.builder.get_object('mn_groups').popup(None, None, None, None, event.button, event.time)
-            selection = widget.get_selection()
+        if _event.button == 3:
+            _menu = self.builder.get_object('mn_groups').popup(None, None, None, None, _event.button, _event.time)
+            selection = _widget.get_selection()
             selected = selection.get_selected_rows()[1]
             if clicked:
                 clicked = clicked[0]
@@ -254,16 +255,16 @@ class Gui:
                 selection.unselect_all()
             return True
 
-    def on_users_treeview_row_activated(self, widget, path, column):
-        user_form.EditUserDialog(self.system, widget.get_model()[path][0])
+    def on_users_treeview_row_activated(self, _widget, path, _column):
+        user_form.EditUserDialog(self.system, _widget.get_model()[path][0])
 
-    def on_groups_treeview_row_activated(self, widget, path, column):
-        group_form.EditGroupDialog(self.system, self.sf, widget.get_model()[path][0])
+    def on_groups_treeview_row_actv(self, _widget, path, _column):
+        group_form.EditGroupDialog(self.system, self.shfol, _widget.get_model()[path][0])
 
-    def on_unselect_all_groups_clicked(self, widget):
+    def on_unselect_all_groups_clicked(self, _widget):
         self.groups_tree.get_selection().unselect_all()
 
-    def on_main_window_delete_event(self, widget, event):
+    def on_main_window_delete_event(self, _widget, _event):
         self.conf.set('GUI', 'show_private_groups', str(self.show_private_groups))
         self.conf.set('GUI', 'show_system_groups', str(self.show_system_groups))
         visible_cols = [col.get_title() for col in self.users_tree.get_columns() if col.get_visible()]
@@ -273,15 +274,17 @@ class Gui:
 
 ## File menu
 
-    def on_mi_signup_activate(self, widget):
+    @classmethod
+    def on_mi_signup_activate(cls, _widget):
         subprocess.Popen(['./signup_server.py'])
 
     #FIXME: Maybe use notify /etc/group then self.populate_treeviews not need to
     #update user groups for shared folder library
-    def on_mi_new_users_activate(self, widget):
-        create_users.NewUsersDialog(self.system, self.sf)
+    def on_mi_new_users_activate(self, _widget):
+        create_users.NewUsersDialog(self.system, self.shfol)
 
-    def on_mi_import_passwd_activate(self, widget):
+    @classmethod
+    def on_mi_import_passwd_activate(cls, _widget):
         """Import password file dialog."""
         chooser = Gtk.FileChooserDialog(title="Επιλέξτε το αρχείο passwd προς εισαγωγή",
                                         action=Gtk.FileChooserAction.OPEN,
@@ -302,7 +305,7 @@ class Gui:
                 shadow = None
             if not os.path.isfile(group):
                 group = None
-            new_users = parsers.passwd().parse(passwd, shadow, group)
+            new_users = parsers.Passwd().parse(passwd, shadow, group)
             if len(new_users.users) == 0:
                 text = "Το αρχείο '%s' δεν περιέχει δεδομένα." % passwd
                 dialogs.ErrorDialog(text, "Σφάλμα").showup()
@@ -312,9 +315,10 @@ class Gui:
         else:
             chooser.destroy()
 
-    def on_mi_import_csv_activate(self, widget):
+    @classmethod
+    def on_mi_import_csv_activate(cls, _widget):
         """Import csv file.
-        
+
         If the file is empty return false.
         """
         chooser = Gtk.FileChooserDialog(title="Επιλέξτε το αρχείο CSV προς εισαγωγή",
@@ -339,7 +343,7 @@ class Gui:
         else:
             chooser.destroy()
 
-    def on_mi_export_csv_activate(self, widget):
+    def on_mi_export_csv_activate(self, _widget):
         """Export csv file."""
         users = self.get_selected_users()
         if len(users) == 0:
@@ -351,14 +355,15 @@ class Gui:
 
 ## Server menu
 
-    def on_mi_configuration_network_activate(self, widget):
-        ip_dialog.Ip_Dialog(self.main_window)
+    def on_mi_config_network_activate(self, _widget):
+        ip_dialog.IpDialog(self.main_window)
 
-    def on_mi_ltsp_update_image_activate(self, widget):
-        """Ltsp-update-image. 
-        
-        Generates a compressed squashfs image from an LTSP chroot 
-        and exports it. Temporarily remove user accounts, logs, 
+    @classmethod
+    def on_mi_ltsp_update_image_actv(cls, _widget):
+        """Ltsp-update-image.
+
+        Generates a compressed squashfs image from an LTSP chroot
+        and exports it. Temporarily remove user accounts, logs,
         caches etc from the chroot before exporting the image.
         """
         message = "Θέλετε σίγουρα να προχωρήσετε στην δημοσίευση του εικονικού δίσκου;"
@@ -369,7 +374,8 @@ class Gui:
         if response == Gtk.ResponseType.YES:
             subprocess.Popen(['./run-in-terminal', 'ltsp-update-image', '--cleanup', '/'])
 
-    def on_mi_ltsp_revert_image_activate(self, widget):
+    @classmethod
+    def on_mi_ltsp_revert_image_actv(cls, _widget):
         """Swap chroot.img with chroot.img.old and update kernels."""
         message = "Θέλετε σίγουρα να προχωρήσετε στην επαναφορά του εικονικού δίσκου σε προηγούμενη έκδοση;"
         dlg = dialogs.AskDialog(message)
@@ -377,61 +383,62 @@ class Gui:
         if response == Gtk.ResponseType.YES:
             subprocess.Popen(['./run-in-terminal', 'ltsp-update-image', '--revert', '/'])
 
-    def on_mi_edit_lts_conf_activate(self, widget):
+    def on_mi_edit_lts_conf_activate(self, _widget):
         """Edit file lts.conf."""
         for file in glob.glob('/var/lib/tftpboot/ltsp/*/lts.conf'):
             self.edit_file(file)
 
-    def on_mi_edit_pxelinux_cfg_activate(self, widget):
+    def on_mi_edit_pxelinux_cfg_actv(self, _widget):
         """Edit file pxelinux.cfg."""
         for file in glob.glob('/var/lib/tftpboot/ltsp/*/pxelinux.cfg/default'):
             self.edit_file(file)
 
-    def on_mi_edit_shared_folders_activate(self, widget):
+    def on_mi_edit_shared_fldrs_actv(self, _widget):
         """Edit shared-folders."""
         self.edit_file('/etc/default/shared-folders')
 
-    def on_mi_edit_dnsmasq_conf_activate(self, widget):
+    def on_mi_edit_dnsmasq_conf_actv(self, _widget):
         """Edit ltsp-server-dnsmasq.conf."""
         self.edit_file('/etc/dnsmasq.d/ltsp-server-dnsmasq.conf')
 
-    def on_mi_purge_kernels_activate(self, widget):
+    def on_mi_purge_kernels_activate(self, _widget):
         maintenance.Purge(self.main_window)
 
-    def on_mi_apt_get_clean_activate(self, widget):
+    def on_mi_apt_get_clean_activate(self, _widget):
         maintenance.Clean(self.main_window)
 
-    def on_mi_apt_get_purge_activate(self, widget):
+    def on_mi_apt_get_purge_activate(self, _widget):
         maintenance.AutoRemove(self.main_window)
 
 ## View menu
 
-    def on_mi_view_column_toggled(self, checkmenuitem, treeviewcolumn):
+    @classmethod
+    def on_mi_view_column_toggled(cls, checkmenuitem, treeviewcolumn):
         treeviewcolumn.set_visible(checkmenuitem.get_active())
 
-    def on_mi_show_system_groups_toggled(self, widget):
+    def on_mi_show_syst_grps_toggled(self, _widget):
         self.show_system_groups = not self.show_system_groups
         self.groups_filter.refilter()
         self.users_filter.refilter()
 
-    def on_mi_show_private_groups_toggled(self, widget):
+    def on_mi_show_prvt_grps_toggled(self, _widget):
         self.show_private_groups = not self.show_private_groups
         self.groups_filter.refilter()
 
-    def on_mi_refresh_activate(self, widget):
+    def on_mi_refresh_activate(self, _widget):
         self.repopulate_treeviews()
 
 ## Users menu
 
-    def on_mi_new_user_activate(self, widget):
+    def on_mi_new_user_activate(self, _widget):
         """New user dialog activate."""
         user_form.NewUserDialog(self.system)
 
-    def on_mi_edit_user_activate(self, widget):
+    def on_mi_edit_user_activate(self, _widget):
         """Edit user dialog activate."""
         user_form.EditUserDialog(self.system, self.get_selected_users()[0])
 
-    def on_mi_delete_user_activate(self, widget):
+    def on_mi_delete_user_activate(self, _widget):
         """Delete users dialog activate."""
         users = self.get_selected_users()
         users_n = len(users)
@@ -458,7 +465,7 @@ class Gui:
             for user in self.get_selected_users():
                 self.system.delete_user(user, rm_homes)
 
-    def on_mi_remove_user_activate(self, widget):
+    def on_mi_remove_user_activate(self, _widget):
         """Remove users from groups dialog."""
         users = self.get_selected_users()
         groups = self.get_selected_groups()
@@ -477,15 +484,15 @@ class Gui:
 
 ## Groups menu
 
-    def on_mi_new_group_activate(self, widget):
+    def on_mi_new_group_activate(self, _widget):
         """New group dialog activate."""
-        group_form.NewGroupDialog(self.system, self.sf)
+        group_form.NewGroupDialog(self.system, self.shfol)
 
-    def on_mi_edit_group_activate(self, widget):
+    def on_mi_edit_group_activate(self, _widget):
         """Edit group dialog activate."""
-        group_form.EditGroupDialog(self.system, self.sf, self.get_selected_groups()[0])
+        group_form.EditGroupDialog(self.system, self.shfol, self.get_selected_groups()[0])
 
-    def on_mi_delete_group_activate(self, widget):
+    def on_mi_delete_group_activate(self, _widget):
         """Delete groups dialog activate."""
         groups = self.get_selected_groups()
         groups_n = len(groups)
@@ -497,28 +504,28 @@ class Gui:
 
         response = dialogs.AskDialog(message).showup()
         if response == Gtk.ResponseType.YES:
-            self.sf.remove(groups)
+            self.shfol.remove(groups)
             for group in groups:
                 self.system.delete_group(group)
 
 ## Help menu
 
-    def on_mi_home_activate(self, widget):
+    def on_mi_home_activate(self, _widget):
         """If help is needed, opens a link."""
         self.open_link('http://ts.sch.gr/wiki/Linux/LTSP')
 
-    def on_mi_report_bug_activate(self, widget):
+    def on_mi_report_bug_activate(self, _widget):
         """If there is a bug to be reported, opens a link."""
         self.open_link('https://bugs.launchpad.net/sch-scripts')
 
-    def on_mi_ask_question_activate(self, widget):
+    def on_mi_ask_question_activate(self, _widget):
         """If there is a question for sch-scripts, opens a link."""
         self.open_link('https://answers.launchpad.net/sch-scripts')
 
-    def on_helpdesk_ticket_activate(self, widget):
+    def on_helpdesk_ticket_activate(self, _widget):
         self.open_link('http://helpdesk.sch.gr/ticketnew_user.php?category_id=9017')
 
-    def on_mi_irc_activate(self, widget):
+    def on_mi_irc_activate(self, _widget):
         host = socket.gethostname()
         user = getpass.getuser()
         if user == "root":
@@ -530,21 +537,21 @@ class Gui:
         self.open_link("http://ts.sch.gr/repo/irc?user=%s&host=%s&lang=%s" % \
                        (user, host, lang))
 
-    def on_mi_forum_activate(self, widget):
+    def on_mi_forum_activate(self, _widget):
         """For more information in a forum, opens a link."""
         self.open_link('http://alkisg.mysch.gr/steki/index.php?board=67.0')
 
-    def on_mi_map_activate(self, widget):
+    def on_mi_map_activate(self, _widget):
         """For more information in who uses Ubuntu LTSP, opens a link."""
         self.open_link('http://ts.sch.gr/wiki/Linux/LTSP/Προχωρημένα/Χάρτης')
 
-    def on_mi_lts_conf_manpage_activate(self, widget):
+    def on_mi_lts_conf_manpage_activate(self, _widget):
         self.open_link('http://manpages.ubuntu.com/lts.conf')
 
-    def on_mi_ltsp_info_activate(self, widget):
+    def on_mi_ltsp_info_activate(self, _widget):
         ltsp_info.LtspInfo(self.main_window)
 
-    def on_mi_about_activate(self, widget):
+    def on_mi_about_activate(self, _widget):
         about_dialog.AboutDialog(self.main_window)
 
 

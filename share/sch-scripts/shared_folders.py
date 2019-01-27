@@ -2,7 +2,6 @@
 # This file is part of sch-scripts, https://launchpad.net/sch-scripts
 # Copyright 2009-2018 the sch-scripts team, see AUTHORS.
 # SPDX-License-Identifier: GPL-3.0-or-later
-# pylint: disable= invalid-name, line-too-long, unused-argument, no-self-use, redefined-outer-name
 """Shared folders."""
 
 import os
@@ -19,7 +18,7 @@ import libuser
 
 class SharedFolders():
     """Control the usage of shared folders."""
-    
+
     def __init__(self, system=None):
         """Initialization."""
         if system is None:
@@ -35,15 +34,16 @@ class SharedFolders():
         self.mount(groups)
         self.save_config()
 
-    def ensure_dir(self, dir, mode, uid=-1, gid=-1):
+    @classmethod
+    def ensure_dir(cls, dir, mode, uid=-1, gid=-1):
         """Ensure that dir exists with the specified mode, uid and gid."""
         if not os.path.isdir(dir):
             os.mkdir(dir)
-        s = os.stat(dir)
-        m = stat.S_IMODE(s.st_mode)
-        if m != mode:
+        val = os.stat(dir)
+        mod = stat.S_IMODE(val.st_mode)
+        if mod != mode:
             os.chmod(dir, mode)
-        if (uid != -1 and uid != s.st_uid) or (gid != -1 and gid != s.st_gid):
+        if (uid != -1 and uid != val.st_uid) or (gid != -1 and gid != val.st_gid):
             os.chown(dir, uid, gid)
 
     def list_mounted(self, groups=None):
@@ -116,7 +116,7 @@ class SharedFolders():
 
     def rename(self, src, dst):
         """Rename folder src to group dst.
-        
+
         Call groupmod to rename the group before calling this function.
         """
         if dst not in self.system.groups:
@@ -162,11 +162,11 @@ class SharedFolders():
 
     def save_config(self):
         """Save share_groups to /home/Shared/.shared-folders."""
-        f = open(self.config["SHARE_CONF"], "w")
-        f.write("""# List of groups for which shared folders will be created.
+        _file = open(self.config["SHARE_CONF"], "w")
+        _file.write("""# List of groups for which shared folders will be created.
 SHARE_GROUPS="%s"
 """ % ' '.join(self.system.share_groups))
-        f.close()
+        _file.close()
 
     def unmount(self, groups=None):
         """Return the folders that were actually unmounted."""
@@ -232,29 +232,29 @@ if __name__ == '__main__':
                                 and (sys.argv[1] == '-h' or sys.argv[1] == '--help')):
         print(usage())
         sys.exit(0)
-    sf = SharedFolders()
-    cmd = sys.argv[1]
-    groups = sys.argv[2:]
-    if cmd == "add":
+    SF = SharedFolders()
+    CMD = sys.argv[1]
+    GROUPS = sys.argv[2:]
+    if CMD == "add":
         if len(sys.argv) < 3:
             sys.stderr.write(usage() + "\n")
             sys.exit(1)
-        sf.add(groups)
-    elif cmd == "list-mounted":
-        print(' '.join(sf.list_mounted(groups)))
-    elif cmd == "list-shared":
-        print(' '.join(sf.list_shared(groups)))
-    elif cmd == "mount":
-        sf.mount(groups)
-    elif cmd == "rename":
+        SF.add(GROUPS)
+    elif CMD == "list-mounted":
+        print(' '.join(SF.list_mounted(GROUPS)))
+    elif CMD == "list-shared":
+        print(' '.join(SF.list_shared(GROUPS)))
+    elif CMD == "mount":
+        SF.mount(GROUPS)
+    elif CMD == "rename":
         if len(sys.argv) != 4:
             sys.stderr.write(usage() + "\n")
             sys.exit(1)
-        sf.rename(groups[0], groups[1])
-    elif cmd == "remove":
-        sf.remove(groups)
-    elif cmd == "unmount":
-        sf.unmount(groups)
+        SF.rename(GROUPS[0], GROUPS[1])
+    elif CMD == "remove":
+        SF.remove(GROUPS)
+    elif CMD == "unmount":
+        SF.unmount(GROUPS)
     else:
         sys.stderr.write(usage() + "\n")
         sys.exit(1)

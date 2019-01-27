@@ -2,7 +2,6 @@
 # This file is part of sch-scripts, https://launchpad.net/sch-scripts
 # Copyright 2009-2018 the sch-scripts team, see AUTHORS.
 # SPDX-License-Identifier: GPL-3.0-or-later
-# pylint: disable= invalid-name, line-too-long, unused-argument
 """Client side signup logic and form."""
 
 import crypt
@@ -20,10 +19,10 @@ gi.require_version('Gtk', '3.0')
 
 class Connection:
     """Connect to the server.
-    
+
     Create a new socket, connect to the server and 'identify' to the server.
     """
-    
+
     def __init__(self, host, port):
         # Create a new socket and connect to the server
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -95,14 +94,14 @@ class Connection:
 
 class UserForm(object):
     """Connect to the server and show a user form for signing up."""
-    
+
     def __init__(self, host='server', port=790):
         try:
             self.connection = Connection(host, port)
-        except socket.error as e:
+        except socket.error as ero:
             msg1 = "Πιθανόν ο διαχειριστής να μην έχει ενεργοποιήσει τις εγγραφές."
             msg2 = "Πιθανόν να υπάρχει πρόβλημα δικτύου."
-            msg = "Σφάλμα %d: %s\n\n%s" % (e.errno, e.strerror, msg1 if e.errno == 111 else msg2)
+            msg = "Σφάλμα %d: %s\n\n%s" % (ero.errno, ero.strerror, msg1 if ero.errno == 111 else msg2)
             dlg = Gtk.MessageDialog(type=Gtk.MessageType.ERROR,
                                     buttons=Gtk.ButtonsType.CLOSE,
                                     message_format=msg)
@@ -150,25 +149,27 @@ class UserForm(object):
 
         self.dialog.show()
 
-    def on_group_toggled(self, widget, path):
+    def on_group_toggled(self, _widget, path):
         self.groups_store[path][0] = not self.groups_store[path][0]
 
-    def get_icon(self, check):
+    @classmethod
+    def get_icon(cls, check):
         """Get the icon."""
         if check:
             return Gtk.STOCK_OK
         return Gtk.STOCK_DIALOG_ERROR
 
-    def to_alpha(self, s):
-        return ''.join(c for c in s if c.isalpha())
+    @classmethod
+    def to_alpha(cls, val):
+        return ''.join(c for c in val if c.isalpha())
 
     def get_suggestions(self, name):
         """Give suggestions for the new entries."""
         tokens = []
         for tok in name.split():
-            t = self.to_alpha(tok).lower()
-            if t:
-                tokens.append(t)
+            tkn = self.to_alpha(tok).lower()
+            if tkn:
+                tokens.append(tkn)
         if len(tokens) == 0:
             return []
         sug = []
@@ -182,24 +183,24 @@ class UserForm(object):
 
         return sug
 
-    def on_realname_entry_changed(self, widget):
+    def on_realname_entry_changed(self, _widget):
         """Change the entry of the realname."""
-        name = widget.get_text()
+        name = _widget.get_text()
         icon = self.get_icon(re.match(self.connection.realname_regex(), name, re.UNICODE))
         self.username_combo.remove_all()
         self.username_entry.set_text('')
         sug = self.get_suggestions(name)
-        sug = [s for s in sug if re.match(self.connection.username_regex(), s, re.UNICODE) and not self.connection.user_exists(s)]
+        sug = [val for val in sug if re.match(self.connection.username_regex(), val, re.UNICODE) and not self.connection.user_exists(val)]
         if sug:
             self.username_entry.set_text(sug[0])
-            for s in sug:
-                self.username_combo.append_text(s)
+            for val in sug:
+                self.username_combo.append_text(val)
         self.builder.get_object('realname_valid').set_from_stock(icon, Gtk.IconSize.BUTTON)
         self.set_apply_sensitivity()
 
-    def on_password_entry_changed(self, widget):
+    def on_password_entry_changed(self, _widget):
         """Change the entry of the password."""
-        password = widget.get_text()
+        password = _widget.get_text()
         password_repeat = self.retype_password.get_text()
         icon = self.get_icon(password == password_repeat)
         self.builder.get_object('retype_password_valid').set_from_stock(icon, Gtk.IconSize.BUTTON)
@@ -208,15 +209,15 @@ class UserForm(object):
         self.builder.get_object('password_valid').set_from_stock(icon, Gtk.IconSize.BUTTON)
         self.set_apply_sensitivity()
 
-    def on_retype_password_entry_changed(self, widget):
+    def on_retype_pswd_entry_changed(self, _widget):
         """Retype the password."""
         password = self.password.get_text()
-        password_repeat = widget.get_text()
+        password_repeat = _widget.get_text()
         icon = self.get_icon(password == password_repeat)
         self.builder.get_object('retype_password_valid').set_from_stock(icon, Gtk.IconSize.BUTTON)
         self.set_apply_sensitivity()
 
-    def on_username_entry_changed(self, widget):
+    def on_username_entry_changed(self, _widget):
         """Change the username entry."""
         username = self.username_entry.get_text()
         valid_name = re.match(self.connection.username_regex(), username, re.UNICODE)
@@ -227,19 +228,19 @@ class UserForm(object):
 
     def set_apply_sensitivity(self):
         icon = lambda x: self.builder.get_object(x).get_stock()[0]
-        s = icon('username_valid') == icon('password_valid') == icon('retype_password_valid') == icon('realname_valid') == Gtk.STOCK_OK
+        val = icon('username_valid') == icon('password_valid') == icon('retype_password_valid') == icon('realname_valid') == Gtk.STOCK_OK
 
-        self.builder.get_object('apply_button').set_sensitive(s)
+        self.builder.get_object('apply_button').set_sensitive(val)
 
-    def on_dialog_delete_event(self, widget, event):
+    def on_dialog_delete_event(self, _widget, _event):
         """Close the dialog."""
         self.quit()
 
-    def on_cancel_clicked(self, widget):
+    def on_cancel_clicked(self, _widget):
         """Cancel the procedure."""
         self.quit()
 
-    def on_apply_clicked(self, widget):
+    def on_apply_clicked(self, _widget):
         """Apply the changes and show the corresponding messages."""
         realname = self.realname.get_text()
         username = self.username_entry.get_text()
@@ -269,7 +270,8 @@ class UserForm(object):
         dlg.destroy()
         self.quit()
 
-    def encrypt(self, pwd):
+    @classmethod
+    def encrypt(cls, pwd):
         """Encrypt the password."""
         alphabet = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'
         salt = ''.join([random.choice(alphabet) for i in range(8)])
@@ -284,9 +286,9 @@ class UserForm(object):
 
 if __name__ == '__main__':
     if len(sys.argv) > 2:
-        form = UserForm(sys.argv[1], int(sys.argv[2]))
+        FORM = UserForm(sys.argv[1], int(sys.argv[2]))
     elif len(sys.argv) > 1:
-        form = UserForm(sys.argv[1])
+        FORM = UserForm(sys.argv[1])
     else:
-        form = UserForm()
+        FORM = UserForm()
     Gtk.main()

@@ -1,7 +1,6 @@
 # This file is part of sch-scripts, https://launchpad.net/sch-scripts
 # Copyright 2009-2018 the sch-scripts team, see AUTHORS.
 # SPDX-License-Identifier: GPL-3.0-or-later
-# pylint: disable=line-too-long, invalid-name, too-many-arguments, too-many-branches, too-many-statements, too-few-public-methods
 """Connection information and creation dialog."""
 
 import re
@@ -77,9 +76,9 @@ def subnet_to_bits(subnet):
 
 ## Define Network Manager classes
 
-class Network_Manager_DBus(object):
+class NetworkManagerDBus(object):
     """Return NetworkManager DBus."""
-    
+
     def __init__(self, object_path, interface_name):
         """Return NetworkManager DBus."""
         self.proxy = BUS.get_object(DBUS_SERVICE_NAME, object_path)
@@ -90,14 +89,14 @@ class Network_Manager_DBus(object):
             pass
 
 
-class Network_Manager(Network_Manager_DBus):
+class NetworkManager(NetworkManagerDBus):
     """For Network Manager."""
-    
+
     def __init__(self):
         """Return NetworkManager interface from NetworkManager object."""
         self.object_path = '/org/freedesktop/NetworkManager'
         self.interface_name = 'org.freedesktop.NetworkManager'
-        super(Network_Manager, self).__init__(self.object_path, self.interface_name)
+        super(NetworkManager, self).__init__(self.object_path, self.interface_name)
 
     def get_devices(self):
         """Return Device object."""
@@ -107,19 +106,19 @@ class Network_Manager(Network_Manager_DBus):
         """Return current active connections."""
         return self.properties['ActiveConnections']
 
-    def get_active_connections_settings_path(self):
+    def get_active_conn_settings_path(self):
         """Return Settings path of the active connections."""
-        active_connections_settings_path = []
+        active_conn_settings_path = []
         for active_conenction in self.get_active_connections():
             activeconnection = ActiveConnection(active_conenction)
-            active_connections_settings_path.append(str(activeconnection.get_properties()))
+            active_conn_settings_path.append(str(activeconnection.get_properties()))
 
-        return active_connections_settings_path
+        return active_conn_settings_path
 
 
-class ActiveConnection(Network_Manager_DBus):
+class ActiveConnection(NetworkManagerDBus):
     """For Active Connection."""
-    
+
     def __init__(self, active_connection_name):
         """Return Active interface from ActiveConnection/X object."""
         self.object_path = active_connection_name
@@ -132,9 +131,9 @@ class ActiveConnection(Network_Manager_DBus):
         return connection_settings
 
 
-class Device(Network_Manager_DBus):
+class Device(NetworkManagerDBus):
     """For Device interface and characteristics."""
-    
+
     def __init__(self, device_name):
         """Return Device interface from Devices/X object."""
         self.object_path = device_name
@@ -151,14 +150,14 @@ class Device(Network_Manager_DBus):
         return ip4config_path, interface, driver, device_type, managed
 
 
-class Device_Wired(Network_Manager_DBus):
+class DeviceWired(NetworkManagerDBus):
     """For WiredDevice interface and characteristics."""
-    
+
     def __init__(self, device_name):
         """Return WiredDevice interface from Devices/X object."""
         self.object_path = device_name
         self.interface_name = 'org.freedesktop.NetworkManager.Device.Wired'
-        super(Device_Wired, self).__init__(self.object_path, self.interface_name)
+        super(DeviceWired, self).__init__(self.object_path, self.interface_name)
 
     def get_properties(self):
         """Return WiredDevice characteristics objectss."""
@@ -172,25 +171,25 @@ class Device_Wired(Network_Manager_DBus):
         return mac, str(speed), carrier
 
 
-class IP4_Config(Network_Manager_DBus):
-    """For IP4_Config."""
-    
+class IP4Config(NetworkManagerDBus):
+    """For IP4Config."""
+
     def __init__(self, ip4config_name):
         """Return IP4Config interface from IP4Config/X object."""
         self.object_path = ip4config_name
         self.interface_name = 'org.freedesktop.NetworkManager.IP4Config'
-        super(IP4_Config, self).__init__(self.object_path, self.interface_name)
+        super(IP4Config, self).__init__(self.object_path, self.interface_name)
 
     def get_properties(self):
         """Return ip, subnet, route and dns values."""
-        ip, mask, route = self.properties['Addresses'][0]
+        ipad, mask, route = self.properties['Addresses'][0]
         dnss = self.properties['Nameservers']
-        return ip, mask, route, dnss
+        return ipad, mask, route, dnss
 
 
-class Settings(Network_Manager_DBus):
+class Settings(NetworkManagerDBus):
     """For the Settings."""
-    
+
     def __init__(self):
         """Return Settings interface from Settings object."""
         self.object_path = '/org/freedesktop/NetworkManager/Settings'
@@ -202,14 +201,14 @@ class Settings(Network_Manager_DBus):
         return self.interface.ListConnections()
 
 
-class Connection_Settings(Network_Manager_DBus):
-    """For the Connection_Settings."""
-    
+class ConnectionSettings(NetworkManagerDBus):
+    """For the ConnectionSettings."""
+
     def __init__(self, connection_settings_name):
         """Return Connection interface from Setting/X object."""
         self.object_path = connection_settings_name
         self.interface_name = 'org.freedesktop.NetworkManager.Settings.Connection'
-        super(Connection_Settings, self).__init__(self.object_path, self.interface_name)
+        super(ConnectionSettings, self).__init__(self.object_path, self.interface_name)
 
     def get_settings(self):
         """Return connection settings, eg: ipv4, dns, etc."""
@@ -219,20 +218,20 @@ class Connection_Settings(Network_Manager_DBus):
 ## Define Information class
 
 class Info:
-    def __init__(self, ip=None, mask=None, route=None, dnss=None):
-        self.ip, self.mask, self.route, self.dnss = ip, mask, route, dnss
+    def __init__(self, ipad=None, mask=None, route=None, dnss=None):
+        self.ipad, self.mask, self.route, self.dnss = ipad, mask, route, dnss
 
         # If IP address is not defined then initialize the attributes with a string
         msg = 'Δεν βρέθηκε διεύθυνση'
-        if not self.ip:
-            self.ip, self.mask, self.route = [msg]*3
+        if not self.ipad:
+            self.ipad, self.mask, self.route = [msg]*3
             self.dnss = [msg]*3
         self.subnet = None
 
     def set_values(self, dict=None):
         """Set info values."""
         if dict:
-            self.ip = dict['ip']
+            self.ipad = dict['ipad']
             self.mask = dict['mask']
             self.route = dict['route']
             self.dnss = dict['dnss']
@@ -241,27 +240,26 @@ class Info:
     def get_values(self, dnss=False):
         """Return info as dict."""
         if dnss:
-            return {'ip': self.ip, 'mask': self.mask, 'route': self.route, 'dnss': self.dnss}
-        else:
-            return {'ip': self.ip, 'mask': self.mask, 'route': self.route}
+            return {'ip': self.ipad, 'mask': self.mask, 'route': self.route, 'dnss': self.dnss}
+        return {'ip': self.ipad, 'mask': self.mask, 'route': self.route}
 
     def _calculate_subnet(self):
         """Calculate subnet."""
-        if self.ip:
-            self.subnet = '.'.join(self.ip.split('.')[:3]) + '.0'
+        if self.ipad:
+            self.subnet = '.'.join(self.ipad.split('.')[:3]) + '.0'
 
 
 ## Define Interface class
 
 class Interface:
     """For the Interface."""
-    
+
     def __init__(self, ip4config_path, device_path, interface, driver, device_type, mac, speed, carrier):
         """Contain all the information about a connection."""
         self.ip4config_path, self.device_path, self.interface, self.driver, self.device_type, self.mac,\
         self.speed, self.carrier = ip4config_path, device_path, interface, driver, device_type, mac, speed, carrier
 
-        self.id = '%s,sch-scripts' % self.interface
+        self.iden = '%s,sch-scripts' % self.interface
         self.interface_connections = []
         self.page = None
         self.conflict = None
@@ -287,10 +285,10 @@ class Interface:
     def _set_ips(self):
         self.existing_info = Info()
         if self.ip4config_path != '/':
-            ip4config = IP4_Config(self.ip4config_path)
-            ip, mask, route, dnss = ip4config.get_properties()
+            ip4config = IP4Config(self.ip4config_path)
+            ipad, mask, route, dnss = ip4config.get_properties()
             self.existing_info.set_values({
-                'ip': int32_to_string(ip),
+                'ip': int32_to_string(ipad),
                 'mask': bits_to_subnet(mask),
                 'route': int32_to_string(route),
                 'dnss': [int32_to_string(x) for x in dnss]
@@ -298,11 +296,11 @@ class Interface:
             self.has_active_connection = True
 
         self.dhcp_request_info = Info()
-        p = common.run_command(['/usr/lib/klibc/bin/ipconfig', '-n', '-t2', self.interface], True)
-        while p.poll() is None:
+        val = common.run_command(['/usr/lib/klibc/bin/ipconfig', '-n', '-t2', self.interface], True)
+        while val.poll() is None:
             while Gtk.events_pending():
                 Gtk.main_iteration()
-        if p.returncode == 0:
+        if val.returncode == 0:
             dhcp_parser = parsers.DHCP()
             dhcp_dict = dhcp_parser.parse(self.interface)
             self.has_active_connection = True
@@ -338,19 +336,19 @@ class Page:
         self.dns3_lbl = self.builder.get_object('dns3_lbl')
         self.auto_checkbutton = self.builder.get_object('auto_checkbutton')
 
-    def fill_entries(self, interface, ip=None, mask=None, route=None, dnss=None):
-        self.id_entry.set_text(interface.id)
+    def fill_entries(self, interface, ipad=None, mask=None, route=None, dnss=None):
+        self.id_entry.set_text(interface.iden)
         self.interface_entry.set_text('Ethernet (%s)' % interface.interface)
         self.mac_entry.set_text(interface.mac)
         self.driver_entry.set_text(interface.driver)
         self.speed_entry.set_text(interface.speed)
 
-        ip = ip if ip else interface.ip
+        ipad = ipad if ipad else interface.ipad
         mask = mask if mask else interface.mask
         route = route if route else interface.route
         dnss = dnss if dnss else interface.dnss
 
-        self.ip_entry.set_text(ip)
+        self.ip_entry.set_text(ipad)
         self.subnet_entry.set_text(mask)
         self.route_entry.set_text(route)
         if len(dnss) >= 1:
@@ -381,15 +379,15 @@ class Page:
             self.method_entry.get_model()[2][1] = False
 
 
-## Define Ip_Dialog class
+## Define IpDialog class
 
-class Ip_Dialog:
+class IpDialog:
     """Ip Dialog.
-    
-    Initialize some values, connect to NetworkManager, 
-    hide some widget and show loading widget until dhcp request finished
+
+    Initialize some values, connect to NetworkManager,
+    hide some widget and show loading widget until dhcp request finished.
     """
-    
+
     def __init__(self, parent):
         # Init some values
         self.parent = parent
@@ -411,7 +409,7 @@ class Ip_Dialog:
 
         # Connect to NetworkManager
         try:
-            self.nm = Network_Manager()
+            self.netman = NetworkManager()
         except dbus.exceptions.DBusException:
             error_dialog = dialogs.ErrorDialog(MSG_ERROR_CONNECT_NM, TITLE_ERROR)
             error_dialog.set_transient_for(self.main_dlg)
@@ -427,14 +425,14 @@ class Ip_Dialog:
 
     def initialize_interfaces(self):
         """Initialize interfaces.
-        
+
         Find devices, populate GUI, show all widgets and destroy loading widget,
-        set the appropriate method to each device and 
+        set the appropriate method to each device and
         if subnet has change alert message,
         which define devices with different subnet.
         """
         self.settings = Settings()
-        device_paths = self.nm.get_devices()
+        device_paths = self.netman.get_devices()
         if len(device_paths) == 0:
             dialogs.ErrorDialog(MSG_NO_DEVICES, TITLE_ERROR).showup()
             return
@@ -442,7 +440,7 @@ class Ip_Dialog:
             device = Device(device_path)
             ip4config_path, interface, driver, device_type, managed = device.get_properties()
             if device_type == 1 and managed:
-                devicewired = Device_Wired(device_path)
+                devicewired = DeviceWired(device_path)
                 mac, speed, carrier = devicewired.get_properties()
                 interface = Interface(ip4config_path, device_path, interface, \
                                         driver, device_type, mac, speed, carrier)
@@ -498,7 +496,7 @@ class Ip_Dialog:
 
     def set_default(self):
         """Set default.
-        
+
         By default active is 4, no creation to all interfaces.
         We care about the first only, so we purpose one method only for the first interface.
         All other interfaces maintained to 4.
@@ -508,7 +506,7 @@ class Ip_Dialog:
             self.interfaces[0].page.method_entry.set_active(1)
             self.main_dlg_notebook.reorder_child(self.interfaces[0].page.grid, 0)
         else:
-            if carrier_interfaces[0].ip.startswith('10.'):
+            if carrier_interfaces[0].ipad.startswith('10.'):
                 carrier_interfaces[0].page.method_entry.set_active(2)
             else:
                 carrier_interfaces[0].page.method_entry.set_active(1)
@@ -524,17 +522,17 @@ class Ip_Dialog:
                 continue
             #TODO: Change it (do not create new instances)
             device = Device(interface.device_path)
-            ip4config_path, interface, driver, device_type, managed = device.get_properties()
+            ip4config_path, interface, _driver, _device_type, _managed = device.get_properties()
             if ip4config_path == '/':
                 break_bool = False
 
         if break_bool:
-            p = common.run_command(['sh', '-c', 'ltsp-config dnsmasq --enable-dns --overwrite'], True)
-            while p.poll() is None:
+            val = common.run_command(['sh', '-c', 'ltsp-config dnsmasq --enable-dns --overwrite'], True)
+            while val.poll() is None:
                 while Gtk.events_pending():
                     Gtk.main_iteration()
 
-            if p.returncode == 0:
+            if val.returncode == 0:
                 msg = MSG_DNSMASQ_RESTART_SUCCESS
                 if prefered_hostname:
                     msg = MSG_SUGGEST_HOSTNAME.format(prefered_hostname) + msg
@@ -571,14 +569,14 @@ class Ip_Dialog:
             # Case which doesn't work: User had set .10 manual and .10 is owned by another pc,
             # arping always fail so we can't catch the conflict.
             if interface.page.method_entry.get_active() == 2 and \
-                            interface.carrier == 1 and self.nm.get_active_connections():
+                            interface.carrier == 1 and self.netman.get_active_connections():
                 test_ip = interface.page.ip_entry.get_text()
-                if test_ip != interface.existing_info.ip:
-                    p = common.run_command(['arping', '-f', '-w1', '-I', interface.interface, test_ip], True)
-                    while p.poll() is None:
+                if test_ip != interface.existing_info.ipad:
+                    val = common.run_command(['arping', '-f', '-w1', '-I', interface.interface, test_ip], True)
+                    while val.poll() is None:
                         while Gtk.events_pending():
                             Gtk.main_iteration()
-                    if p.returncode == 0:
+                    if val.returncode == 0:
                         interface.page.ip_entry.set_icon_from_stock(1, Gtk.STOCK_DIALOG_WARNING)
                         interface.page.ip_entry.set_icon_tooltip_text(1, MSG_PC_CONFLICT_IP.format(test_ip))
                         title = MSG_PC_CONFLICT_IP.format(test_ip)
@@ -592,11 +590,11 @@ class Ip_Dialog:
             if interface.conflict is not None:
                 interface.conflict.interface.Update(interface.connection)
                 if interface.carrier == 1 and interface.page.auto_checkbutton.get_active():
-                    self.nm.interface.ActivateConnection(interface.conflict.object_path, interface.device_path, '/')
+                    self.netman.interface.ActivateConnection(interface.conflict.object_path, interface.device_path, '/')
             else:
                 object_path = self.settings.interface.AddConnection(interface.connection)
                 if interface.carrier == 1 and interface.page.auto_checkbutton.get_active():
-                    self.nm.interface.ActivateConnection(object_path, interface.device_path, '/')
+                    self.netman.interface.ActivateConnection(object_path, interface.device_path, '/')
 
             for connection_settings in interface.interface_connections:
                 settings = connection_settings.get_settings()
@@ -617,9 +615,9 @@ class Ip_Dialog:
         for interface in self.interfaces:
             if interface.page is None:
                 continue
-            ip = interface.page.ip_entry.get_text()
+            ipad = interface.page.ip_entry.get_text()
             method = interface.page.method_entry.get_active()
-            if not re.match(IP_REG, ip) and ip != 'Δεν βρέθηκε διεύθυνση':
+            if not re.match(IP_REG, ipad) and ipad != 'Δεν βρέθηκε διεύθυνση':
                 check_ip = False
             if method != 4:
                 check_method = True
@@ -630,7 +628,7 @@ class Ip_Dialog:
             self.main_dlg.set_response_sensitive(Gtk.ResponseType.OK, False)
 
 
-    def on_method_entry_changed(self, method_entry, interface):
+    def on_method_entry_changed(self, _method_entry, interface):
         """Callbacks."""
         reset_ltsp_method = True
         for l_interface in self.interfaces:
@@ -654,36 +652,36 @@ class Ip_Dialog:
                                         **interface.dhcp_request_info.get_values())
         # Manual
         elif interface.page.method_entry.get_active() == 2:
-            ip = None
+            ipad = None
             interface.page.ip_entry.set_sensitive(True)
             interface.page.auto_checkbutton.set_sensitive(True)
             connection_settings_paths = self.settings.get_list_connections()
             # if we want to bring back the settings from any connection we have to remove the following line
-            if interface.ip.startswith('10.'):
+            if interface.ipad.startswith('10.'):
                 if interface.existing_info.subnet and interface.dhcp_request_info.subnet and \
                                 interface.existing_info.subnet != interface.dhcp_request_info.subnet:
-                    ip = '.'.join(interface.ip.split('.')[0:3])+'.10'
-                elif self.nm.get_active_connections():
+                    ipad = '.'.join(interface.ipad.split('.')[0:3])+'.10'
+                elif self.netman.get_active_connections():
                     # if ip starts with 10. and we have active connections
                     for counter, connection_settings_path in enumerate(connection_settings_paths):
-                        connection_settings = Connection_Settings(connection_settings_path)
+                        connection_settings = ConnectionSettings(connection_settings_path)
                         connection_settings_id = connection_settings.get_settings()['connection']['id']
                         try:
                             connection_settings_method = connection_settings.get_settings()['ipv4']['method']
                         except KeyError:
                             connection_settings_method = None
 
-                        if connection_settings_id == interface.id and \
+                        if connection_settings_id == interface.iden and \
                                         connection_settings_method == dbus.String('manual') and \
-                                        connection_settings_path in self.nm.get_active_connections_settings_path():
-                            ip = interface.existing_info.ip
+                                        connection_settings_path in self.netman.get_active_conn_settings_path():
+                            ipad = interface.existing_info.ipad
                             break
                         elif counter == len(connection_settings_paths) - 1:
-                            ip = '.'.join(interface.ip.split('.')[0:3])+'.10'
+                            ipad = '.'.join(interface.ipad.split('.')[0:3])+'.10'
                 else:
                     # if ip starts with 10. and we don't have active connections load instant .10
-                    ip = '.'.join(interface.ip.split('.')[0:3])+'.10'
-            interface.page.fill_entries(interface, ip=ip, dnss=[dns for dns in self.ts_dns])
+                    ipad = '.'.join(interface.ipad.split('.')[0:3])+'.10'
+            interface.page.fill_entries(interface, ipad=ipad, dnss=[dns for dns in self.ts_dns])
         # Ltsp
         elif interface.page.method_entry.get_active() == 3:
             interface.page.ip_entry.set_sensitive(False)
@@ -699,28 +697,28 @@ class Ip_Dialog:
             interface.page.fill_entries(interface, **interface.existing_info.get_values(dnss=True))
         self.check_button()
 
-    def on_ip_entry_changed(self, ip_entry, interface):
+    def on_ip_entry_changed(self, _ip_entry, interface):
         """Callbacks."""
         if interface.page.ip_entry.get_text() != 'Δεν βρέθηκε διεύθυνση':
-            ip = interface.page.ip_entry.get_text()
-            sub_ip = '.'.join(interface.ip.split('.')[0:3])+'.'
-            if not re.match(IP_REG, ip):
+            ipad = interface.page.ip_entry.get_text()
+            sub_ip = '.'.join(interface.ipad.split('.')[0:3])+'.'
+            if not re.match(IP_REG, ipad):
                 interface.page.ip_entry.set_position(-1)
-                if ip != interface.page.route_entry.get_text():
+                if ipad != interface.page.route_entry.get_text():
                     interface.page.ip_entry.set_text(sub_ip)
                 interface.page.ip_entry.set_icon_from_stock(1, Gtk.STOCK_DIALOG_WARNING)
                 interface.page.ip_entry.set_icon_tooltip_text(1, MSG_WRONG_REGEX_IP)
-            elif ip == interface.page.route_entry.get_text():
+            elif ipad == interface.page.route_entry.get_text():
                 interface.page.ip_entry.set_position(-1)
-                if ip != interface.page.route_entry.get_text():
+                if ipad != interface.page.route_entry.get_text():
                     interface.page.ip_entry.set_text(sub_ip)
                 interface.page.ip_entry.set_icon_from_stock(1, Gtk.STOCK_DIALOG_WARNING)
-                interface.page.ip_entry.set_icon_tooltip_text(1, MSG_ROUTE_CONFLICT_IP.format(ip))
+                interface.page.ip_entry.set_icon_tooltip_text(1, MSG_ROUTE_CONFLICT_IP.format(ipad))
             else:
                 interface.page.ip_entry.set_icon_from_stock(1, None)
             self.check_button()
 
-    def on_ip_dialog_response(self, main_dlg, response):
+    def on_ip_dialog_response(self, _main_dlg, response):
         """Callbacks."""
         if response != Gtk.ResponseType.OK:
             self.main_dlg.destroy()
@@ -739,7 +737,7 @@ class Ip_Dialog:
             ethernet = dbus.Dictionary({'duplex': 'full',
                                         'mac-address': dbus.Array(bytes, signature=dbus.Signature('y'))})
 
-            connection = dbus.Dictionary({'type': '802-3-ethernet', 'uuid': str(uuid.uuid4()), 'id': interface.id})
+            connection = dbus.Dictionary({'type': '802-3-ethernet', 'uuid': str(uuid.uuid4()), 'id': interface.iden})
 
             dns = dbus.Array([dbus.UInt32(string_to_int32(self.ts_dns[0])),
                               dbus.UInt32(string_to_int32(self.ts_dns[1])),
@@ -750,11 +748,11 @@ class Ip_Dialog:
 
             try:
                 # This variables is used only in 2 and 3 method
-                ip = string_to_int32(interface.page.ip_entry.get_text().strip())
+                ipad = string_to_int32(interface.page.ip_entry.get_text().strip())
                 subnet = subnet_to_bits(interface.page.subnet_entry.get_text().strip())
                 route = string_to_int32(interface.page.route_entry.get_text().strip())
 
-                addresses = dbus.Array([dbus.UInt32(ip),
+                addresses = dbus.Array([dbus.UInt32(ipad),
                                         dbus.UInt32(subnet),
                                         dbus.UInt32(route)],
                                        signature=dbus.Signature('u'))
@@ -776,11 +774,11 @@ class Ip_Dialog:
                                         'dhcp-send-hostname': dbus.Boolean('false'),
                                         'addresses': dbus.Array([addresses], signature=dbus.Signature('au'))})
 
-                if int32_to_string(ip).startswith('10.') and \
-                        (int32_to_string(ip).endswith('.10') or int32_to_string(ip).endswith('.11')) and \
+                if int32_to_string(ipad).startswith('10.') and \
+                        (int32_to_string(ipad).endswith('.10') or int32_to_string(ipad).endswith('.11')) and \
                         interface.carrier == 1:
                     # Try to resolve the ip and purpose hostname. We keep info if dns_search endswith sch.gr
-                    found, hostname = common.run_command(['dig', '@nic.sch.gr', '+short', '-x', int32_to_string(ip)])
+                    found, hostname = common.run_command(['dig', '@nic.sch.gr', '+short', '-x', int32_to_string(ipad)])
                     if found:
                         hostname = hostname.split('\n')[0].strip('.')
                         dns_search = '.'.join(hostname.split('.')[1:])
@@ -800,11 +798,11 @@ class Ip_Dialog:
 
             connection_settings_paths = self.settings.get_list_connections()
             for connection_settings_path in connection_settings_paths:
-                connection_settings = Connection_Settings(connection_settings_path)
+                connection_settings = ConnectionSettings(connection_settings_path)
                 connection_settings_id = connection_settings.get_settings()['connection']['id']
                 # If connection with same id found set conflict variable to this existing connection and give to our
                 # connection the existing connection uuid
-                if connection_settings_id == interface.id:
+                if connection_settings_id == interface.iden:
                     connection_settings_uuid = connection_settings.get_settings()['connection']['uuid']
                     interface.connection['connection']['uuid'] = connection_settings_uuid
                     interface.conflict = connection_settings
@@ -816,7 +814,7 @@ class Ip_Dialog:
                                   for v in connection_settings.get_settings()['802-3-ethernet']['mac-address']]).upper()
                 except KeyError:
                     continue
-                if interface.mac == connection_settings_mac and interface.id != connection_settings_id and \
+                if interface.mac == connection_settings_mac and interface.iden != connection_settings_id and \
                         interface.page.auto_checkbutton.get_active():
                     interface.interface_connections.append(connection_settings)
 
@@ -835,7 +833,7 @@ class Ip_Dialog:
                     dnsmasq_via_carrier = True
                 if interface.page.auto_checkbutton.get_active():
                     dnsmasq_via_autoconnect = True
-                msg += '<b>%s</b> (%s)\n' %(str(interface.id),
+                msg += '<b>%s</b> (%s)\n' %(str(interface.iden),
                                             interface.page.method_lstore[interface.page.method_entry.get_active()][0])
                 if counter == len(new_connections) -1 and len(replace_connections) != 0:
                     msg += '\n'
@@ -853,7 +851,7 @@ class Ip_Dialog:
                     dnsmasq_via_carrier = True
                 if interface.page.auto_checkbutton.get_active():
                     dnsmasq_via_autoconnect = True
-                msg += '<b>%s</b> (%s)\n' %(str(interface.id),
+                msg += '<b>%s</b> (%s)\n' %(str(interface.iden),
                                             interface.page.method_lstore[interface.page.method_entry.get_active()][0])
 
         if dnsmasq_via_carrier and dnsmasq_via_autoconnect:
