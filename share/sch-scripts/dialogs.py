@@ -6,7 +6,7 @@
 from gi.repository import Gtk
 
 class AskDialog(Gtk.MessageDialog):
-    """Show an Ask message dialog."""
+    """For the Ask message dialog."""
 
     def __init__(self, message, title=""):
         super(AskDialog, self).__init__(type=Gtk.MessageType.WARNING,
@@ -17,14 +17,18 @@ class AskDialog(Gtk.MessageDialog):
         self.set_default_response(Gtk.ResponseType.NO)
 
     def showup(self):
-        """Close the Ask dialog and return the response."""
+        """Show the Ask dialog.
+
+        Wait for the user to press a button, close the dialog
+        and return the response.
+        """
         response = self.run()
         self.destroy()
         return response
 
 
 class InfoDialog(Gtk.MessageDialog):
-    """Show an Info message dialog."""
+    """For the Info message dialog."""
 
     def __init__(self, message, title=""):
         super(InfoDialog, self).__init__(type=Gtk.MessageType.INFO,
@@ -34,13 +38,17 @@ class InfoDialog(Gtk.MessageDialog):
         self.set_title(title)
 
     def showup(self):
-        """Close the Info message dialog and return the response."""
+        """Show the Info message dialog.
+
+        Wait for the user to press a button, close the Info message dialog 
+        and return the response.
+        """
         response = self.run()
         self.destroy()
         return response
 
 class WarningDialog(Gtk.MessageDialog):
-    """Show a Warning message dialog."""
+    """For the Warning message dialog."""
 
     def __init__(self, message, title=""):
         super(WarningDialog, self).__init__(type=Gtk.MessageType.WARNING,
@@ -50,13 +58,17 @@ class WarningDialog(Gtk.MessageDialog):
         self.set_title(title)
 
     def showup(self):
-        """Close the Warning message dialog and return the response."""
+        """Show the Warning message dialog.
+
+        Wait for the user to press a button, close the Warning message dialog 
+        and return the response.
+        """
         response = self.run()
         self.destroy()
         return response
 
 class ErrorDialog(Gtk.MessageDialog):
-    """Show an Error message dialog."""
+    """For the Error message dialog."""
 
     def __init__(self, message, title=""):
         super(ErrorDialog, self).__init__(type=Gtk.MessageType.ERROR,
@@ -66,7 +78,11 @@ class ErrorDialog(Gtk.MessageDialog):
         self.set_title(title)
 
     def showup(self):
-        """Close the Error message dialog and return the response."""
+        """Show the Error message dialog.
+
+        Wait for the user to press a button, close the Error message dialog 
+        and return the response.
+        """
         response = self.run()
         self.destroy()
         return response

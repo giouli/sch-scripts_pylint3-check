@@ -11,11 +11,14 @@ import libuser
 import shared_folders
 
 class GroupForm(object):
-    """Creating a group."""
+    """Creating a group.
 
-    def __init__(self, system, slf):
+    Show a form in order to create a new group.
+    """
+
+    def __init__(self, system, oneself):
         self.system = system
-        self.slf = slf
+        self.oneself = oneself
         self.mode = None
         self.group = None
         self.builder = Gtk.Builder()
@@ -51,12 +54,20 @@ class GroupForm(object):
         self.users_filter.refilter()
 
     def users_visible_func(self, model, itr, _x):
-        """Show if the users are visible in the system."""
+        """Return true or false for system users.
+
+        If the option Show system users is on, it retuns true
+        and shows all the users, else it returns false
+        and system users don't appear in the user's list.
+        """
         system_user = model[itr][0].is_system_user()
         return self.show_sys_users or not system_user
 
     def on_name_entry_changed(self, _widget):
-        """Edite the name entry after checking if the new entry is availabe and valid."""
+        """Edit the name entry for a group.
+
+        Also check if the new entry is availabe and valid.
+        """
         groupname = _widget.get_text()
         valid_name = self.system.name_is_valid(groupname)
         free_name = groupname not in self.system.groups
@@ -108,9 +119,9 @@ class GroupForm(object):
 class NewGroupDialog(GroupForm):
     """Open a dialog for a new group."""
 
-    def __init__(self, system, slf):
+    def __init__(self, system, oneself):
         self.mode = 'new'
-        super(NewGroupDialog, self).__init__(system, slf)
+        super(NewGroupDialog, self).__init__(system, oneself)
         self.builder.connect_signals(self)
 
         self.gid_entry.set_text(str(system.get_free_gid()))
@@ -125,7 +136,7 @@ class NewGroupDialog(GroupForm):
         grp = libuser.Group(name, gid, members)
         self.system.add_group(grp)
         if self.has_shared.get_active():
-            self.slf.add([grp.name])
+            self.oneself.add([grp.name])
         self.dialog.destroy()
 
 class EditGroupDialog(GroupForm):
@@ -134,10 +145,10 @@ class EditGroupDialog(GroupForm):
     Activate the members of the group and check if the shared folders are enabled.
     """
 
-    def __init__(self, system, slf, group):
+    def __init__(self, system, oneself, group):
         self.mode = 'edit'
         self.group = group
-        super(EditGroupDialog, self).__init__(system, slf)
+        super(EditGroupDialog, self).__init__(system, oneself)
         self.builder.connect_signals(self)
 
         self.groupname.set_text(group.name)
@@ -149,7 +160,7 @@ class EditGroupDialog(GroupForm):
                 row[1] = True
 
         # See if the group has shared folders enabled
-        if group.name in self.slf.list_shared():
+        if group.name in self.oneself.list_shared():
             self.has_shared.set_active(True)
             self.shared_state = True
         else:
@@ -170,7 +181,7 @@ class EditGroupDialog(GroupForm):
     def on_apply_clicked(self, _widget):
         """Apply the changes.
 
-        Remove the users that are not members of the current group 
+        Remove the users that are not members of the current group
         and apply the changes on the shared folders.
         """
         old_name = self.group.name
@@ -188,16 +199,16 @@ class EditGroupDialog(GroupForm):
                 self.system.remove_user_from_groups(user, [self.group])
         if self.shared_state and not self.has_shared.get_active():
             # Shared folders were active but now they are not
-            self.slf.remove([self.group.name])
+            self.oneself.remove([self.group.name])
         elif self.has_shared.get_active():
             if not self.shared_state:
                 # Shared folders were not active and now they are
-                self.slf.add([self.group.name])
+                self.oneself.add([self.group.name])
             else:
                 # Share folders were and are active, check for name/gid changes
                 if old_name != self.group.name:
-                    self.slf.rename(old_name, self.group.name)
+                    self.oneself.rename(old_name, self.group.name)
                 elif old_gid != self.group.gid:
-                    self.slf.mount([self.group.name])
+                    self.oneself.mount([self.group.name])
 
         self.dialog.destroy()

@@ -182,7 +182,7 @@ class DHCP():
         config = configparser.ConfigParser(allow_no_value=True)
         config.readfp(vconfig_file)
         try:
-            ipad = config.get('Root', 'ipv4addr').strip("'")
+            ip_add = config.get('Root', 'ipv4addr').strip("'")
         except configparser.NoOptionError:
             return
 
@@ -206,6 +206,6 @@ class DHCP():
 
         dnss = sorted([value for key, value in locals().items() if key.startswith('dns') and value and value != '0.0.0.0'])
 
-        self.dhcp_info.update(ipad=ipad, mask=mask, route=route, dnss=dnss)
+        self.dhcp_info.update(ip_add=ip_add, mask=mask, route=route, dnss=dnss)
 
         return self.dhcp_info

@@ -41,7 +41,7 @@ gi.require_version('Gtk', '3.0')
 class Gui:
     def __init__(self):
         self.system = libuser.SYSTEM
-        self.shfol = shared_folders.SharedFolders(self.system)
+        self.shared_fold = shared_folders.SharedFolders(self.system)
         self.conf = config.PARSER
         self.builder = Gtk.Builder()
         self.builder.add_from_file('sch-scripts.ui')
@@ -259,7 +259,7 @@ class Gui:
         user_form.EditUserDialog(self.system, _widget.get_model()[path][0])
 
     def on_groups_treeview_row_actv(self, _widget, path, _column):
-        group_form.EditGroupDialog(self.system, self.shfol, _widget.get_model()[path][0])
+        group_form.EditGroupDialog(self.system, self.shared_fold, _widget.get_model()[path][0])
 
     def on_unselect_all_groups_clicked(self, _widget):
         self.groups_tree.get_selection().unselect_all()
@@ -281,7 +281,7 @@ class Gui:
     #FIXME: Maybe use notify /etc/group then self.populate_treeviews not need to
     #update user groups for shared folder library
     def on_mi_new_users_activate(self, _widget):
-        create_users.NewUsersDialog(self.system, self.shfol)
+        create_users.NewUsersDialog(self.system, self.shared_fold)
 
     @classmethod
     def on_mi_import_passwd_activate(cls, _widget):
@@ -486,11 +486,11 @@ class Gui:
 
     def on_mi_new_group_activate(self, _widget):
         """New group dialog activate."""
-        group_form.NewGroupDialog(self.system, self.shfol)
+        group_form.NewGroupDialog(self.system, self.shared_fold)
 
     def on_mi_edit_group_activate(self, _widget):
         """Edit group dialog activate."""
-        group_form.EditGroupDialog(self.system, self.shfol, self.get_selected_groups()[0])
+        group_form.EditGroupDialog(self.system, self.shared_fold, self.get_selected_groups()[0])
 
     def on_mi_delete_group_activate(self, _widget):
         """Delete groups dialog activate."""
@@ -504,7 +504,7 @@ class Gui:
 
         response = dialogs.AskDialog(message).showup()
         if response == Gtk.ResponseType.YES:
-            self.shfol.remove(groups)
+            self.shared_fold.remove(groups)
             for group in groups:
                 self.system.delete_group(group)
 

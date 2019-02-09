@@ -39,11 +39,11 @@ class SharedFolders():
         """Ensure that dir exists with the specified mode, uid and gid."""
         if not os.path.isdir(dir):
             os.mkdir(dir)
-        val = os.stat(dir)
-        mod = stat.S_IMODE(val.st_mode)
+        status = os.stat(dir)
+        mod = stat.S_IMODE(status.st_mode)
         if mod != mode:
             os.chmod(dir, mode)
-        if (uid != -1 and uid != val.st_uid) or (gid != -1 and gid != val.st_gid):
+        if (uid != -1 and uid != status.st_uid) or (gid != -1 and gid != status.st_gid):
             os.chown(dir, uid, gid)
 
     def list_mounted(self, groups=None):

@@ -160,8 +160,8 @@ class UserForm(object):
         return Gtk.STOCK_DIALOG_ERROR
 
     @classmethod
-    def to_alpha(cls, val):
-        return ''.join(c for c in val if c.isalpha())
+    def to_alpha(cls, opt):
+        return ''.join(c for c in opt if c.isalpha())
 
     def get_suggestions(self, name):
         """Give suggestions for the new entries."""
@@ -190,11 +190,11 @@ class UserForm(object):
         self.username_combo.remove_all()
         self.username_entry.set_text('')
         sug = self.get_suggestions(name)
-        sug = [val for val in sug if re.match(self.connection.username_regex(), val, re.UNICODE) and not self.connection.user_exists(val)]
+        sug = [opt for opt in sug if re.match(self.connection.username_regex(), opt, re.UNICODE) and not self.connection.user_exists(opt)]
         if sug:
             self.username_entry.set_text(sug[0])
-            for val in sug:
-                self.username_combo.append_text(val)
+            for opt in sug:
+                self.username_combo.append_text(opt)
         self.builder.get_object('realname_valid').set_from_stock(icon, Gtk.IconSize.BUTTON)
         self.set_apply_sensitivity()
 
@@ -228,9 +228,9 @@ class UserForm(object):
 
     def set_apply_sensitivity(self):
         icon = lambda x: self.builder.get_object(x).get_stock()[0]
-        val = icon('username_valid') == icon('password_valid') == icon('retype_password_valid') == icon('realname_valid') == Gtk.STOCK_OK
+        opt = icon('username_valid') == icon('password_valid') == icon('retype_password_valid') == icon('realname_valid') == Gtk.STOCK_OK
 
-        self.builder.get_object('apply_button').set_sensitive(val)
+        self.builder.get_object('apply_button').set_sensitive(opt)
 
     def on_dialog_delete_event(self, _widget, _event):
         """Close the dialog."""

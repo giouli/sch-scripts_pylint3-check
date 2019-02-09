@@ -15,9 +15,9 @@ gi.require_version('Gtk', '3.0')
 class NewUsersDialog:
     """Create users dialog."""
 
-    def __init__(self, system, slf):
+    def __init__(self, system, oneself):
         self.system = system
-        self.slf = slf
+        self.oneself = oneself
 
         self.glade = Gtk.Builder()
         self.glade.add_from_file('create_users.ui')
@@ -96,10 +96,10 @@ class NewUsersDialog:
             for compn in range(1, self.computers+1):
                 if len(self.user_store) == 300:
                     break
-                evl = lambda x: x.replace('{c}', classn.strip()).replace('{i}',
+                evaluate_user_template = lambda x: x.replace('{c}', classn.strip()).replace('{i}',
                                                                          str(compn)).replace('{0i}', '%02d' %compn)
-                self.user_store.append([evl(self.username_tmpl), evl(self.name_tmpl),
-                                        '/home/'+evl(self.username_tmpl), evl(self.password_tmpl)])
+                self.user_store.append([evaluate_user_template(self.username_tmpl), evaluate_user_template(self.name_tmpl),
+                                        '/home/'+evaluate_user_template(self.username_tmpl), evaluate_user_template(self.password_tmpl)])
 
         users_number = self.computers * len(self.classes)
         self.glade.get_object('users_number_label').set_text(
@@ -164,7 +164,7 @@ class NewUsersDialog:
                 for classn in self.classes:
                     while Gtk.events_pending():
                         Gtk.main_iteration()
-                    self.slf.add([classn])
+                    self.oneself.add([classn])
 
 
         # And finally, create the users
@@ -176,20 +176,20 @@ class NewUsersDialog:
                 progressbar.set_text('Δημιουργία χρήστη %d από %d...'
                                      %(users_created+1, total_users))
 
-                evl = lambda x: x.replace('{c}', classn.strip()).replace('{i}',
+                evaluate_user_template = lambda x: x.replace('{c}', classn.strip()).replace('{i}',
                                                                          str(compn)).replace('{0i}', '%02d'%compn)
                 epoch = datetime.datetime.utcfromtimestamp(0)
-                uname = evl(self.username_tmpl)
+                uname = evaluate_user_template(self.username_tmpl)
                 tmp_uid = self.system.get_free_uid(exclude=set_uids)
                 set_uids.append(tmp_uid)
                 tmp_gid = self.system.get_free_gid(exclude=set_gids)
-                tmp_password = evl(self.password_tmpl)
+                tmp_password = evaluate_user_template(self.password_tmpl)
                 # Create the UPG
                 grp = libuser.Group(uname, tmp_gid)
                 self.system.add_group(grp)
                 usr = libuser.User(name=uname, uid=tmp_uid,
-                                   gid=tmp_gid, rname=evl(self.name_tmpl),
-                                   directory=('/home/'+evl(self.username_tmpl)),
+                                   gid=tmp_gid, rname=evaluate_user_template(self.name_tmpl),
+                                   directory=('/home/'+evaluate_user_template(self.username_tmpl)),
                                    lstchg=(datetime.datetime.today() - epoch).days,
                                    groups=[classn],
                                    password=self.system.encrypt(tmp_password))

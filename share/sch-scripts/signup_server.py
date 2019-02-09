@@ -31,7 +31,7 @@ class Registrations(LineReceiver):
         self.groups = groups
         self.roles = roles
         self.state = 'identify'
-        self.ipad = None
+        self.ip_add = None
         self.port = None
         self.id_hostname = None
 
@@ -41,10 +41,10 @@ class Registrations(LineReceiver):
         Get the port, the ip and informs that a new connection
         is made to the server.
         """
-        self.ipad = self.transport.getPeer().host
+        self.ip_add = self.transport.getPeer().host
         self.port = self.transport.getPeer().port
         self.connections.append(self)
-        print("New connection from %s:%s" % (self.ipad, self.port))
+        print("New connection from %s:%s" % (self.ip_add, self.port))
 
     def connectionLost(self, reason):
         """Connection lost.
@@ -52,7 +52,7 @@ class Registrations(LineReceiver):
         If the connection is lost it inform that the connection with the
         current ip and port is closed.
         """
-        print("Connection with %s:%s was closed." % (self.ipad, self.port))
+        print("Connection with %s:%s was closed." % (self.ip_add, self.port))
         if self in self.connections:
             del self.connections[self.connections.index(self)]
 
@@ -76,12 +76,12 @@ class Registrations(LineReceiver):
             if cmd == 'ID':
                 self.identify(data)
             else:
-                print("Error: Expected ID command from %s:%s but instead got %s. Closing connection" % (self.ipad, self.port, cmd))
+                print("Error: Expected ID command from %s:%s but instead got %s. Closing connection" % (self.ip_add, self.port, cmd))
                 self.transport.loseConnection()
             return
 
         if line == 'BYE':
-            print("%s:%s sent BYE." % (self.ipad, self.port))
+            print("%s:%s sent BYE." % (self.ip_add, self.port))
             self.transport.loseConnection()
         elif cmd == "USER_EXISTS":
             self.sendLine(self.booltr(data in self.system.users))
@@ -109,7 +109,7 @@ class Registrations(LineReceiver):
                     groups = data[4].split(',') if data[4] else []
 
                 # Create a new request
-                applicant = Applicant(self.ipad, self.id_hostname)
+                applicant = Applicant(self.ip_add, self.id_hostname)
                 user = libuser.User(username, rname=realname, password=password, groups=groups)
                 #print user # DEBUGGING
                 req = Request(time.localtime(), applicant, user, role)
@@ -122,7 +122,7 @@ class Registrations(LineReceiver):
                 self.sendLine(b'NO')
                 print("Error receiving data.")
         else:
-            print("Received invalid command %s from %s:%s" % (cmd, self.ipad, self.port))
+            print("Received invalid command %s from %s:%s" % (cmd, self.ip_add, self.port))
 
     def identify(self, line):
         self.id_hostname = line
@@ -144,12 +144,12 @@ class RegistrationsFactory(Factory):
 
 
 class Applicant(object):
-    def __init__(self, ipad, hostname=None):
-        self.ipad = ipad
+    def __init__(self, ip_add, hostname=None):
+        self.ip_add = ip_add
         self.hostname = hostname
 
     def __str__(self):
-        return '%s (%s)' % (self.hostname, self.ipad)
+        return '%s (%s)' % (self.hostname, self.ip_add)
 
 
 class Request(object):

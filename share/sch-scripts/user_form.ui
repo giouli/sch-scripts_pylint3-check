@@ -275,7 +275,7 @@
                         <property name="visibility">False</property>
                         <property name="invisible_char">•</property>
                         <property name="invisible_char_set">True</property>
-                        <signal name="changed" handler="on_password_repeat_entry_changed" swapped="no"/>
+                        <signal name="changed" handler="on_pswd_repeat_entry_changed" swapped="no"/>
                       </object>
                       <packing>
                         <property name="left_attach">1</property>
@@ -425,7 +425,7 @@
                         <property name="can_focus">True</property>
                         <property name="invisible_char">•</property>
                         <property name="invisible_char_set">True</property>
-                        <signal name="changed" handler="on_gcos_office_phone_entry_changed" swapped="no"/>
+                        <signal name="changed" handler="on_gcos_ofc_phone_entry_chngd" swapped="no"/>
                       </object>
                       <packing>
                         <property name="left_attach">1</property>
@@ -440,7 +440,7 @@
                         <property name="can_focus">True</property>
                         <property name="invisible_char">•</property>
                         <property name="invisible_char_set">True</property>
-                        <signal name="changed" handler="on_gcos_home_phone_entry_changed" swapped="no"/>
+                        <signal name="changed" handler="on_gcos_home_phone_entr_chngd" swapped="no"/>
                       </object>
                       <packing>
                         <property name="left_attach">1</property>

@@ -55,9 +55,9 @@ class ImportDialog:
     def tree_view(self):
         """Make the liststore.
 
-        The first 20 cells refers to users values,
-        the second 20 cells refers to color foreach of first 20 cells, the
-        third 20 cells refers to conflicts and the last cell refers to first
+        The first 20 cells refer to user's values,
+        the second 20 cells refer to color for each of the first 20 cells, the
+        third 20 cells refer to conflicts and the last cell refers to first
         column image.
         """
         types = [str, int, int, str, str, str, str, str, str, str, str, str,
@@ -122,8 +122,8 @@ class ImportDialog:
     def check_identical_users(self, other=libuser.system):
         """Check identical users.
 
-        If there are users in the list that are identical to 
-        a user in the system and ask for removal.
+        If there are users in the list that are identical to
+        a user in the system, ask for removal.
         """
         attrs = ['name', 'uid', 'gid', 'primary_group', 'rname', 'office',
                  'wphone', 'hphone', 'other', 'directory', 'shell', 'min',
@@ -211,7 +211,7 @@ class ImportDialog:
             user.plainpw = ''
 
     def set_row_props(self, row, col, prob, color=None, state=None):
-        """Set how the rows will appear."""
+        """Set how the rows will appear, set the color to point out an error."""
         row[col+40] = prob
         if color:
             row[col+20] = color
@@ -237,7 +237,7 @@ class ImportDialog:
                 row[60] = self.states['error']
 
     def detect_conflicts(self):
-        """Detect conflicts.
+        """Detect conflicts in users attributes.
 
         Detects and marks the conflicts in the treeview based on the user
         object.
@@ -278,9 +278,9 @@ class ImportDialog:
             # Illegal input checking #FIXME: This should be in a separate function
                                      #and (for later): executed only once, since
                                      #the edit dialog won't allow illegal input
-            def invalidate(numb):
+            def invalidate(column_number):
                 """Check the validity of the attributes of a user and if there are any conflicts."""
-                self.set_row_props(row, numb, 'char')
+                self.set_row_props(row, column_number, 'char')
             if not libuser.system.name_is_valid(usr.name):
                 invalidate(0)
             if not libuser.system.uid_is_valid(usr.uid):
@@ -307,9 +307,9 @@ class ImportDialog:
                     invalidate(11)
                     break
             chage = [usr.lstchg, usr.min, usr.max, usr.warn, usr.inact, usr.expire]
-            for numb, attr in enumerate(chage, 12):
+            for column_number, attr in enumerate(chage, 12):
                 if attr > 2147483647 or attr < -1:
-                    invalidate(numb)
+                    invalidate(column_number)
 
             # Duplicate checking (New users)
             if usr.name in passed_users['names']:
